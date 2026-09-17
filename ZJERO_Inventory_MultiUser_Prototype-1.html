@@ -424,7 +424,7 @@ th{
                 <th>Toko</th>
                 <th>Model</th>
                 <th>Jumlah</th>
-                <th>Tujuan</th>
+                <th>Objetivu</th>
               </tr>
             </thead>
 
@@ -573,7 +573,7 @@ th{
             placeholder="Contoh: 2"
           >
 
-          <label>Tujuan / Dikirim ke Daerah Mana</label>
+          <label>Objetivu Sai / Dikirim ke Daerah Mana</label>
           <input
             id="outdest"
             type="text"
@@ -619,7 +619,7 @@ th{
               <th>Model</th>
               <th>Jenis</th>
               <th>Jumlah</th>
-              <th>Tujuan</th>
+              <th>Objetivu</th>
               <th>Catatan</th>
             </tr>
 
@@ -796,7 +796,7 @@ async function loadData(){
 
 
   const tx = await api(
-    "stock_transactions?select=id,product_id,transaction_type,quantity,naran_loja,destination,notes,created_at&order=created_at.desc"
+    "stock_transactions?select=id,product_id,transaction_type,quantity,naran_loja,objetivu_sai,notes,created_at&order=created_at.desc"
   );
 
 
@@ -827,7 +827,7 @@ async function loadData(){
 
       qty:Number(h.quantity || 0),
 
-      dest:h.destination || "—",
+      dest:h.objetivu_sai || "—",
 
       note:h.notes || "",
 
@@ -1308,7 +1308,7 @@ async function transact(kind){
 
           naran_loja:store,
 
-          destination:dest,
+          objetivu_sai:dest,
 
           notes:note
 
