@@ -240,28 +240,40 @@ th{
   min-height:15px
 }
 
-/* KHUSUS CETAK/PRINT */
+/* KHUSUS CETAK/PRINT YANG DIPERBAIKI */
 @media print{
   body{
     background:#fff;
+    color:#000;
   }
-  .app, .side, .top, button, .form, input, select{
+  .side, .top, button, .print-btn, .form, input, select{
     display:none!important;
   }
+  .app{
+    display:block!important;
+  }
   .main{
-    padding:0;
-    overflow:visible;
+    padding:0!important;
+    overflow:visible!important;
+  }
+  section{
+    display:none!important;
   }
   section:not(.hidden){
     display:block!important;
   }
   .panel{
-    box-shadow:none;
-    padding:0;
-    border:0;
+    box-shadow:none!important;
+    padding:0!important;
+    border:0!important;
   }
   table{
-    font-size:11px;
+    width:100%!important;
+    border-collapse:collapse!important;
+  }
+  th, td{
+    border:1px solid #999!important;
+    padding:8px!important;
   }
 }
 
