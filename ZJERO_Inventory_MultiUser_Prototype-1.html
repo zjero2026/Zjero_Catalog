@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="id">
+<html lang="tet">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -375,21 +375,21 @@ th{
 
     <div class="form">
 
-      <label>Username</label>
+      <label>Naran User (Username)</label>
 
       <input
         id="username"
         type="text"
-        placeholder="Masukkan username"
+        placeholder="Hatama username"
         autocomplete="username"
       >
 
-      <label>Password</label>
+      <label>Lian Fatin (Password)</label>
 
       <input
         id="password"
         type="password"
-        placeholder="Masukkan password"
+        placeholder="Hatama lian fatin"
         autocomplete="current-password"
       >
 
@@ -416,31 +416,31 @@ th{
     </div>
 
     <div class="nav active" onclick="page('dashboard',this)">
-      ⌂ <span>Dashboard</span>
+      ⌂ <span>Painel</span>
     </div>
 
     <div class="nav" onclick="page('data',this)">
-      ▣ <span>Data Peti</span>
+      ▣ <span>Dadus Kaixaun</span>
     </div>
 
     <div class="nav" onclick="page('in',this)">
-      ↓ <span>Barang Masuk</span>
+      ↓ <span>Barang Tama</span>
     </div>
 
     <div class="nav" onclick="page('out',this)">
-      ↑ <span>Barang Keluar</span>
+      ↑ <span>Barang Sai</span>
     </div>
 
     <div class="nav" onclick="page('history',this)">
-      ▤ <span>Riwayat</span>
+      ▤ <span>Istoria Transaksaun</span>
     </div>
 
     <div class="nav" onclick="page('users',this)">
-      ♙ <span>Pengguna</span>
+      ♙ <span>Uzuáriu</span>
     </div>
 
     <div class="nav" onclick="logout()">
-      ↪ <span>Keluar</span>
+      ↪ <span>Sai</span>
     </div>
 
   </aside>
@@ -451,8 +451,8 @@ th{
     <div class="top">
 
       <div>
-        <h1 id="title">Dashboard</h1>
-        <div class="sub">Sistem Manajemen Stok Toko</div>
+        <h1 id="title">Painel</h1>
+        <div class="sub">Sistema Jestaun Stock Loja</div>
       </div>
 
       <div class="user">
@@ -468,22 +468,22 @@ th{
       <div class="cards">
 
         <div class="card">
-          <div class="label">Total Jenis/Varian</div>
+          <div class="label">Total Varian Kaixaun</div>
           <div class="num" id="cmodels">0</div>
         </div>
 
         <div class="card">
-          <div class="label">Stok Tercatat</div>
+          <div class="label">Stock Haree Total</div>
           <div class="num gold" id="cstock">0</div>
         </div>
 
         <div class="card">
-          <div class="label">Barang Masuk</div>
+          <div class="label">Barang Tama</div>
           <div class="num green" id="cin">0</div>
         </div>
 
         <div class="card">
-          <div class="label">Barang Keluar</div>
+          <div class="label">Barang Sai</div>
           <div class="num red" id="cout">0</div>
         </div>
 
@@ -494,16 +494,16 @@ th{
 
         <div class="panel">
 
-          <h2>Transaksi Terbaru</h2>
+          <h2>Transaksaun Foun</h2>
 
           <table>
 
             <thead>
               <tr>
-                <th>Waktu</th>
-                <th>Lokasi</th>
-                <th>Model</th>
-                <th>Jumlah</th>
+                <th>Tempu</th>
+                <th>Fatin</th>
+                <th>Model Peti</th>
+                <th>Kuantidade</th>
                 <th>Objetivu</th>
               </tr>
             </thead>
@@ -517,10 +517,10 @@ th{
 
         <div class="panel">
 
-          <h2>Ringkasan</h2>
+          <h2>Rezumu</h2>
 
           <p style="font-size:13px;color:#666">
-            Stok berubah otomatis setiap transaksi.
+            Stock muda rasik tuir transaksaun hotu.
           </p>
 
           <div id="summary"></div>
@@ -538,14 +538,14 @@ th{
       <div class="panel">
 
         <button type="button" class="print-btn" onclick="window.print()">
-          🖨️ Cetak / Download PDF Data Peti
+          🖨️ Imprime / Download PDF Dadus Kaixaun
         </button>
 
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
 
           <input
             id="search"
-            placeholder="🔎 Cari model..."
+            placeholder="🔎 Aluka model peti..."
             oninput="renderData()"
             style="flex:1"
           >
@@ -555,7 +555,7 @@ th{
             onchange="renderData()"
             style="max-width:210px"
           >
-            <option value="">Semua Type</option>
+            <option value="">Type Hotu-hotu</option>
             <option>AMERICAN STYLE</option>
             <option>JATI STANDARD</option>
             <option>ASIA STYLE</option>
@@ -571,9 +571,9 @@ th{
             <tr>
               <th>Kode</th>
               <th>Type</th>
-              <th>Model / Varian</th>
-              <th>Stok</th>
-              <th>Status</th>
+              <th>Model Peti / Varian</th>
+              <th>Stock</th>
+              <th>Estadu</th>
             </tr>
 
           </thead>
@@ -592,11 +592,11 @@ th{
 
       <div class="panel" style="max-width:650px">
 
-        <h2>Barang Masuk</h2>
+        <h2>Barang Tama</h2>
 
         <div class="form">
 
-          <label>Pilih Lokasi / Gudang</label>
+          <label>Hili Fatin / Loja</label>
           <select id="instore">
             <option value="Toko Rebal">Toko Rebal</option>
             <option value="Toko Bairopite">Toko Bairopite</option>
@@ -606,23 +606,23 @@ th{
           <label>Model Peti</label>
           <select id="inmodel"></select>
 
-          <label>Jumlah Masuk</label>
+          <label>Kuantidade Tama</label>
           <input
             id="inqty"
             type="number"
             min="1"
-            placeholder="Contoh: 5"
+            placeholder="Egzemplu: 5"
           >
 
-          <label>Catatan</label>
+          <label>Komentáriu / Notas</label>
           <textarea
             id="innote"
             rows="3"
-            placeholder="Opsional"
+            placeholder="Opcional"
           ></textarea>
 
           <button type="button" onclick="transact('in')">
-            Simpan Barang Masuk
+            Rejistu Barang Tama
           </button>
 
         </div>
@@ -637,11 +637,11 @@ th{
 
       <div class="panel" style="max-width:650px">
 
-        <h2>Barang Keluar</h2>
+        <h2>Barang Sai</h2>
 
         <div class="form">
 
-          <label>Pilih Lokasi Asal Barang</label>
+          <label>Hili Fatin Asal Barang</label>
           <select id="outstore">
             <option value="Toko Rebal">Toko Rebal</option>
             <option value="Toko Bairopite">Toko Bairopite</option>
@@ -651,26 +651,26 @@ th{
           <label>Model Peti</label>
           <select id="outmodel"></select>
 
-          <label>Jumlah Keluar</label>
+          <label>Kuantidade Sai</label>
           <input
             id="outqty"
             type="number"
             min="1"
-            placeholder="Contoh: 2"
+            placeholder="Egzemplu: 2"
           >
 
-          <label>Objetivu Sai / Dikirim ke Daerah Mana</label>
+          <label>Objetivu Sai / Hatama ba Fatin Ne'ebé</label>
           <input
             id="outdest"
             type="text"
-            placeholder="Contoh: RSUD / Cabang / Rumah Duka"
+            placeholder="Egzemplu: RSUD / Filial / Uma Duka"
           >
 
-          <label>Catatan</label>
+          <label>Komentáriu / Notas</label>
           <textarea
             id="outnote"
             rows="3"
-            placeholder="Contoh: Penjualan / pemakaian"
+            placeholder="Egzemplu: Venda / uza rasik"
           ></textarea>
 
           <button
@@ -678,7 +678,7 @@ th{
             class="danger"
             onclick="transact('out')"
           >
-            Simpan Barang Keluar
+            Rejistu Barang Sai
           </button>
 
         </div>
@@ -694,23 +694,23 @@ th{
       <div class="panel">
 
         <button type="button" class="print-btn" onclick="window.print()">
-          🖨️ Cetak / Download PDF Riwayat
+          🖨️ Imprime / Download PDF Istoria
         </button>
 
-        <h2>Riwayat Transaksi</h2>
+        <h2>Istoria Transaksaun</h2>
 
         <table>
 
           <thead>
 
             <tr>
-              <th>Waktu</th>
-              <th>Lokasi</th>
-              <th>Model</th>
-              <th>Jenis</th>
-              <th>Jumlah</th>
+              <th>Tempu</th>
+              <th>Fatin</th>
+              <th>Model Peti</th>
+              <th>Kategoria</th>
+              <th>Kuantidade</th>
               <th>Objetivu</th>
-              <th>Catatan</th>
+              <th>Notas</th>
             </tr>
 
           </thead>
@@ -729,7 +729,7 @@ th{
 
       <div class="panel">
 
-        <h2>Pengguna & Hak Akses</h2>
+        <h2>Uzuáriu & Direitu Acessu</h2>
 
         <table>
 
@@ -737,8 +737,8 @@ th{
 
             <tr>
               <th>Username</th>
-              <th>Role</th>
-              <th>Akses</th>
+              <th>Papel (Role)</th>
+              <th>Acessu Menu</th>
             </tr>
 
           </thead>
@@ -748,21 +748,21 @@ th{
             <tr>
               <td>admin</td>
               <td>Admin</td>
-              <td>Semua menu</td>
+              <td>Menu hotu-hotu</td>
             </tr>
 
             <tr>
               <td>gudang</td>
               <td>Gudang</td>
               <td>
-                Data Peti, Barang Masuk, Barang Keluar, Riwayat
+                Dadus Kaixaun, Barang Tama, Barang Sai, Istoria
               </td>
             </tr>
 
             <tr>
               <td>viewer</td>
               <td>Viewer</td>
-              <td>Dashboard & Data Peti</td>
+              <td>Painel & Dadus Kaixaun</td>
             </tr>
 
           </tbody>
@@ -846,7 +846,7 @@ async function api(path, options = {}) {
 
   if (!response.ok) {
     const message = await response.text();
-    throw new Error(message || "Supabase request gagal");
+    throw new Error(message || "Supabase request la la'o di'ak");
   }
 
   if (response.status === 204) {
@@ -914,8 +914,8 @@ async function loadData(){
 
       type:
         h.transaction_type === "in"
-        ? "Barang Masuk"
-        : "Barang Keluar",
+        ? "Barang Tama"
+        : "Barang Sai",
 
       qty:Number(h.quantity || 0),
 
@@ -970,7 +970,7 @@ async function login(){
   if(!username || !password){
 
     error.textContent =
-      "Username dan password harus diisi.";
+      "Favor hatama username ho lian fatin.";
 
     return;
 
@@ -984,7 +984,7 @@ async function login(){
   if(!user || user.pass !== password){
 
     error.textContent =
-      "Username atau password salah.";
+      "Username ka lian fatin sala.";
 
     return;
 
@@ -1025,7 +1025,7 @@ async function login(){
     console.error(error);
 
     alert(
-      "Login berhasil, tetapi data Supabase gagal dimuat.\n\n"
+      "Login susesu, maibe dada dadus husi Supabase la konsege.\n\n"
       + error.message
     );
 
@@ -1161,23 +1161,23 @@ function page(id,el){
 
   const titles = {
 
-    dashboard:"Dashboard",
+    dashboard:"Painel",
 
-    data:"Data Peti",
+    data:"Dadus Kaixaun",
 
-    in:"Barang Masuk",
+    in:"Barang Tama",
 
-    out:"Barang Keluar",
+    out:"Barang Sai",
 
-    history:"Riwayat Transaksi",
+    history:"Istoria Transaksaun",
 
-    users:"Pengguna"
+    users:"Uzuáriu"
 
   };
 
 
   document.getElementById("title").textContent =
-    titles[id] || "Dashboard";
+    titles[id] || "Painel";
 
 
   if(id === "history"){
@@ -1244,15 +1244,15 @@ function renderData(){
 
       if(stock === 0){
 
-        status = "Habis";
+        status = "Hotu ona";
 
       }else if(stock <= 3){
 
-        status = "Menipis";
+        status = "Menus";
 
       }else{
 
-        status = "Tersedia";
+        status = "Disponível";
 
       }
 
@@ -1271,7 +1271,7 @@ function renderData(){
           <td>${stock}</td>
           <td>
             <span class="pill ${
-              status !== "Tersedia" ? "warn" : ""
+              status !== "Disponível" ? "warn" : ""
             }">
               ${status}
             </span>
@@ -1349,7 +1349,7 @@ async function transact(kind){
 
   if(!product){
 
-    alert("Model peti tidak ditemukan.");
+    alert("Model peti la hetan.");
 
     return;
 
@@ -1358,7 +1358,7 @@ async function transact(kind){
 
   if(!qty || qty < 1){
 
-    alert("Masukkan jumlah yang benar.");
+    alert("Favoor hatama kuantidade ne'ebé loloos.");
 
     return;
 
@@ -1370,7 +1370,7 @@ async function transact(kind){
     qty > Number(product.stock || 0)
   ){
 
-    alert("Stok tidak mencukupi.");
+    alert("Stock la iha Sufisiente.");
 
     return;
 
@@ -1476,7 +1476,7 @@ async function transact(kind){
 
 
     alert(
-      "Transaksi berhasil disimpan ke Supabase."
+      "Transaksaun Rai ona ba Supabase ho susesu."
     );
 
 
@@ -1485,7 +1485,7 @@ async function transact(kind){
     console.error(error);
 
     alert(
-      "Transaksi gagal disimpan ke Supabase.\n\n"
+      "Transaksaun la konsege rai ba Supabase.\n\n"
       + error.message
     );
 
@@ -1509,7 +1509,7 @@ function renderHistory(){
     table.innerHTML =
       `<tr>
         <td colspan="7">
-          Belum ada transaksi.
+          Seidauk iha transaksaun.
         </td>
       </tr>`;
 
@@ -1554,7 +1554,7 @@ updateDash = function(){
 
   const totalIn =
     history
-      .filter(h => h.type === "Barang Masuk")
+      .filter(h => h.type === "Barang Tama")
       .reduce(
         (total,h) =>
           total + Number(h.qty || 0),
@@ -1564,7 +1564,7 @@ updateDash = function(){
 
   const totalOut =
     history
-      .filter(h => h.type === "Barang Keluar")
+      .filter(h => h.type === "Barang Sai")
       .reduce(
         (total,h) =>
           total + Number(h.qty || 0),
@@ -1611,7 +1611,7 @@ updateDash = function(){
       ||
       `<tr>
         <td colspan="5">
-          Belum ada transaksi.
+          Seidauk iha transaksaun.
         </td>
       </tr>`;
 
@@ -1639,15 +1639,15 @@ updateDash = function(){
   document.getElementById("summary").innerHTML = `
 
     <p style="font-size:12px">
-      Tersedia: <b>${available}</b> model
+      Disponível: <b>${available}</b> model
     </p>
 
     <p style="font-size:12px">
-      Menipis: <b>${low}</b> model
+      Menus (Menipis): <b>${low}</b> model
     </p>
 
     <p style="font-size:12px">
-      Habis: <b>${empty}</b> model
+      Hotu ona (Habis): <b>${empty}</b> model
     </p>
 
   `;
