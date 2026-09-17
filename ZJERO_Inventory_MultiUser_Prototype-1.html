@@ -159,6 +159,7 @@ button{
 
 .secondary{background:#555}
 .danger{background:#a8483e}
+.print-btn{background:#39734e;margin-bottom:14px;}
 
 table{
   width:100%;
@@ -237,6 +238,31 @@ th{
   color:#a8483e;
   font-size:12px;
   min-height:15px
+}
+
+/* KHUSUS CETAK/PRINT */
+@media print{
+  body{
+    background:#fff;
+  }
+  .app, .side, .top, button, .form, input, select{
+    display:none!important;
+  }
+  .main{
+    padding:0;
+    overflow:visible;
+  }
+  section:not(.hidden){
+    display:block!important;
+  }
+  .panel{
+    box-shadow:none;
+    padding:0;
+    border:0;
+  }
+  table{
+    font-size:11px;
+  }
 }
 
 @media(max-width:800px){
@@ -457,6 +483,10 @@ th{
 
       <div class="panel">
 
+        <button type="button" class="print-btn" onclick="window.print()">
+          🖨️ Cetak / Download PDF Data Peti
+        </button>
+
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
 
           <input
@@ -606,6 +636,10 @@ th{
     <section id="history" class="hidden">
 
       <div class="panel">
+
+        <button type="button" class="print-btn" onclick="window.print()">
+          🖨️ Cetak / Download PDF Riwayat
+        </button>
 
         <h2>Riwayat Transaksi</h2>
 
@@ -1450,7 +1484,7 @@ function renderHistory(){
    DASHBOARD
 ========================= */
 
-function updateDash(){
+updateDash = function(){
 
   const totalStock =
     data.reduce(
@@ -1560,7 +1594,7 @@ function updateDash(){
 
   `;
 
-}
+};
 
 
 /* =========================
