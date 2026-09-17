@@ -24,22 +24,36 @@ body{
   width:225px;
   background:#211e1a;
   color:#fff;
-  padding:22px 14px
+  padding:22px 14px;
+  text-align:center;
 }
 
 .logo{
-  font-size:25px;
+  padding:0 0 20px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+}
+
+.logo img{
+  width:50px;
+  height:50px;
+  object-fit:contain;
+  border-radius:8px;
+}
+
+.logo-text{
+  font-size:18px;
   font-weight:800;
-  letter-spacing:3px;
-  padding:8px 12px 25px
+  letter-spacing:2px;
 }
 
 .logo small{
   display:block;
   font-size:9px;
   color:#d5ac45;
-  letter-spacing:2px;
-  margin-top:5px
+  letter-spacing:1px;
 }
 
 .nav{
@@ -48,7 +62,8 @@ body{
   border-radius:9px;
   color:#ddd;
   font-size:14px;
-  cursor:pointer
+  cursor:pointer;
+  text-align:left;
 }
 
 .nav.active{
@@ -213,25 +228,35 @@ th{
   background:white;
   border-radius:15px;
   padding:30px;
-  box-shadow:0 10px 35px #0005
+  box-shadow:0 10px 35px #0005;
+  text-align:center;
 }
 
-.loginlogo{
-  text-align:center;
-  font-size:28px;
+.loginlogo img{
+  width:75px;
+  height:75px;
+  object-fit:contain;
+  margin-bottom:10px;
+}
+
+.loginlogo h2{
+  font-size:26px;
   font-weight:bold;
-  letter-spacing:4px
+  letter-spacing:4px;
+  margin:0;
 }
 
 .loginbox p{
   text-align:center;
   color:#777;
   font-size:12px;
-  margin-bottom:25px
+  margin-bottom:25px;
+  margin-top:5px;
 }
 
 .loginbox .form{
-  margin-top:15px
+  margin-top:15px;
+  text-align:left;
 }
 
 .error{
@@ -240,7 +265,7 @@ th{
   min-height:15px
 }
 
-/* KHUSUS CETAK/PRINT YANG DIPERBAIKI */
+/* KHUSUS CETAK/PRINT */
 @media print{
   body{
     background:#fff;
@@ -280,21 +305,32 @@ th{
 @media(max-width:800px){
 
   .side{
-    width:70px
+    width:85px;
+    padding:15px 4px;
   }
 
-  .logo{
-    font-size:18px;
-    padding-left:5px
+  .logo img{
+    width:36px;
+    height:36px;
   }
 
-  .logo small,
+  .logo-text{
+    font-size:10px;
+    letter-spacing:1px;
+    display:block!important;
+  }
+
+  .logo small{
+    display:none
+  }
+
   .nav span{
     display:none
   }
 
   .nav{
-    text-align:center
+    text-align:center;
+    padding:11px 4px;
   }
 
   .main{
@@ -328,7 +364,10 @@ th{
 
   <div class="loginbox">
 
-    <div class="loginlogo">ZJERO</div>
+    <div class="loginlogo">
+      <img src="logo.png" alt="Logo ZJERO" onerror="this.style.display='none'">
+      <h2>ZJERO</h2>
+    </div>
 
     <p>INVENTORY MANAGEMENT SYSTEM</p>
 
@@ -369,8 +408,9 @@ th{
   <aside class="side">
 
     <div class="logo">
-      ZJERO
-      <small>INVENTORY SYSTEM</small>
+      <img src="logo.png" alt="Logo ZJERO" onerror="this.style.display='none'">
+      <div class="logo-text">ZJERO</div>
+      <small>SYSTEM</small>
     </div>
 
     <div class="nav active" onclick="page('dashboard',this)">
