@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ZJERO Inventory Multi-User</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f5f3ef;color:#29251f}.app{display:flex;min-height:100vh}
+.side{width:225px;background:#211e1a;color:#fff;padding:22px 14px}.logo{font-size:25px;font-weight:800;letter-spacing:3px;padding:8px 12px 25px}.logo small{display:block;font-size:9px;color:#d5ac45;letter-spacing:2px;margin-top:5px}
+.nav{padding:11px 13px;margin:5px 0;border-radius:9px;color:#ddd;font-size:14px;cursor:pointer}.nav.active{background:#c59a38;color:#fff;font-weight:bold}
+.main{flex:1;padding:25px;overflow:auto}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}h1{margin:0;font-size:25px}.sub{color:#777;font-size:13px;margin-top:5px}.user{background:#fff;padding:9px 14px;border-radius:20px;font-size:12px}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}.card,.panel{background:#fff;border-radius:12px;padding:17px;box-shadow:0 2px 12px #0001}.label{font-size:12px;color:#777}.num{font-size:27px;font-weight:bold;margin-top:7px}.gold{color:#a77c1e}.green{color:#39734e}.red{color:#a8483e}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:15px}.panel h2{font-size:16px;margin:0 0 14px}
+.form{display:grid;gap:10px}label{font-size:12px;color:#666}input,select,textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px;background:white}button{padding:10px 14px;border:0;border-radius:8px;background:#c59a38;color:white;font-weight:bold;cursor:pointer}.secondary{background:#555}.danger{background:#a8483e}
+table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:10px 7px;text-align:left;border-bottom:1px solid #eee}th{color:#777}.pill{padding:5px 8px;border-radius:12px;background:#e7f3ea;color:#39704c;font-size:10px}.warn{background:#fff0d7;color:#986b1a}.out{background:#f6dfdd;color:#963f37}
+.hidden{display:none}.login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#211e1a}.loginbox{width:350px;background:white;border-radius:15px;padding:30px;box-shadow:0 10px 35px #0005}.loginlogo{text-align:center;font-size:28px;font-weight:bold;letter-spacing:4px}.loginbox p{text-align:center;color:#777;font-size:12px;margin-bottom:25px}.loginbox .form{margin-top:15px}.error{color:#a8483e;font-size:12px;min-height:15px}
+@media(max-width:800px){.side{width:70px}.logo{font-size:18px;padding-left:5px}.logo small,.nav span{display:none}.nav{text-align:center}.main{padding:15px}.cards{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="login" class="login">
+<div class="loginbox">
+<div class="loginlogo">ZJERO</div><p>INVENTORY MANAGEMENT SYSTEM</p>
+<div class="form">
+<label>Username</label><input id="username" placeholder="Masukkan username">
+<label>Password</label><input id="password" type="password" placeholder="Masukkan password">
+<div id="err" class="error"></div><button onclick="login()">LOGIN</button>
+</div>
+<p style="margin-top:20px">Demo: admin / admin123 &nbsp; | &nbsp; gudang / gudang123</p>
+</div></div>
+
+<div id="app" class="app hidden">
+<aside class="side">
+<div class="logo">ZJERO<small>INVENTORY SYSTEM</small></div>
+<div class="nav active" onclick="page('dashboard',this)">⌂ <span>Dashboard</span></div>
+<div class="nav" onclick="page('data',this)">▣ <span>Data Peti</span></div>
+<div class="nav" onclick="page('in',this)">↓ <span>Barang Masuk</span></div>
+<div class="nav" onclick="page('out',this)">↑ <span>Barang Keluar</span></div>
+<div class="nav" onclick="page('history',this)">▤ <span>Riwayat</span></div>
+<div class="nav" onclick="page('users',this)">♙ <span>Pengguna</span></div>
+<div class="nav" onclick="logout()">↪ <span>Keluar</span></div>
+</aside>
+
+<main class="main">
+<div class="top"><div><h1 id="title">Dashboard</h1><div class="sub">Gudang Peti Mati ZJERO</div></div><div class="user">● <span id="who"></span></div></div>
+
+<section id="dashboard">
+<div class="cards">
+<div class="card"><div class="label">Total Jenis/Varian</div><div class="num" id="cmodels">49</div></div>
+<div class="card"><div class="label">Stok Tercatat</div><div class="num gold" id="cstock">470</div></div>
+<div class="card"><div class="label">Barang Masuk</div><div class="num green" id="cin">0</div></div>
+<div class="card"><div class="label">Barang Keluar</div><div class="num red" id="cout">0</div></div>
+</div>
+<div class="grid">
+<div class="panel"><h2>Transaksi Terbaru</h2><table><thead><tr><th>Waktu</th><th>Model</th><th>Jenis</th><th>Jumlah</th><th>User</th></tr></thead><tbody id="dashhist"></tbody></table></div>
+<div class="panel"><h2>Ringkasan</h2><p style="font-size:13px;color:#666">Stok berubah otomatis setiap transaksi. Model yang stoknya belum diberikan tetap ditandai sebagai <b>Belum diisi</b>.</p><div id="summary"></div></div>
+</div></section>
+
+<section id="data" class="hidden"><div class="panel"><div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px"><input id="search" placeholder="🔎 Cari model..." oninput="renderData()" style="flex:1"><select id="filter" onchange="renderData()" style="max-width:210px"><option value="">Semua Type</option><option>AMERICAN STYLE</option><option>JATI STANDARD</option><option>ASIA STYLE</option></select></div><table><thead><tr><th>Kode</th><th>Type</th><th>Model / Varian</th><th>Stok</th><th>Status</th></tr></thead><tbody id="datatable"></tbody></table></div></section>
+
+<section id="in" class="hidden"><div class="panel" style="max-width:650px"><h2>Barang Masuk</h2><div class="form"><label>Model Peti</label><select id="inmodel"></select><label>Jumlah Masuk</label><input id="inqty" type="number" min="1" placeholder="Contoh: 5"><label>Catatan</label><textarea id="innote" rows="3" placeholder="Opsional"></textarea><button onclick="transact('in')">Simpan Barang Masuk</button></div></div></section>
+
+<section id="out" class="hidden"><div class="panel" style="max-width:650px"><h2>Barang Keluar</h2><div class="form"><label>Model Peti</label><select id="outmodel"></select><label>Jumlah Keluar</label><input id="outqty" type="number" min="1" placeholder="Contoh: 2"><label>Catatan</label><textarea id="outnote" rows="3" placeholder="Contoh: Penjualan / pemakaian"></textarea><button class="danger" onclick="transact('out')">Simpan Barang Keluar</button></div></div></section>
+
+<section id="history" class="hidden"><div class="panel"><h2>Riwayat Transaksi</h2><table><thead><tr><th>Waktu</th><th>Model</th><th>Jenis</th><th>Jumlah</th><th>User</th><th>Catatan</th></tr></thead><tbody id="historytable"></tbody></table></div></section>
+
+<section id="users" class="hidden"><div class="panel"><h2>Pengguna & Hak Akses</h2><table><thead><tr><th>Username</th><th>Role</th><th>Akses</th></tr></thead><tbody><tr><td>admin</td><td>Admin</td><td>Semua menu</td></tr><tr><td>gudang</td><td>Gudang</td><td>Data Peti, Barang Masuk, Barang Keluar, Riwayat</td></tr><tr><td>viewer</td><td>Viewer</td><td>Dashboard & Data Peti</td></tr></tbody></table><p style="font-size:11px;color:#888;margin-top:15px">Catatan: ini masih prototype lokal. Multi-user online/database akan dibuat pada tahap berikutnya.</p></div></section>
+</main></div>
+
+<script>
+const SUPABASE_URL="https://nlyofmbqfmvhxssourwc.supabase.co";
+const SUPABASE_KEY="sb_publishable_0FYPfH2F2AggNG_Zp7FKBA_NkK_KKnh";
+const HEADERS={"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY,"Content-Type":"application/json"};
+let data=[],history=[],current=null;
+const users={admin:{pass:"admin123",role:"Admin"},gudang:{pass:"gudang123",role:"Gudang"},viewer:{pass:"viewer123",role:"Viewer"}};
+
+async function api(path,options={}){
+  const r=await fetch(SUPABASE_URL+"/rest/v1/"+path,{...options,headers:{...HEADERS,...(options.headers||{})}});
+  if(!r.ok) throw new Error(await r.text());
+  return r.status===204?null:r.json();
+}
+async function loadData(){
+  const rows=await api("products?select=id,code,name,style,variant,stock,status&order=id");
+  data=rows.map(x=>({id:x.id,code:x.code,type:x.style,name:x.name,variant:x.variant,stock:x.stock,status:x.status}));
+  const tx=await api("stock_transactions?select=id,product_id,transaction_type,quantity,notes,created_at&order=created_at.desc");
+  history=tx.map(h=>{
+    const x=data.find(p=>p.id===h.product_id);
+    return {id:h.id,productId:h.product_id,name:x?(x.variant?x.name+" — "+x.variant:x.name):"—",
+      type:h.transaction_type==="in"?"Barang Masuk":"Barang Keluar",qty:h.quantity,
+      user:"Database",note:h.notes||"",time:new Date(h.created_at).toLocaleString("id-ID")};
+  });
+}
+async function login(){
+  let u=username.value,p=password.value;
+  if(users[u]&&users[u].pass===p){
+    current={name:u,role:users[u].role}; loginDiv();
+    try{await loadData(); setup(); page("dashboard",document.querySelector(".nav.active"))}
+    catch(e){alert("Gagal mengambil data Supabase: "+e.message)}
+  }else err.textContent="Username atau password salah.";
+}
+function loginDiv(){login.classList.add("hidden");app.classList.remove("hidden");who.textContent=current.name+" — "+current.role}
+function logout(){current=null;app.classList.add("hidden");login.classList.remove("hidden");username.value="";password.value=""}
+function setup(){inmodel.innerHTML=outmodel.innerHTML=data.map((x,i)=>`<option value="${i}">${x.name}${x.variant?" — "+x.variant:""}</option>`).join("");renderData();updateDash();applyRole()}
+function applyRole(){document.querySelectorAll(".nav").forEach(n=>n.style.display="block");if(current.role==="Viewer"){document.querySelectorAll(".nav")[2].style.display="none";document.querySelectorAll(".nav")[3].style.display="none";document.querySelectorAll(".nav")[4].style.display="none";document.querySelectorAll(".nav")[5].style.display="none"}if(current.role==="Gudang")document.querySelectorAll(".nav")[5].style.display="none"}
+function page(id,el){document.querySelectorAll("main section").forEach(s=>s.classList.add("hidden"));document.getElementById(id).classList.remove("hidden");document.querySelectorAll(".nav").forEach(n=>n.classList.remove("active"));if(el)el.classList.add("active");title.textContent={dashboard:"Dashboard",data:"Data Peti",in:"Barang Masuk",out:"Barang Keluar",history:"Riwayat Transaksi",users:"Pengguna"}[id]||"Dashboard";if(id==="history")renderHistory()}
+function renderData(){let q=(search.value||"").toLowerCase(),f=filter.value||"";datatable.innerHTML=data.filter(x=>(!f||x.type===f)&&(!q||((x.name+" "+(x.variant||"")).toLowerCase().includes(q)))).map(x=>{let st=x.stock??0;let status=st===0?"Habis":st<=3?"Menipis":"Tersedia";let label=x.variant?x.name+" — "+x.variant:x.name;return `<tr><td>${x.code||"—"}</td><td>${x.type}</td><td><b>${label}</b></td><td>${st}</td><td><span class="pill ${status!=="Tersedia"?"warn":""}">${status}</span></td></tr>`}).join("")}
+async function transact(kind){
+  let idx=Number((kind==="in"?inmodel:outmodel).value),qty=Number(kind==="in"?inqty.value:outqty.value),note=(kind==="in"?innote:outnote).value.trim(),x=data[idx];
+  if(!qty||qty<1)return alert("Masukkan jumlah yang benar.");
+  if(kind==="out"&&qty>x.stock)return alert("Stok tidak mencukupi.");
+  try{
+    await api("stock_transactions",{method:"POST",headers:{"Prefer":"return=minimal"},body:JSON.stringify({product_id:x.id,transaction_type:kind,quantity:qty,notes:note})});
+    const newStock=x.stock+(kind==="in"?qty:-qty);
+    await api("products?id=eq."+x.id,{method:"PATCH",headers:{"Prefer":"return=minimal"},body:JSON.stringify({stock:newStock,status:newStock===0?"out_of_stock":newStock<=3?"low_stock":"available"})});
+    await loadData();setup();
+    if(kind==="in"){inqty.value="";innote.value=""}else{outqty.value="";outnote.value=""}
+    alert("Transaksi berhasil disimpan ke Supabase.");
+  }catch(e){alert("Transaksi gagal disimpan ke Supabase.\n\n"+e.message)}
+}
+function renderHistory(){historytable.innerHTML=history.length?history.map(h=>`<tr><td>${h.time}</td><td>${h.name}</td><td>${h.type}</td><td>${h.qty}</td><td>${h.user}</td><td>${h.note||"—"}</td></tr>`).join(""):`<tr><td colspan="6">Belum ada transaksi.</td></tr>`}
+function updateDash(){let total=data.reduce((a,x)=>a+(x.stock??0),0),ins=history.filter(h=>h.type==="Barang Masuk").reduce((a,h)=>a+h.qty,0),outs=history.filter(h=>h.type==="Barang Keluar").reduce((a,h)=>a+h.qty,0);cmodels.textContent=data.length;cstock.textContent=total;cin.textContent=ins;cout.textContent=outs;dashhist.innerHTML=history.slice(0,5).map(h=>`<tr><td>${h.time}</td><td>${h.name}</td><td>${h.type}</td><td>${h.qty}</td><td>${h.user}</td></tr>`).join("")||`<tr><td colspan="5">Belum ada transaksi.</td></tr>`;summary.innerHTML=`<p style="font-size:12px">Tersedia: <b>${data.filter(x=>x.stock>3).length}</b> model</p><p style="font-size:12px">Menipis: <b>${data.filter(x=>x.stock>0&&x.stock<=3).length}</b> model</p><p style="font-size:12px">Habis: <b>${data.filter(x=>x.stock===0).length}</b> model</p>`}
+</script></body></html>
