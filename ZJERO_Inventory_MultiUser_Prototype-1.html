@@ -420,7 +420,7 @@ th{
     </div>
 
     <div class="nav" onclick="page('data',this)">
-      ▣ <span>Dadus Kaixaun</span>
+      ▣ <span>Dadus Kaixao</span>
     </div>
 
     <div class="nav" onclick="page('in',this)">
@@ -468,7 +468,7 @@ th{
       <div class="cards">
 
         <div class="card">
-          <div class="label">Total Varian Kaixaun</div>
+          <div class="label">Total Varian Kaixao</div>
           <div class="num" id="cmodels">0</div>
         </div>
 
@@ -501,8 +501,8 @@ th{
             <thead>
               <tr>
                 <th>Tempu</th>
-                <th>Fatin</th>
-                <th>Model Peti</th>
+                <th>Loja</th>
+                <th>Modelu Kaixao</th>
                 <th>Kuantidade</th>
                 <th>Objetivu</th>
               </tr>
@@ -532,20 +532,20 @@ th{
     </section>
 
 
-    <!-- DATA PETI -->
+    <!-- DATA KAIXAO -->
     <section id="data" class="hidden">
 
       <div class="panel">
 
         <button type="button" class="print-btn" onclick="window.print()">
-          🖨️ Imprime / Download PDF Dadus Kaixaun
+          🖨️ Imprime / Download PDF Dadus Kaixao
         </button>
 
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
 
           <input
             id="search"
-            placeholder="🔎 Aluka model peti..."
+            placeholder="🔎 Aluka modelu kaixao..."
             oninput="renderData()"
             style="flex:1"
           >
@@ -571,7 +571,7 @@ th{
             <tr>
               <th>Kode</th>
               <th>Type</th>
-              <th>Model Peti / Varian</th>
+              <th>Modelu Kaixao / Varian</th>
               <th>Stock</th>
               <th>Estadu</th>
             </tr>
@@ -596,14 +596,14 @@ th{
 
         <div class="form">
 
-          <label>Hili Fatin / Loja</label>
+          <label>Hili Loja / Fatin</label>
           <select id="instore">
             <option value="Toko Rebal">Toko Rebal</option>
             <option value="Toko Bairopite">Toko Bairopite</option>
             <option value="Gudang Lahane">Gudang Lahane</option>
           </select>
 
-          <label>Model Peti</label>
+          <label>Modelu Kaixao</label>
           <select id="inmodel"></select>
 
           <label>Kuantidade Tama</label>
@@ -641,14 +641,14 @@ th{
 
         <div class="form">
 
-          <label>Hili Fatin Asal Barang</label>
+          <label>Hili Loja Asal Barang</label>
           <select id="outstore">
             <option value="Toko Rebal">Toko Rebal</option>
             <option value="Toko Bairopite">Toko Bairopite</option>
             <option value="Gudang Lahane">Gudang Lahane</option>
           </select>
 
-          <label>Model Peti</label>
+          <label>Modelu Kaixao</label>
           <select id="outmodel"></select>
 
           <label>Kuantidade Sai</label>
@@ -705,8 +705,8 @@ th{
 
             <tr>
               <th>Tempu</th>
-              <th>Fatin</th>
-              <th>Model Peti</th>
+              <th>Loja</th>
+              <th>Modelu Kaixao</th>
               <th>Kategoria</th>
               <th>Kuantidade</th>
               <th>Objetivu</th>
@@ -755,14 +755,14 @@ th{
               <td>gudang</td>
               <td>Gudang</td>
               <td>
-                Dadus Kaixaun, Barang Tama, Barang Sai, Istoria
+                Dadus Kaixao, Barang Tama, Barang Sai, Istoria
               </td>
             </tr>
 
             <tr>
               <td>viewer</td>
               <td>Viewer</td>
-              <td>Painel & Dadus Kaixaun</td>
+              <td>Painel & Dadus Kaixao</td>
             </tr>
 
           </tbody>
@@ -1163,7 +1163,7 @@ function page(id,el){
 
     dashboard:"Painel",
 
-    data:"Dadus Kaixaun",
+    data:"Dadus Kaixao",
 
     in:"Barang Tama",
 
@@ -1190,7 +1190,7 @@ function page(id,el){
 
 
 /* =========================
-   DATA PETI
+   DATA KAIXAO
 ========================= */
 
 function renderData(){
@@ -1349,7 +1349,7 @@ async function transact(kind){
 
   if(!product){
 
-    alert("Model peti la hetan.");
+    alert("Modelu kaixao la hetan.");
 
     return;
 
