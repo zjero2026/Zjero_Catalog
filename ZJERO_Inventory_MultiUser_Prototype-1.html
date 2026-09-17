@@ -897,11 +897,15 @@ async function loadData(){
     const product =
       data.find(p => p.id === h.product_id);
 
+    let storeName = h.naran_loja || "Loja Rebal";
+    if(storeName === "Toko Rebal") storeName = "Loja Rebal";
+    if(storeName === "Toko Bairopite") storeName = "Loja Bairopite";
+
     return {
       id:h.id,
       productId:h.product_id,
 
-      store:h.naran_loja || "Loja Rebal",
+      store: storeName,
 
       name:
         product
