@@ -796,7 +796,7 @@ async function loadData(){
 
 
   const tx = await api(
-    "stock_transactions?select=id,product_id,transaction_type,quantity,nama_toko,destination,notes,created_at&order=created_at.desc"
+    "stock_transactions?select=id,product_id,transaction_type,quantity,naran_loja,destination,notes,created_at&order=created_at.desc"
   );
 
 
@@ -809,7 +809,7 @@ async function loadData(){
       id:h.id,
       productId:h.product_id,
 
-      store:h.nama_toko || "Toko Rebal",
+      store:h.naran_loja || "Toko Rebal",
 
       name:
         product
@@ -1306,7 +1306,7 @@ async function transact(kind){
 
           quantity:qty,
 
-          nama_toko:store,
+          naran_loja:store,
 
           destination:dest,
 
