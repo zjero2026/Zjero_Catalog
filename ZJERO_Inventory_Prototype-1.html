@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZJERO Inventory</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f5f3ef;color:#26221d}
+.app{display:flex;min-height:100vh}.side{width:235px;background:#211e1a;color:white;padding:24px 16px}
+.logo{font-size:25px;font-weight:800;letter-spacing:3px;padding:8px 12px 28px}.logo small{display:block;font-size:10px;letter-spacing:2px;color:#d6ad43;margin-top:5px}
+.nav{padding:11px 13px;border-radius:9px;margin:5px 0;color:#ddd;font-size:14px}.nav.active{background:#c69a35;color:#fff;font-weight:bold}
+.main{flex:1;padding:26px;overflow:auto}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+h1{margin:0;font-size:25px}.sub{color:#777;margin-top:6px;font-size:13px}.user{background:white;padding:9px 13px;border-radius:20px;font-size:13px;box-shadow:0 2px 10px #0000000d}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.card{background:white;border-radius:13px;padding:18px;box-shadow:0 2px 12px #0000000a}.label{font-size:12px;color:#777}.num{font-size:28px;font-weight:700;margin-top:8px}.gold{color:#b18325}.red{color:#b54c43}.green{color:#47825b}
+.grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-top:18px}.panel{background:white;border-radius:13px;padding:20px;box-shadow:0 2px 12px #0000000a}.panel h2{font-size:16px;margin:0 0 17px}
+.bar{display:flex;align-items:end;height:170px;gap:12px;border-bottom:1px solid #ddd;padding:0 8px}.b{flex:1;background:#c69a35;border-radius:6px 6px 0 0;min-height:25px}.months{display:flex;justify-content:space-around;color:#888;font-size:11px;margin-top:7px}
+table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;padding:11px 7px;border-bottom:1px solid #eee}th{color:#777;font-weight:600}.status{padding:5px 8px;border-radius:12px;font-size:10px}.ok{background:#e7f3ea;color:#39704c}.low{background:#fff2d9;color:#9a6c16}.out{background:#f8e3e1;color:#9b4139}
+@media(max-width:850px){.side{width:75px}.logo{font-size:18px;padding-left:5px}.logo small,.nav span{display:none}.nav{text-align:center}.main{padding:18px}.cards{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
+@media(max-width:520px){.cards{grid-template-columns:1fr 1fr}.num{font-size:22px}.top{align-items:flex-start}.user{font-size:11px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side">
+  <div class="logo">ZJERO<small>INVENTORY SYSTEM</small></div>
+  <div class="nav active">⌂ <span>Dashboard</span></div>
+  <div class="nav">▣ <span>Data Peti</span></div>
+  <div class="nav">↓ <span>Barang Masuk</span></div>
+  <div class="nav">↑ <span>Barang Keluar</span></div>
+  <div class="nav">▤ <span>Laporan Stok</span></div>
+  <div class="nav">♙ <span>Pengguna</span></div>
+  <div class="nav">⚙ <span>Pengaturan</span></div>
+</aside>
+<main class="main">
+ <div class="top"><div><h1>Dashboard Inventory</h1><div class="sub">Gudang Peti Mati ZJERO</div></div><div class="user">● Admin Gudang</div></div>
+ <section class="cards">
+  <div class="card"><div class="label">Total Jenis Peti</div><div class="num">35</div></div>
+  <div class="card"><div class="label">Total Stok</div><div class="num gold">128</div></div>
+  <div class="card"><div class="label">Barang Masuk</div><div class="num green">24</div></div>
+  <div class="card"><div class="label">Barang Keluar</div><div class="num red">18</div></div>
+ </section>
+ <div class="grid">
+  <section class="panel"><h2>Pergerakan Stok — 7 Hari</h2><div class="bar">
+   <div class="b" style="height:42%"></div><div class="b" style="height:65%"></div><div class="b" style="height:48%"></div><div class="b" style="height:82%"></div><div class="b" style="height:58%"></div><div class="b" style="height:92%"></div><div class="b" style="height:72%"></div>
+  </div><div class="months"><span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span><span>Min</span></div></section>
+  <section class="panel"><h2>Ringkasan Stok</h2><table><tr><td>Tersedia</td><td><b>121</b></td><td><span class="status ok">Normal</span></td></tr><tr><td>Menipis</td><td><b>5</b></td><td><span class="status low">Perhatian</span></td></tr><tr><td>Habis</td><td><b>2</b></td><td><span class="status out">Habis</span></td></tr></table></section>
+ </div>
+ <section class="panel" style="margin-top:18px"><h2>Transaksi Terbaru</h2><table><tr><th>Kode</th><th>Nama Peti</th><th>Transaksi</th><th>Jumlah</th><th>User</th><th>Status</th></tr>
+ <tr><td>ZJ-001</td><td>Peti Kayu Premium</td><td>Barang Masuk</td><td>+10</td><td>Admin</td><td><span class="status ok">Berhasil</span></td></tr>
+ <tr><td>ZJ-014</td><td>Peti Standard</td><td>Barang Keluar</td><td>-2</td><td>Gudang</td><td><span class="status ok">Berhasil</span></td></tr>
+ <tr><td>ZJ-022</td><td>Peti Mahoni</td><td>Barang Keluar</td><td>-1</td><td>Kasir</td><td><span class="status ok">Berhasil</span></td></tr></table></section>
+</main></div>
+</body></html>
