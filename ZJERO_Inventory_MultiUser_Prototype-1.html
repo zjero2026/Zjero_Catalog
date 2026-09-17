@@ -517,19 +517,1061 @@ th{
         <div class="form">
 
           <label>Model Peti</label>
-          <select id="inmodel"></select>async function transact(kind){
-  let idx=Number((kind==="in"?inmodel:outmodel).value),qty=Number(kind==="in"?inqty.value:outqty.value),note=(kind==="in"?innote:outnote).value.trim(),x=data[idx];
-  if(!qty||qty<1)return alert("Masukkan jumlah yang benar.");
-  if(kind==="out"&&qty>x.stock)return alert("Stok tidak mencukupi.");
-  try{
-    await api("stock_transactions",{method:"POST",headers:{"Prefer":"return=minimal"},body:JSON.stringify({product_id:x.id,transaction_type:kind,quantity:qty,notes:note})});
-    const newStock=x.stock+(kind==="in"?qty:-qty);
-    await api("products?id=eq."+x.id,{method:"PATCH",headers:{"Prefer":"return=minimal"},body:JSON.stringify({stock:newStock,status:newStock===0?"out_of_stock":newStock<=3?"low_stock":"available"})});
-    await loadData();setup();
-    if(kind==="in"){inqty.value="";innote.value=""}else{outqty.value="";outnote.value=""}
-    alert("Transaksi berhasil disimpan ke Supabase.");
-  }catch(e){alert("Transaksi gagal disimpan ke Supabase.\n\n"+e.message)}
+          <select id="inmodel"></select>
+
+          <label>Jumlah Masuk</label>
+          <input
+            id="inqty"
+            type="number"
+            min="1"
+            placeholder="Contoh: 5"
+          >
+
+          <label>Catatan</label>
+          <textarea
+            id="innote"
+            rows="3"
+            placeholder="Opsional"
+          ></textarea>
+
+          <button type="button" onclick="transact('in')">
+            Simpan Barang Masuk
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- BARANG KELUAR -->
+    <section id="out" class="hidden">
+
+      <div class="panel" style="max-width:650px">
+
+        <h2>Barang Keluar</h2>
+
+        <div class="form">
+
+          <label>Model Peti</label>
+          <select id="outmodel"></select>
+
+          <label>Jumlah Keluar</label>
+          <input
+            id="outqty"
+            type="number"
+            min="1"
+            placeholder="Contoh: 2"
+          >
+
+          <label>Catatan</label>
+          <textarea
+            id="outnote"
+            rows="3"
+            placeholder="Contoh: Penjualan / pemakaian"
+          ></textarea>
+
+          <button
+            type="button"
+            class="danger"
+            onclick="transact('out')"
+          >
+            Simpan Barang Keluar
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- HISTORY -->
+    <section id="history" class="hidden">
+
+      <div class="panel">
+
+        <h2>Riwayat Transaksi</h2>
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>Waktu</th>
+              <th>Model</th>
+              <th>Jenis</th>
+              <th>Jumlah</th>
+              <th>User</th>
+              <th>Catatan</th>
+            </tr>
+
+          </thead>
+
+          <tbody id="historytable"></tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+    <!-- USERS -->
+    <section id="users" class="hidden">
+
+      <div class="panel">
+
+        <h2>Pengguna & Hak Akses</h2>
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>Username</th>
+              <th>Role</th>
+              <th>Akses</th>
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            <tr>
+              <td>admin</td>
+              <td>Admin</td>
+              <td>Semua menu</td>
+            </tr>
+
+            <tr>
+              <td>gudang</td>
+              <td>Gudang</td>
+              <td>
+                Data Peti, Barang Masuk, Barang Keluar, Riwayat
+              </td>
+            </tr>
+
+            <tr>
+              <td>viewer</td>
+              <td>Viewer</td>
+              <td>Dashboard & Data Peti</td>
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+
+<script>
+
+/* =========================
+   SUPABASE
+========================= */
+
+const SUPABASE_URL =
+"https://nlyofmbqfmvhxssourwc.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_0FYPfH2F2AggNG_Zp7FKBA_NkK_KKnh";
+
+const HEADERS = {
+  "apikey": SUPABASE_KEY,
+  "Authorization": "Bearer " + SUPABASE_KEY,
+  "Content-Type": "application/json"
+};
+
+
+/* =========================
+   VARIABLES
+========================= */
+
+let data = [];
+let history = [];
+let current = null;
+
+
+/* =========================
+   USERS
+========================= */
+
+const users = {
+  admin:{
+    pass:"admin123",
+    role:"Admin"
+  },
+
+  gudang:{
+    pass:"gudang123",
+    role:"Gudang"
+  },
+
+  viewer:{
+    pass:"viewer123",
+    role:"Viewer"
+  }
+};
+
+
+/* =========================
+   API SUPABASE
+========================= */
+
+async function api(path,options={}){
+
+  const response = await fetch(
+    SUPABASE_URL + "/rest/v1/" + path,
+    {
+      ...options,
+      headers:{
+        ...HEADERS,
+        ...(options.headers || {})
+      }
+    }
+  );
+
+  if(!response.ok){
+
+    const message = await response.text();
+
+    throw new Error(message || "Supabase request gagal");
+
+  }
+
+  if(response.status === 204){
+
+    return null;
+
+  }
+
+  return await response.json();
+
 }
-function renderHistory(){historytable.innerHTML=history.length?history.map(h=>`<tr><td>${h.time}</td><td>${h.name}</td><td>${h.type}</td><td>${h.qty}</td><td>${h.user}</td><td>${h.note||"—"}</td></tr>`).join(""):`<tr><td colspan="6">Belum ada transaksi.</td></tr>`}
-function updateDash(){let total=data.reduce((a,x)=>a+(x.stock??0),0),ins=history.filter(h=>h.type==="Barang Masuk").reduce((a,h)=>a+h.qty,0),outs=history.filter(h=>h.type==="Barang Keluar").reduce((a,h)=>a+h.qty,0);cmodels.textContent=data.length;cstock.textContent=total;cin.textContent=ins;cout.textContent=outs;dashhist.innerHTML=history.slice(0,5).map(h=>`<tr><td>${h.time}</td><td>${h.name}</td><td>${h.type}</td><td>${h.qty}</td><td>${h.user}</td></tr>`).join("")||`<tr><td colspan="5">Belum ada transaksi.</td></tr>`;summary.innerHTML=`<p style="font-size:12px">Tersedia: <b>${data.filter(x=>x.stock>3).length}</b> model</p><p style="font-size:12px">Menipis: <b>${data.filter(x=>x.stock>0&&x.stock<=3).length}</b> model</p><p style="font-size:12px">Habis: <b>${data.filter(x=>x.stock===0).length}</b> model</p>`}
-</script></body></html>
+
+
+/* =========================
+   LOAD DATA
+========================= */
+
+async function loadData(){
+
+  const rows = await api(
+    "products?select=id,code,name,style,variant,stock,status&order=id"
+  );
+
+  data = rows.map(x => ({
+    id:x.id,
+    code:x.code,
+    type:x.style,
+    name:x.name,
+    variant:x.variant,
+    stock:Number(x.stock || 0),
+    status:x.status
+  }));
+
+
+  const tx = await api(
+    "stock_transactions?select=id,product_id,transaction_type,quantity,notes,created_at&order=created_at.desc"
+  );
+
+
+  history = tx.map(h => {
+
+    const product =
+      data.find(p => p.id === h.product_id);
+
+    return {
+      id:h.id,
+      productId:h.product_id,
+
+      name:
+        product
+          ? (
+              product.variant
+              ? product.name + " — " + product.variant
+              : product.name
+            )
+          : "—",
+
+      type:
+        h.transaction_type === "in"
+        ? "Barang Masuk"
+        : "Barang Keluar",
+
+      qty:Number(h.quantity || 0),
+
+      user:"Database",
+
+      note:h.notes || "",
+
+      time:new Date(h.created_at)
+        .toLocaleString("id-ID")
+    };
+
+  });
+
+}
+
+
+/* =========================
+   LOGIN
+========================= */
+
+async function login(){
+
+  const usernameInput =
+    document.getElementById("username");
+
+  const passwordInput =
+    document.getElementById("password");
+
+  const error =
+    document.getElementById("err");
+
+  const loginBox =
+    document.getElementById("login");
+
+  const app =
+    document.getElementById("app");
+
+  const who =
+    document.getElementById("who");
+
+
+  const username =
+    usernameInput.value.trim();
+
+  const password =
+    passwordInput.value;
+
+
+  error.textContent = "";
+
+
+  if(!username || !password){
+
+    error.textContent =
+      "Username dan password harus diisi.";
+
+    return;
+
+  }
+
+
+  const user =
+    users[username];
+
+
+  if(!user || user.pass !== password){
+
+    error.textContent =
+      "Username atau password salah.";
+
+    return;
+
+  }
+
+
+  current = {
+    name:username,
+    role:user.role
+  };
+
+
+  /* Tampilkan aplikasi */
+
+  loginBox.classList.add("hidden");
+
+  app.classList.remove("hidden");
+
+  who.textContent =
+    current.name + " — " + current.role;
+
+
+  /* Ambil data Supabase */
+
+  try{
+
+    await loadData();
+
+    setup();
+
+    page(
+      "dashboard",
+      document.querySelector(".nav.active")
+    );
+
+  }catch(error){
+
+    console.error(error);
+
+    alert(
+      "Login berhasil, tetapi data Supabase gagal dimuat.\n\n"
+      + error.message
+    );
+
+  }
+
+}
+
+
+/* =========================
+   SETUP
+========================= */
+
+function setup(){
+
+  const inmodel =
+    document.getElementById("inmodel");
+
+  const outmodel =
+    document.getElementById("outmodel");
+
+
+  const options =
+    data.map((x,i) => {
+
+      const label =
+        x.variant
+        ? x.name + " — " + x.variant
+        : x.name;
+
+      return `
+        <option value="${i}">
+          ${label}
+        </option>
+      `;
+
+    }).join("");
+
+
+  inmodel.innerHTML = options;
+
+  outmodel.innerHTML = options;
+
+
+  renderData();
+
+  updateDash();
+
+  applyRole();
+
+}
+
+
+/* =========================
+   ROLE ACCESS
+========================= */
+
+function applyRole(){
+
+  const nav =
+    document.querySelectorAll(".nav");
+
+
+  nav.forEach(n => {
+
+    n.style.display = "block";
+
+  });
+
+
+  /* Viewer */
+
+  if(current.role === "Viewer"){
+
+    nav[2].style.display = "none";
+    nav[3].style.display = "none";
+    nav[4].style.display = "none";
+    nav[5].style.display = "none";
+
+  }
+
+
+  /* Gudang */
+
+  if(current.role === "Gudang"){
+
+    nav[5].style.display = "none";
+
+  }
+
+}
+
+
+/* =========================
+   PAGE NAVIGATION
+========================= */
+
+function page(id,el){
+
+  document
+    .querySelectorAll("main section")
+    .forEach(section => {
+
+      section.classList.add("hidden");
+
+    });
+
+
+  const selected =
+    document.getElementById(id);
+
+  if(selected){
+
+    selected.classList.remove("hidden");
+
+  }
+
+
+  document
+    .querySelectorAll(".nav")
+    .forEach(nav => {
+
+      nav.classList.remove("active");
+
+    });
+
+
+  if(el){
+
+    el.classList.add("active");
+
+  }
+
+
+  const titles = {
+
+    dashboard:"Dashboard",
+
+    data:"Data Peti",
+
+    in:"Barang Masuk",
+
+    out:"Barang Keluar",
+
+    history:"Riwayat Transaksi",
+
+    users:"Pengguna"
+
+  };
+
+
+  document.getElementById("title").textContent =
+    titles[id] || "Dashboard";
+
+
+  if(id === "history"){
+
+    renderHistory();
+
+  }
+
+}
+
+
+/* =========================
+   DATA PETI
+========================= */
+
+function renderData(){
+
+  const search =
+    document.getElementById("search");
+
+  const filter =
+    document.getElementById("filter");
+
+  const table =
+    document.getElementById("datatable");
+
+
+  if(!table) return;
+
+
+  const q =
+    (search.value || "").toLowerCase();
+
+  const f =
+    filter.value || "";
+
+
+  const filtered =
+    data.filter(x => {
+
+      const label =
+        x.name + " " + (x.variant || "");
+
+
+      return (
+        (!f || x.type === f) &&
+        (
+          !q ||
+          label.toLowerCase().includes(q)
+        )
+      );
+
+    });
+
+
+  table.innerHTML =
+    filtered.map(x => {
+
+      const stock =
+        Number(x.stock || 0);
+
+
+      let status;
+
+      if(stock === 0){
+
+        status = "Habis";
+
+      }else if(stock <= 3){
+
+        status = "Menipis";
+
+      }else{
+
+        status = "Tersedia";
+
+      }
+
+
+      const label =
+        x.variant
+        ? x.name + " — " + x.variant
+        : x.name;
+
+
+      return `
+        <tr>
+          <td>${x.code || "—"}</td>
+          <td>${x.type || "—"}</td>
+          <td><b>${label}</b></td>
+          <td>${stock}</td>
+          <td>
+            <span class="pill ${
+              status !== "Tersedia" ? "warn" : ""
+            }">
+              ${status}
+            </span>
+          </td>
+        </tr>
+      `;
+
+    }).join("");
+
+
+}
+
+
+/* =========================
+   TRANSACTION
+========================= */
+
+async function transact(kind){
+
+  const modelElement =
+    document.getElementById(
+      kind === "in"
+      ? "inmodel"
+      : "outmodel"
+    );
+
+
+  const qtyElement =
+    document.getElementById(
+      kind === "in"
+      ? "inqty"
+      : "outqty"
+    );
+
+
+  const noteElement =
+    document.getElementById(
+      kind === "in"
+      ? "innote"
+      : "outnote"
+    );
+
+
+  const idx =
+    Number(modelElement.value);
+
+
+  const qty =
+    Number(qtyElement.value);
+
+
+  const note =
+    noteElement.value.trim();
+
+
+  const product =
+    data[idx];
+
+
+  if(!product){
+
+    alert("Model peti tidak ditemukan.");
+
+    return;
+
+  }
+
+
+  if(!qty || qty < 1){
+
+    alert("Masukkan jumlah yang benar.");
+
+    return;
+
+  }
+
+
+  if(
+    kind === "out" &&
+    qty > Number(product.stock || 0)
+  ){
+
+    alert("Stok tidak mencukupi.");
+
+    return;
+
+  }
+
+
+  try{
+
+    /* Simpan transaksi */
+
+    await api(
+      "stock_transactions",
+      {
+        method:"POST",
+
+        headers:{
+          "Prefer":"return=minimal"
+        },
+
+        body:JSON.stringify({
+
+          product_id:product.id,
+
+          transaction_type:kind,
+
+          quantity:qty,
+
+          notes:note
+
+        })
+
+      }
+    );
+
+
+    /* Hitung stok baru */
+
+    const newStock =
+      Number(product.stock || 0) +
+      (
+        kind === "in"
+        ? qty
+        : -qty
+      );
+
+
+    let newStatus;
+
+    if(newStock === 0){
+
+      newStatus = "out_of_stock";
+
+    }else if(newStock <= 3){
+
+      newStatus = "low_stock";
+
+    }else{
+
+      newStatus = "available";
+
+    }
+
+
+    /* Update products */
+
+    await api(
+      "products?id=eq." + product.id,
+      {
+        method:"PATCH",
+
+        headers:{
+          "Prefer":"return=minimal"
+        },
+
+        body:JSON.stringify({
+
+          stock:newStock,
+
+          status:newStatus
+
+        })
+
+      }
+    );
+
+
+    /* Reload database */
+
+    await loadData();
+
+    setup();
+
+
+    /* Bersihkan form */
+
+    qtyElement.value = "";
+
+    noteElement.value = "";
+
+
+    alert(
+      "Transaksi berhasil disimpan ke Supabase."
+    );
+
+
+  }catch(error){
+
+    console.error(error);
+
+    alert(
+      "Transaksi gagal disimpan ke Supabase.\n\n"
+      + error.message
+    );
+
+  }
+
+}
+
+
+/* =========================
+   HISTORY
+========================= */
+
+function renderHistory(){
+
+  const table =
+    document.getElementById("historytable");
+
+
+  if(!history.length){
+
+    table.innerHTML =
+      `<tr>
+        <td colspan="6">
+          Belum ada transaksi.
+        </td>
+      </tr>`;
+
+    return;
+
+  }
+
+
+  table.innerHTML =
+    history.map(h => {
+
+      return `
+        <tr>
+          <td>${h.time}</td>
+          <td>${h.name}</td>
+          <td>${h.type}</td>
+          <td>${h.qty}</td>
+          <td>${h.user}</td>
+          <td>${h.note || "—"}</td>
+        </tr>
+      `;
+
+    }).join("");
+
+}
+
+
+/* =========================
+   DASHBOARD
+========================= */
+
+function updateDash(){
+
+  const totalStock =
+    data.reduce(
+      (total,x) =>
+        total + Number(x.stock || 0),
+      0
+    );
+
+
+  const totalIn =
+    history
+      .filter(h => h.type === "Barang Masuk")
+      .reduce(
+        (total,h) =>
+          total + Number(h.qty || 0),
+        0
+      );
+
+
+  const totalOut =
+    history
+      .filter(h => h.type === "Barang Keluar")
+      .reduce(
+        (total,h) =>
+          total + Number(h.qty || 0),
+        0
+      );
+
+
+  document.getElementById("cmodels")
+    .textContent = data.length;
+
+
+  document.getElementById("cstock")
+    .textContent = totalStock;
+
+
+  document.getElementById("cin")
+    .textContent = totalIn;
+
+
+  document.getElementById("cout")
+    .textContent = totalOut;
+
+
+  const dashhist =
+    document.getElementById("dashhist");
+
+
+  dashhist.innerHTML =
+    history
+      .slice(0,5)
+      .map(h => {
+
+        return `
+          <tr>
+            <td>${h.time}</td>
+            <td>${h.name}</td>
+            <td>${h.type}</td>
+            <td>${h.qty}</td>
+            <td>${h.user}</td>
+          </tr>
+        `;
+
+      }).join("")
+      ||
+      `<tr>
+        <td colspan="5">
+          Belum ada transaksi.
+        </td>
+      </tr>`;
+
+
+  const available =
+    data.filter(
+      x => Number(x.stock || 0) > 3
+    ).length;
+
+
+  const low =
+    data.filter(
+      x =>
+        Number(x.stock || 0) > 0 &&
+        Number(x.stock || 0) <= 3
+    ).length;
+
+
+  const empty =
+    data.filter(
+      x => Number(x.stock || 0) === 0
+    ).length;
+
+
+  document.getElementById("summary").innerHTML = `
+
+    <p style="font-size:12px">
+      Tersedia: <b>${available}</b> model
+    </p>
+
+    <p style="font-size:12px">
+      Menipis: <b>${low}</b> model
+    </p>
+
+    <p style="font-size:12px">
+      Habis: <b>${empty}</b> model
+    </p>
+
+  `;
+
+}
+
+
+/* =========================
+   LOGOUT
+========================= */
+
+function logout(){
+
+  current = null;
+
+  document
+    .getElementById("app")
+    .classList.add("hidden");
+
+
+  document
+    .getElementById("login")
+    .classList.remove("hidden");
+
+
+  document.getElementById("username").value = "";
+
+  document.getElementById("password").value = "";
+
+  document.getElementById("err").textContent = "";
+
+}
+
+
+/* =========================
+   ENTER KEY LOGIN
+========================= */
+
+document.addEventListener("DOMContentLoaded",function(){
+
+  document
+    .getElementById("password")
+    .addEventListener("keydown",function(event){
+
+      if(event.key === "Enter"){
+
+        login();
+
+      }
+
+    });
+
+});
+
+</script>
+
+</body>
+</html>
