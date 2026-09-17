@@ -1,0 +1,15 @@
+{
+  "name": "ZJERO Inventory",
+  "short_name": "ZJERO",
+  "start_url": "/Iventory_MultiUser_Prototype-1.html",
+  "display": "standalone",
+  "background_color": "#211e1a",
+  "theme_color": "#211e1a",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png"
+    }
+  ]
+}
