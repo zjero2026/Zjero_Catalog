@@ -372,7 +372,7 @@ th{
 
       <div>
         <h1 id="title">Dashboard</h1>
-        <div class="sub">Gudang Peti Mati ZJERO</div>
+        <div class="sub">Sistem Manajemen Stok Toko</div>
       </div>
 
       <div class="user">
@@ -421,10 +421,10 @@ th{
             <thead>
               <tr>
                 <th>Waktu</th>
+                <th>Toko</th>
                 <th>Model</th>
-                <th>Jenis</th>
                 <th>Jumlah</th>
-                <th>User</th>
+                <th>Tujuan</th>
               </tr>
             </thead>
 
@@ -512,6 +512,12 @@ th{
 
         <div class="form">
 
+          <label>Pilih Toko / Lokasi</label>
+          <select id="instore">
+            <option value="Toko Rebal">Toko Rebal</option>
+            <option value="Toko Bairopite">Toko Bairopite</option>
+          </select>
+
           <label>Model Peti</label>
           <select id="inmodel"></select>
 
@@ -550,6 +556,12 @@ th{
 
         <div class="form">
 
+          <label>Pilih Toko / Lokasi Asal Barang</label>
+          <select id="outstore">
+            <option value="Toko Rebal">Toko Rebal</option>
+            <option value="Toko Bairopite">Toko Bairopite</option>
+          </select>
+
           <label>Model Peti</label>
           <select id="outmodel"></select>
 
@@ -559,6 +571,13 @@ th{
             type="number"
             min="1"
             placeholder="Contoh: 2"
+          >
+
+          <label>Tujuan / Dikirim ke Daerah Mana</label>
+          <input
+            id="outdest"
+            type="text"
+            placeholder="Contoh: RSUD / Cabang / Rumah Duka"
           >
 
           <label>Catatan</label>
@@ -596,10 +615,11 @@ th{
 
             <tr>
               <th>Waktu</th>
+              <th>Toko</th>
               <th>Model</th>
               <th>Jenis</th>
               <th>Jumlah</th>
-              <th>User</th>
+              <th>Tujuan</th>
               <th>Catatan</th>
             </tr>
 
@@ -776,7 +796,7 @@ async function loadData(){
 
 
   const tx = await api(
-    "stock_transactions?select=id,product_id,transaction_type,quantity,notes,created_at&order=created_at.desc"
+    "stock_transactions?select=id,product_id,transaction_type,quantity,nama_toko,destination,notes,created_at&order=created_at.desc"
   );
 
 
@@ -788,6 +808,8 @@ async function loadData(){
     return {
       id:h.id,
       productId:h.product_id,
+
+      store:h.nama_toko || "Toko Rebal",
 
       name:
         product
@@ -805,7 +827,7 @@ async function loadData(){
 
       qty:Number(h.quantity || 0),
 
-      user:"Database",
+      dest:h.destination || "—",
 
       note:h.notes || "",
 
@@ -1177,6 +1199,13 @@ function renderData(){
 
 async function transact(kind){
 
+  const storeElement =
+    document.getElementById(
+      kind === "in"
+      ? "instore"
+      : "outstore"
+    );
+
   const modelElement =
     document.getElementById(
       kind === "in"
@@ -1193,6 +1222,11 @@ async function transact(kind){
     );
 
 
+  const store = storeElement.value;
+
+  const destElement =
+    document.getElementById("outdest");
+
   const noteElement =
     document.getElementById(
       kind === "in"
@@ -1207,6 +1241,10 @@ async function transact(kind){
 
   const qty =
     Number(qtyElement.value);
+
+
+  const dest =
+    kind === "out" ? (destElement.value.trim() || "—") : "—";
 
 
   const note =
@@ -1267,6 +1305,10 @@ async function transact(kind){
           transaction_type:kind,
 
           quantity:qty,
+
+          nama_toko:store,
+
+          destination:dest,
 
           notes:note
 
@@ -1337,7 +1379,7 @@ async function transact(kind){
     /* Bersihkan form */
 
     qtyElement.value = "";
-
+    if(destElement) destElement.value = "";
     noteElement.value = "";
 
 
@@ -1374,7 +1416,7 @@ function renderHistory(){
 
     table.innerHTML =
       `<tr>
-        <td colspan="6">
+        <td colspan="7">
           Belum ada transaksi.
         </td>
       </tr>`;
@@ -1390,10 +1432,11 @@ function renderHistory(){
       return `
         <tr>
           <td>${h.time}</td>
+          <td><b>${h.store}</b></td>
           <td>${h.name}</td>
           <td>${h.type}</td>
           <td>${h.qty}</td>
-          <td>${h.user}</td>
+          <td>${h.dest}</td>
           <td>${h.note || "—"}</td>
         </tr>
       `;
@@ -1465,10 +1508,10 @@ function updateDash(){
         return `
           <tr>
             <td>${h.time}</td>
+            <td><b>${h.store}</b></td>
             <td>${h.name}</td>
-            <td>${h.type}</td>
             <td>${h.qty}</td>
-            <td>${h.user}</td>
+            <td>${h.dest}</td>
           </tr>
         `;
 
