@@ -589,7 +589,7 @@ th{
                 <th>Loja</th>
                 <th>Modelu Kaixao</th>
                 <th>Kuantidade</th>
-                <th>Objetivu</th>
+                <th>Total ($)</th>
               </tr>
             </thead>
 
@@ -760,11 +760,37 @@ th{
             placeholder="Egzemplu: 2"
           >
 
-          <label>Status Pagamentu</label>
-          <select id="outpayment">
-            <option value="LUNAS">LUNAS</option>
-            <option value="SEIDAUK LUNAS">SEIDAUK LUNAS (Belum Lunas)</option>
+          <label>Harga Kaixao ($)</label>
+          <input
+            id="outboxprice"
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="Egzemplu: 500"
+          >
+
+          <label>Harga Ambulansia</label>
+          <select id="outambulance">
+            <option value="0">Gratuita (Pakote) - $0</option>
+            <option value="50">1 loron - $50 (Dili laran)</option>
+            <option value="190">1 loron - $190 (Municipiu)</option>
           </select>
+
+          <label>Harga Freezer</label>
+          <select id="outfreezer">
+            <option value="0">Gratuita (Pakote) - $0</option>
+            <option value="100">1 loron - $100 (Dili laran)</option>
+            <option value="150">1 loron - $150 (Municipiu)</option>
+          </select>
+
+          <label>Down Payment / DP ($)</label>
+          <input
+            id="outdp"
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="Egzemplu: 200"
+          >
 
           <label>Objetivu Sai / Hatama ba Fatin Ne'ebé</label>
           <input
@@ -777,7 +803,7 @@ th{
           <textarea
             id="outnote"
             rows="3"
-            placeholder="Egzemplu: Venda / uza rasik"
+            placeholder="Egzemplu: Staff : Aldo"
           ></textarea>
 
           <button
@@ -814,9 +840,9 @@ th{
               <th>Tempu</th>
               <th>Loja</th>
               <th>Modelu Kaixao</th>
-              <th>Kategoria</th>
               <th>Kuantidade</th>
-              <th>Objetivu</th>
+              <th>Total ($)</th>
+              <th>DP ($)</th>
               <th>Status / Aksi</th>
             </tr>
 
@@ -1026,7 +1052,7 @@ async function loadData(){
 
 
   const tx = await api(
-    "stock_transactions?select=id,product_id,transaction_type,quantity,naran_loja,objetivu_sai,notes,payment_status,created_at&order=created_at.desc"
+    "stock_transactions?select=id,product_id,transaction_type,quantity,naran_loja,objetivu_sai,notes,payment_status,total_price,dp_amount,ambulance_price,freezer_price,created_at&order=created_at.desc"
   );
 
 
@@ -1062,6 +1088,9 @@ async function loadData(){
       qty:Number(h.quantity || 0),
 
       dest: h.transaction_type === "in" ? "(Sasan Tama)" : (h.objetivu_sai || "—"),
+
+      totalPrice: Number(h.total_price || 0),
+      dpAmount: Number(h.dp_amount || 0),
 
       paymentStatus: h.transaction_type === "out" ? (h.payment_status || "LUNAS") : "—",
 
@@ -1509,8 +1538,10 @@ async function transact(kind){
   const destElement =
     document.getElementById("outdest");
 
-  const paymentElement =
-    document.getElementById("outpayment");
+  const boxPriceEl = document.getElementById("outboxprice");
+  const ambulanceEl = document.getElementById("outambulance");
+  const freezerEl = document.getElementById("outfreezer");
+  const dpEl = document.getElementById("outdp");
 
   const noteElement =
     document.getElementById(
@@ -1531,8 +1562,13 @@ async function transact(kind){
   const dest =
     kind === "out" ? (destElement.value.trim() || "—") : "—";
 
-  const paymentStatus =
-    kind === "out" ? paymentElement.value : "LUNAS";
+  const boxPrice = kind === "out" ? Number(boxPriceEl.value || 0) : 0;
+  const ambulancePrice = kind === "out" ? Number(ambulanceEl.value || 0) : 0;
+  const freezerPrice = kind === "out" ? Number(freezerEl.value || 0) : 0;
+  const dpAmount = kind === "out" ? Number(dpEl.value || 0) : 0;
+
+  const totalPrice = boxPrice + ambulancePrice + freezerPrice;
+  const paymentStatus = (kind === "out" && dpAmount < totalPrice) ? "SEIDAUK LUNAS" : "LUNAS";
 
   const note =
     noteElement ? noteElement.value.trim() : "";
@@ -1596,6 +1632,14 @@ async function transact(kind){
           naran_loja:store,
 
           objetivu_sai:dest,
+
+          total_price:totalPrice,
+
+          dp_amount:dpAmount,
+
+          ambulance_price:ambulancePrice,
+
+          freezer_price:freezerPrice,
 
           payment_status:paymentStatus,
 
@@ -1669,12 +1713,13 @@ async function transact(kind){
 
     qtyElement.value = "";
     if(destElement) destElement.value = "";
-    if(paymentElement) paymentElement.value = "LUNAS";
+    if(boxPriceEl) boxPriceEl.value = "";
+    if(dpEl) dpEl.value = "";
     if(noteElement) noteElement.value = "";
 
 
     alert(
-      "Transaksaun Rai ona ba Supabase ho susesu."
+      "Transaksaun Rai ona ba Supabase ho susesu. Total: $" + totalPrice
     );
 
 
@@ -1755,7 +1800,7 @@ function renderHistory(){
         if(h.paymentStatus === "LUNAS") {
           paymentBadge = `<span class="badge-lunas">LUNAS</span>`;
         } else {
-          paymentBadge = `<span class="badge-belum">SEIDAUK LUNAS</span>`;
+          paymentBadge = `<span class="badge-belum">SEIDAUK LUNAS (DP: $${h.dpAmount})</span>`;
           if(current && current.role === "Admin") {
             paymentBadge += `<button type="button" class="btn-lunas" onclick="updatePaymentStatus('${h.id}')">Update LUNAS</button>`;
           }
@@ -1767,9 +1812,9 @@ function renderHistory(){
           <td>${h.time}</td>
           <td><b>${h.store}</b></td>
           <td>${h.name}</td>
-          <td>${h.type}</td>
           <td>${h.qty}</td>
-          <td>${h.dest}</td>
+          <td>$${h.totalPrice}</td>
+          <td>$${h.dpAmount}</td>
           <td>${paymentBadge}</td>
         </tr>
       `;
@@ -1843,7 +1888,7 @@ updateDash = function(){
             <td><b>${h.store}</b></td>
             <td>${h.name}</td>
             <td>${h.qty}</td>
-            <td>${h.dest}</td>
+            <td>$${h.totalPrice}</td>
           </tr>
         `;
 
