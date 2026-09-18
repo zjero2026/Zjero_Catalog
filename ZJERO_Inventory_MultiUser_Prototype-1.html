@@ -847,8 +847,8 @@ th{
               <th>Loja</th>
               <th>Modelu Kaixao</th>
               <th>Kuantidade</th>
-              <th>Total ($)</th>
-              <th>DP & Sisa ($)</th>
+              <th>Biaya Rincian ($)</th>
+              <th>Total & DP</th>
               <th>Status / Aksi</th>
             </tr>
 
@@ -1071,6 +1071,11 @@ async function loadData(){
     if(storeName === "Toko Rebal") storeName = "Loja Rebal";
     if(storeName === "Toko Bairopite") storeName = "Loja Bairopite";
 
+    const tot = Number(h.total_price || 0);
+    const amb = Number(h.ambulance_price || 0);
+    const frz = Number(h.freezer_price || 0);
+    const boxP = tot - amb - frz;
+
     return {
       id:h.id,
       productId:h.product_id,
@@ -1095,8 +1100,11 @@ async function loadData(){
 
       dest: h.transaction_type === "in" ? "(Sasan Tama)" : (h.objetivu_sai || "—"),
 
-      totalPrice: Number(h.total_price || 0),
+      totalPrice: tot,
       dpAmount: Number(h.dp_amount || 0),
+      ambulancePrice: amb,
+      freezerPrice: frz,
+      boxPrice: boxP > 0 ? boxP : tot,
 
       paymentStatus: h.transaction_type === "out" ? (h.payment_status || "LUNAS") : "—",
 
@@ -1801,6 +1809,11 @@ function renderHistory(){
   table.innerHTML =
     history.map(h => {
 
+      let rincianText = "—";
+      if(h.type === "Sasan Sai") {
+        rincianText = `Kaixao: $${h.boxPrice}<br>Ambulansia: $${h.ambulancePrice}<br>Freezer: $${h.freezerPrice}`;
+      }
+
       let paymentBadge = "—";
       if(h.type === "Sasan Sai") {
         if(h.paymentStatus === "LUNAS") {
@@ -1820,8 +1833,8 @@ function renderHistory(){
           <td><b>${h.store}</b></td>
           <td>${h.name}</td>
           <td>${h.qty}</td>
-          <td>$${h.totalPrice}</td>
-          <td>DP: $${h.dpAmount}</td>
+          <td>${rincianText}</td>
+          <td><b>Total: $${h.totalPrice}</b></td>
           <td>${paymentBadge}</td>
         </tr>
       `;
