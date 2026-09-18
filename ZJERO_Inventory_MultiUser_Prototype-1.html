@@ -197,7 +197,7 @@ button{
 .secondary{background:#555}
 .danger{background:#a8483e}
 .print-btn{background:#39734e;margin-bottom:14px;}
-.invoice-btn{background:#211e1a;padding:4px 8px;font-size:10px;margin-left:5px;}
+.invoice-btn{background:#211e1a;padding:6px 10px;font-size:11px;margin-left:5px;cursor:pointer;}
 
 table{
   width:100%;
@@ -336,9 +336,10 @@ th{
 
 .btn-lunas {
   background: #39734e;
-  padding: 4px 8px;
-  font-size: 10px;
+  padding: 5px 10px;
+  font-size: 11px;
   margin-left: 5px;
+  cursor: pointer;
 }
 
 /* PERBAIKAN PRINT / CETAK DI MOBILE */
@@ -996,7 +997,10 @@ async function updatePaymentStatus(txId) {
 
 function showInvoice(txId) {
   const h = history.find(x => x.id === txId);
-  if(!h) return;
+  if(!h) {
+    alert("Dados transaksaun la hetan.");
+    return;
+  }
 
   const sisa = h.totalPrice - h.dpAmount;
   const invoiceHtml = `
@@ -1027,6 +1031,8 @@ function showInvoice(txId) {
 
 function renderHistory(){
   const table = document.getElementById("historytable");
+  if(!table) return;
+  
   if(!history.length){
     table.innerHTML = `<tr><td colspan="7">Seidauk iha transaksaun.</td></tr>`;
     return;
@@ -1106,7 +1112,6 @@ updateDash = function(){
     if(!hasItems) breakdownHTML += `<li style="color:#888;">Seidauk iha stock</li>`;
     breakdownHTML += `</ul></div>`;
   });
-  breakdownHTML += `</ul></div>`;
   breakdownEl.innerHTML = breakdownHTML;
 
   const available = data.filter(x => Number(x.stock || 0) > 3).length;
