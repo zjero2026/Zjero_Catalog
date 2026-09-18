@@ -744,7 +744,6 @@ async function login(){
   }
 
   current = { name: username, role: user.role };
-  // Simpan sesi login agar tidak logout saat halaman di-refresh
   localStorage.setItem("zjero_user", JSON.stringify(current));
   
   initApp();
@@ -1002,7 +1001,8 @@ async function updatePaymentStatus(txId) {
 }
 
 function showInvoice(txId) {
-  const h = history.find(x => x.id === txId);
+  // Menggunakan String() agar pencocokan ID aman dari perbedaan tipe data angka dan teks
+  const h = history.find(x => String(x.id) === String(txId));
   if(!h) {
     alert("Dados transaksaun la hetan.");
     return;
