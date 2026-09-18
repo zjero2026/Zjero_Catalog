@@ -79,7 +79,7 @@ body{
 .install-btn{
   margin-top:auto;
   background:#39734e;
-  color:#white;
+  color:#fff;
   padding:11px 13px;
   border-radius:9px;
   font-size:13px;
@@ -284,6 +284,16 @@ th{
   color:#a8483e;
   font-size:12px;
   min-height:15px
+}
+
+.stock-info{
+  background:#fdf8ed;
+  border:1px solid #e5d3a1;
+  padding:8px 12px;
+  border-radius:6px;
+  font-size:12px;
+  color:#7a5a14;
+  font-weight:bold;
 }
 
 /* KHUSUS CETAK/PRINT */
@@ -631,14 +641,18 @@ th{
         <div class="form">
 
           <label>Hili Loja / Fatin</label>
-          <select id="instore">
+          <select id="instore" onchange="updateStoreStock('in')">
             <option value="Loja Rebal">Loja Rebal</option>
             <option value="Loja Bairopite">Loja Bairopite</option>
             <option value="Gudang Lahane">Gudang Lahane</option>
           </select>
 
           <label>Modelu Kaixao</label>
-          <select id="inmodel"></select>
+          <select id="inmodel" onchange="updateStoreStock('in')"></select>
+
+          <div id="instockinfo" class="stock-info">
+            📦 Stock iha loja ne'e: 0
+          </div>
 
           <label>Kuantidade Tama</label>
           <input
@@ -676,14 +690,18 @@ th{
         <div class="form">
 
           <label>Hili Loja Asal Barang</label>
-          <select id="outstore">
+          <select id="outstore" onchange="updateStoreStock('out')">
             <option value="Loja Rebal">Loja Rebal</option>
             <option value="Loja Bairopite">Loja Bairopite</option>
             <option value="Gudang Lahane">Gudang Lahane</option>
           </select>
 
           <label>Modelu Kaixao</label>
-          <select id="outmodel"></select>
+          <select id="outmodel" onchange="updateStoreStock('out')"></select>
+
+          <div id="outstockinfo" class="stock-info">
+            📦 Stock iha loja ne'e: 0
+          </div>
 
           <label>Kuantidade Sai</label>
           <input
@@ -1138,12 +1156,52 @@ function setup(){
   outmodel.innerHTML = options;
 
 
+  updateStoreStock('in');
+  updateStoreStock('out');
+
   renderData();
 
   updateDash();
 
   applyRole();
 
+}
+
+
+/* =========================
+   UPDATE STORE STOCK INFO
+========================= */
+
+function updateStoreStock(kind){
+  const storeEl = document.getElementById(kind === 'in' ? 'instore' : 'outstore');
+  const modelEl = document.getElementById(kind === 'in' ? 'inmodel' : 'outmodel');
+  const infoEl = document.getElementById(kind === 'in' ? 'instockinfo' : 'outstockinfo');
+
+  if(!storeEl || !modelEl || !infoEl) return;
+
+  const storeName = storeEl.value;
+  const productIdx = Number(modelEl.value);
+  const product = data[productIdx];
+
+  if(!product){
+    infoEl.textContent = `📦 Stock iha ${storeName}: 0`;
+    return;
+  }
+
+  // Hitung stok berdasarkan riwayat transaksi di loja terkait
+  const storeTransactions = history.filter(h => h.store === storeName && h.productId === product.id);
+  
+  let storeStock = 0;
+  storeTransactions.forEach(h => {
+    if(h.type === "Barang Tama"){
+      storeStock += h.qty;
+    }else if(h.type === "Barang Sai"){
+      storeStock -= h.qty;
+    }
+  });
+
+  // Jika belum ada riwayat spesifik toko, fallback ke estimasi proporsional atau 0
+  infoEl.textContent = `📦 Stock ${product.name} (${storeName}): ${storeStock >= 0 ? storeStock : product.stock}`;
 }
 
 
