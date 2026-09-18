@@ -789,14 +789,22 @@ th{
             <option value="450">3 loron - $450 (Municipiu)</option>
           </select>
 
-          <label>Down Payment / DP ($)</label>
-          <input
-            id="outdp"
-            type="number"
-            min="0"
-            step="0.01"
-            placeholder="Egzemplu: 200"
-          >
+          <label>Opsi Pembayaran</label>
+          <select id="outpaytype" onchange="toggleDPField()">
+            <option value="lunas">Cash Lunas</option>
+            <option value="dp">Down Payment (DP)</option>
+          </select>
+
+          <div id="dpcontainer" class="hidden">
+            <label>Down Payment / DP ($)</label>
+            <input
+              id="outdp"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="Egzemplu: 200"
+            >
+          </div>
 
           <label>Objetivu Sai / Hatama ba Fatin Ne'ebé</label>
           <input
@@ -1269,6 +1277,22 @@ function setup(){
 
 
 /* =========================
+   TOGGLE DP FIELD
+========================= */
+
+function toggleDPField(){
+  const payType = document.getElementById("outpaytype").value;
+  const dpContainer = document.getElementById("dpcontainer");
+  if(payType === "dp"){
+    dpContainer.classList.remove("hidden");
+  } else {
+    dpContainer.classList.add("hidden");
+    document.getElementById("outdp").value = "";
+  }
+}
+
+
+/* =========================
    CALCULATE STOCK PER STORE
 ========================= */
 
@@ -1555,6 +1579,7 @@ async function transact(kind){
   const boxPriceEl = document.getElementById("outboxprice");
   const ambulanceEl = document.getElementById("outambulance");
   const freezerEl = document.getElementById("outfreezer");
+  const payTypeEl = document.getElementById("outpaytype");
   const dpEl = document.getElementById("outdp");
 
   const noteElement =
@@ -1579,10 +1604,16 @@ async function transact(kind){
   const boxPrice = kind === "out" ? Number(boxPriceEl.value || 0) : 0;
   const ambulancePrice = kind === "out" ? Number(ambulanceEl.value || 0) : 0;
   const freezerPrice = kind === "out" ? Number(freezerEl.value || 0) : 0;
-  const dpAmount = kind === "out" ? Number(dpEl.value || 0) : 0;
 
   const totalPrice = boxPrice + ambulancePrice + freezerPrice;
-  const paymentStatus = (kind === "out" && dpAmount < totalPrice) ? "SEIDAUK LUNAS" : "LUNAS";
+  
+  let dpAmount = 0;
+  let paymentStatus = "LUNAS";
+
+  if (kind === "out" && payTypeEl.value === "dp") {
+    dpAmount = Number(dpEl.value || 0);
+    paymentStatus = (dpAmount < totalPrice) ? "SEIDAUK LUNAS" : "LUNAS";
+  }
 
   const note =
     noteElement ? noteElement.value.trim() : "";
@@ -1729,6 +1760,8 @@ async function transact(kind){
     if(destElement) destElement.value = "";
     if(boxPriceEl) boxPriceEl.value = "";
     if(dpEl) dpEl.value = "";
+    if(payTypeEl) payTypeEl.value = "lunas";
+    toggleDPField();
     if(noteElement) noteElement.value = "";
 
 
@@ -1817,7 +1850,7 @@ function renderHistory(){
       let paymentBadge = "—";
       if(h.type === "Sasan Sai") {
         if(h.paymentStatus === "LUNAS") {
-          paymentBadge = `<span class="badge-lunas">LUNAS</span>`;
+          paymentBadge = `<span class="badge-lunas">LUNAS (Cash)</span>`;
         } else {
           const sisa = h.totalPrice - h.dpAmount;
           paymentBadge = `<span class="badge-belum">SEIDAUK LUNAS</span><br><small style="color:#a8483e;font-weight:bold;">DP: $${h.dpAmount} | Sisa: $${sisa > 0 ? sisa : 0}</small>`;
