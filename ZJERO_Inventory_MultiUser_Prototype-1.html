@@ -313,6 +313,31 @@ th{
   padding-bottom: 5px;
 }
 
+.badge-lunas {
+  background: #e7f3ea;
+  color: #39704c;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 11px;
+}
+
+.badge-belum {
+  background: #f6dfdd;
+  color: #963f37;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 11px;
+}
+
+.btn-lunas {
+  background: #39734e;
+  padding: 4px 8px;
+  font-size: 10px;
+  margin-left: 5px;
+}
+
 /* KHUSUS CETAK/PRINT */
 @media print{
   body{
@@ -735,6 +760,12 @@ th{
             placeholder="Egzemplu: 2"
           >
 
+          <label>Status Pagamentu</label>
+          <select id="outpayment">
+            <option value="LUNAS">LUNAS</option>
+            <option value="SEIDAUK LUNAS">SEIDAUK LUNAS (Belum Lunas)</option>
+          </select>
+
           <label>Objetivu Sai / Hatama ba Fatin Ne'ebé</label>
           <input
             id="outdest"
@@ -786,7 +817,7 @@ th{
               <th>Kategoria</th>
               <th>Kuantidade</th>
               <th>Objetivu</th>
-              <th>Notas</th>
+              <th>Status / Aksi</th>
             </tr>
 
           </thead>
@@ -995,7 +1026,7 @@ async function loadData(){
 
 
   const tx = await api(
-    "stock_transactions?select=id,product_id,transaction_type,quantity,naran_loja,objetivu_sai,notes,created_at&order=created_at.desc"
+    "stock_transactions?select=id,product_id,transaction_type,quantity,naran_loja,objetivu_sai,notes,payment_status,created_at&order=created_at.desc"
   );
 
 
@@ -1031,6 +1062,8 @@ async function loadData(){
       qty:Number(h.quantity || 0),
 
       dest: h.transaction_type === "in" ? "(Sasan Tama)" : (h.objetivu_sai || "—"),
+
+      paymentStatus: h.transaction_type === "out" ? (h.payment_status || "LUNAS") : "—",
 
       note:h.notes || "",
 
@@ -1476,6 +1509,9 @@ async function transact(kind){
   const destElement =
     document.getElementById("outdest");
 
+  const paymentElement =
+    document.getElementById("outpayment");
+
   const noteElement =
     document.getElementById(
       kind === "in"
@@ -1495,9 +1531,8 @@ async function transact(kind){
   const dest =
     kind === "out" ? (destElement.value.trim() || "—") : "—";
 
-
-  const note =
-    noteElement.value.trim();
+  const paymentStatus =
+    kind === "out" ? paymentElement.value : "LUNAS";
 
 
   const product =
@@ -1558,6 +1593,8 @@ async function transact(kind){
           naran_loja:store,
 
           objetivu_sai:dest,
+
+          payment_status:paymentStatus,
 
           notes:note
 
@@ -1629,6 +1666,7 @@ async function transact(kind){
 
     qtyElement.value = "";
     if(destElement) destElement.value = "";
+    if(paymentElement) paymentElement.value = "LUNAS";
     noteElement.value = "";
 
 
@@ -1648,6 +1686,37 @@ async function transact(kind){
 
   }
 
+}
+
+
+/* =========================
+   UPDATE PAYMENT STATUS TO LUNAS
+========================= */
+
+async function updatePaymentStatus(txId) {
+  if(!confirm("Muda estadu pagamentu ba LUNAS?")) return;
+
+  try {
+    await api(
+      "stock_transactions?id=eq." + txId,
+      {
+        method: "PATCH",
+        headers: {
+          "Prefer": "return=minimal"
+        },
+        body: JSON.stringify({
+          payment_status: "LUNAS"
+        })
+      }
+    );
+
+    await loadData();
+    renderHistory();
+    alert("Estadu pagamentu muda ona ba LUNAS ho susesu!");
+  } catch(error) {
+    console.error(error);
+    alert("La konsege atualiza estadu pagamentu.\n\n" + error.message);
+  }
 }
 
 
@@ -1678,6 +1747,18 @@ function renderHistory(){
   table.innerHTML =
     history.map(h => {
 
+      let paymentBadge = "—";
+      if(h.type === "Sasan Sai") {
+        if(h.paymentStatus === "LUNAS") {
+          paymentBadge = `<span class="badge-lunas">LUNAS</span>`;
+        } else {
+          paymentBadge = `<span class="badge-belum">SEIDAUK LUNAS</span>`;
+          if(current && current.role === "Admin") {
+            paymentBadge += `<button type="button" class="btn-lunas" onclick="updatePaymentStatus('${h.id}')">Update LUNAS</button>`;
+          }
+        }
+      }
+
       return `
         <tr>
           <td>${h.time}</td>
@@ -1686,7 +1767,7 @@ function renderHistory(){
           <td>${h.type}</td>
           <td>${h.qty}</td>
           <td>${h.dest}</td>
-          <td>${h.note || "—"}</td>
+          <td>${paymentBadge}</td>
         </tr>
       `;
 
