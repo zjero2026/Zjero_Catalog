@@ -1534,6 +1534,9 @@ async function transact(kind){
   const paymentStatus =
     kind === "out" ? paymentElement.value : "LUNAS";
 
+  const note =
+    noteElement ? noteElement.value.trim() : "";
+
 
   const product =
     data[idx];
@@ -1667,7 +1670,7 @@ async function transact(kind){
     qtyElement.value = "";
     if(destElement) destElement.value = "";
     if(paymentElement) paymentElement.value = "LUNAS";
-    noteElement.value = "";
+    if(noteElement) noteElement.value = "";
 
 
     alert(
