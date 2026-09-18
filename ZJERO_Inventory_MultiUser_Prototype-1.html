@@ -985,8 +985,12 @@ async function updatePaymentStatus(txId) {
       headers: { "Prefer": "return=minimal" },
       body: JSON.stringify({ payment_status: "LUNAS" })
     });
+
+    // Refresh data otomatis secara instan setelah sukses
     await loadData();
     renderHistory();
+    updateDash();
+
     alert("Estadu pagamentu muda ona ba LUNAS ho susesu!");
   } catch(error) {
     console.error(error);
