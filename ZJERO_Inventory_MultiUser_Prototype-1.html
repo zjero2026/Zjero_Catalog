@@ -342,17 +342,15 @@ th{
   cursor: pointer;
 }
 
-/* PERBAIKAN PRINT / CETAK DI MOBILE */
+/* KHUSUS CETAK/PRINT */
 @media print{
   body { background: #fff !important; color: #000 !important; }
   .side, .top, button, .print-btn, .invoice-btn, .btn-lunas, .form { display: none !important; }
   .app { display: block !important; }
   .main { padding: 0 !important; overflow: visible !important; width: 100% !important; }
   section { display: none !important; }
-  section:not(.hidden) { display: block !important; }
-  .panel { box-shadow: none !important; padding: 0 !important; border: 0 !important; }
-  table { width: 100% !important; border-collapse: collapse !important; }
-  th, td { border: 1px solid #999 !important; padding: 6px !important; font-size: 11px !important; }
+  section#invoice-section { display: block !important; }
+  #invoice-section { border: 0 !important; box-shadow: none !important; padding: 0 !important; }
 }
 </style>
 </head>
@@ -729,9 +727,6 @@ async function login(){
   const usernameInput = document.getElementById("username");
   const passwordInput = document.getElementById("password");
   const error = document.getElementById("err");
-  const loginBox = document.getElementById("login");
-  const app = document.getElementById("app");
-  const who = document.getElementById("who");
 
   const username = usernameInput.value.trim();
   const password = passwordInput.value;
@@ -749,17 +744,27 @@ async function login(){
   }
 
   current = { name: username, role: user.role };
+  // Simpan sesi login agar tidak logout saat halaman di-refresh
+  localStorage.setItem("zjero_user", JSON.stringify(current));
+  
+  initApp();
+}
+
+function initApp(){
+  const loginBox = document.getElementById("login");
+  const app = document.getElementById("app");
+  const who = document.getElementById("who");
+
   loginBox.classList.add("hidden");
   app.classList.remove("hidden");
   who.textContent = current.name + " — " + current.role;
 
-  try{
-    await loadData();
+  loadData().then(() => {
     setup();
     page("dashboard", document.querySelector(".nav.active"));
-  }catch(error){
+  }).catch(error){
     console.error(error);
-    alert("Login susesu, maibe dada dadus husi Supabase la konsege.\n\n" + error.message);
+    alert("Dada dadus husi Supabase la konsege.\n\n" + error.message);
   }
 }
 
@@ -771,8 +776,8 @@ function setup(){
     return `<option value="${i}">${label}</option>`;
   }).join("");
 
-  inmodel.innerHTML = options;
-  outmodel.innerHTML = options;
+  if(inmodel) inmodel.innerHTML = options;
+  if(outmodel) outmodel.innerHTML = options;
   updateStoreStock('in');
   updateStoreStock('out');
   renderData();
@@ -821,6 +826,7 @@ function updateStoreStock(kind){
 
 function applyRole(){
   const nav = document.querySelectorAll(".nav");
+  if(!nav.length) return;
   nav.forEach(n => n.style.display = "block");
   if(current.role === "Viewer"){
     nav[2].style.display = "none";
@@ -1127,6 +1133,7 @@ updateDash = function(){
 
 function logout(){
   current = null;
+  localStorage.removeItem("zjero_user");
   document.getElementById("app").classList.add("hidden");
   document.getElementById("login").classList.remove("hidden");
   document.getElementById("username").value = "";
@@ -1135,9 +1142,22 @@ function logout(){
 }
 
 document.addEventListener("DOMContentLoaded", function(){
-  document.getElementById("password").addEventListener("keydown", function(event){
-    if(event.key === "Enter") login();
-  });
+  const savedUser = localStorage.getItem("zjero_user");
+  if(savedUser){
+    try{
+      current = JSON.parse(savedUser);
+      initApp();
+    }catch(e){
+      localStorage.removeItem("zjero_user");
+    }
+  }
+
+  const pwdInput = document.getElementById("password");
+  if(pwdInput){
+    pwdInput.addEventListener("keydown", function(event){
+      if(event.key === "Enter") login();
+    });
+  }
 });
 </script>
 
