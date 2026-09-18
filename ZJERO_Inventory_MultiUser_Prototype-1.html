@@ -632,7 +632,7 @@ const installBtn = document.getElementById("installAppBtn");
 window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  installBtn.classList.remove("hidden");
+  if(installBtn) installBtn.classList.remove("hidden");
 });
 
 function installPWA() {
@@ -640,7 +640,7 @@ function installPWA() {
     deferredPrompt.prompt();
     deferredPrompt.userChoice.then((choiceResult) => {
       deferredPrompt = null;
-      installBtn.classList.add("hidden");
+      if(installBtn) installBtn.classList.add("hidden");
     });
   }
 }
@@ -746,10 +746,10 @@ async function login(){
   current = { name: username, role: user.role };
   localStorage.setItem("zjero_user", JSON.stringify(current));
   
-  initApp();
+  await executeAppStartup();
 }
 
-function initApp(){
+async function executeAppStartup(){
   const loginBox = document.getElementById("login");
   const app = document.getElementById("app");
   const who = document.getElementById("who");
@@ -758,10 +758,11 @@ function initApp(){
   app.classList.remove("hidden");
   who.textContent = current.name + " — " + current.role;
 
-  loadData().then(() => {
+  try {
+    await loadData();
     setup();
     page("dashboard", document.querySelector(".nav.active"));
-  }).catch(error){
+  } catch(error) {
     console.error(error);
     alert("Dada dadus husi Supabase la konsege.\n\n" + error.message);
   }
@@ -1001,7 +1002,6 @@ async function updatePaymentStatus(txId) {
 }
 
 function showInvoice(txId) {
-  // Menggunakan String() agar pencocokan ID aman dari perbedaan tipe data angka dan teks
   const h = history.find(x => String(x.id) === String(txId));
   if(!h) {
     alert("Dados transaksaun la hetan.");
@@ -1146,7 +1146,7 @@ document.addEventListener("DOMContentLoaded", function(){
   if(savedUser){
     try{
       current = JSON.parse(savedUser);
-      initApp();
+      executeAppStartup();
     }catch(e){
       localStorage.removeItem("zjero_user");
     }
