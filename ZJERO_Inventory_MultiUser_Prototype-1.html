@@ -662,6 +662,10 @@ th{
             <option value="Loja Rebal">Loja Rebal</option>
             <option value="Loja Bairopite">Loja Bairopite</option>
             <option value="Gudang Lahane">Gudang Lahane</option>
+            <option value="Loja Same">Loja Same</option>
+            <option value="Loja Oe-cusse">Loja Oe-cusse</option>
+            <option value="Loja Ainaro">Loja Ainaro</option>
+            <option value="Loja Baucau">Loja Baucau</option>
           </select>
 
           <label>Modelu Kaixao</label>
@@ -711,6 +715,10 @@ th{
             <option value="Loja Rebal">Loja Rebal</option>
             <option value="Loja Bairopite">Loja Bairopite</option>
             <option value="Gudang Lahane">Gudang Lahane</option>
+            <option value="Loja Same">Loja Same</option>
+            <option value="Loja Oe-cusse">Loja Oe-cusse</option>
+            <option value="Loja Ainaro">Loja Ainaro</option>
+            <option value="Loja Baucau">Loja Baucau</option>
           </select>
 
           <label>Modelu Kaixao</label>
@@ -1766,8 +1774,16 @@ updateDash = function(){
       </tr>`;
 
 
-  // Rincian Stock per Loja
-  const stores = ["Loja Rebal", "Loja Bairopite", "Gudang Lahane"];
+  // Rincian Stock per Loja (Termasuk Loja Baru)
+  const stores = [
+    "Loja Rebal", 
+    "Loja Bairopite", 
+    "Gudang Lahane", 
+    "Loja Same", 
+    "Loja Oe-cusse", 
+    "Loja Ainaro", 
+    "Loja Baucau"
+  ];
   const breakdownEl = document.getElementById("storestockbreakdown");
 
   let breakdownHTML = "";
