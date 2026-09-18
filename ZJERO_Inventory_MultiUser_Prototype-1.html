@@ -329,6 +329,8 @@ th{
   border-radius: 6px;
   font-weight: bold;
   font-size: 11px;
+  display: inline-block;
+  margin-bottom: 4px;
 }
 
 .btn-lunas {
@@ -842,7 +844,7 @@ th{
               <th>Modelu Kaixao</th>
               <th>Kuantidade</th>
               <th>Total ($)</th>
-              <th>DP ($)</th>
+              <th>DP & Sisa ($)</th>
               <th>Status / Aksi</th>
             </tr>
 
@@ -1800,9 +1802,10 @@ function renderHistory(){
         if(h.paymentStatus === "LUNAS") {
           paymentBadge = `<span class="badge-lunas">LUNAS</span>`;
         } else {
-          paymentBadge = `<span class="badge-belum">SEIDAUK LUNAS (DP: $${h.dpAmount})</span>`;
+          const sisa = h.totalPrice - h.dpAmount;
+          paymentBadge = `<span class="badge-belum">SEIDAUK LUNAS</span><br><small style="color:#a8483e;font-weight:bold;">DP: $${h.dpAmount} | Sisa: $${sisa > 0 ? sisa : 0}</small>`;
           if(current && current.role === "Admin") {
-            paymentBadge += `<button type="button" class="btn-lunas" onclick="updatePaymentStatus('${h.id}')">Update LUNAS</button>`;
+            paymentBadge += `<br><button type="button" class="btn-lunas" onclick="updatePaymentStatus('${h.id}')">Update LUNAS</button>`;
           }
         }
       }
@@ -1814,7 +1817,7 @@ function renderHistory(){
           <td>${h.name}</td>
           <td>${h.qty}</td>
           <td>$${h.totalPrice}</td>
-          <td>$${h.dpAmount}</td>
+          <td>DP: $${h.dpAmount}</td>
           <td>${paymentBadge}</td>
         </tr>
       `;
