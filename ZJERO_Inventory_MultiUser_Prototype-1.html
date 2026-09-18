@@ -127,7 +127,8 @@ h1{
 .cards{
   display:grid;
   grid-template-columns:repeat(4,1fr);
-  gap:13px
+  gap:13px;
+  margin-bottom:15px;
 }
 
 .card,.panel{
@@ -294,6 +295,22 @@ th{
   font-size:12px;
   color:#7a5a14;
   font-weight:bold;
+}
+
+.store-card {
+  background: #fdfbf7;
+  border: 1px solid #e6dec5;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.store-card h3 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #a77c1e;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 5px;
 }
 
 /* KHUSUS CETAK/PRINT */
@@ -561,11 +578,11 @@ th{
 
         <div class="panel">
 
-          <h2>Rezumu</h2>
+          <h2>Rinaum Stock tuir Loja / Fatin</h2>
 
-          <p style="font-size:13px;color:#666">
-            Stock muda rasik tuir transaksaun hotu.
-          </p>
+          <div id="storestockbreakdown"></div>
+
+          <h2 style="margin-top:20px">Rezumu</h2>
 
           <div id="summary"></div>
 
@@ -1169,6 +1186,24 @@ function setup(){
 
 
 /* =========================
+   CALCULATE STOCK PER STORE
+========================= */
+
+function getStoreStock(storeName, productId){
+  const storeTransactions = history.filter(h => h.store === storeName && h.productId === productId);
+  let storeStock = 0;
+  storeTransactions.forEach(h => {
+    if(h.type === "Barang Tama"){
+      storeStock += h.qty;
+    }else if(h.type === "Barang Sai"){
+      storeStock -= h.qty;
+    }
+  });
+  return storeStock >= 0 ? storeStock : 0;
+}
+
+
+/* =========================
    UPDATE STORE STOCK INFO
 ========================= */
 
@@ -1188,20 +1223,8 @@ function updateStoreStock(kind){
     return;
   }
 
-  // Hitung stok berdasarkan riwayat transaksi di loja terkait
-  const storeTransactions = history.filter(h => h.store === storeName && h.productId === product.id);
-  
-  let storeStock = 0;
-  storeTransactions.forEach(h => {
-    if(h.type === "Barang Tama"){
-      storeStock += h.qty;
-    }else if(h.type === "Barang Sai"){
-      storeStock -= h.qty;
-    }
-  });
-
-  // Jika belum ada riwayat spesifik toko, fallback ke estimasi proporsional atau 0
-  infoEl.textContent = `📦 Stock ${product.name} (${storeName}): ${storeStock >= 0 ? storeStock : product.stock}`;
+  const storeStock = getStoreStock(storeName, product.id);
+  infoEl.textContent = `📦 Stock ${product.name} (${storeName}): ${storeStock}`;
 }
 
 
@@ -1741,6 +1764,34 @@ updateDash = function(){
           Seidauk iha transaksaun.
         </td>
       </tr>`;
+
+
+  // Rincian Stock per Loja
+  const stores = ["Loja Rebal", "Loja Bairopite", "Gudang Lahane"];
+  const breakdownEl = document.getElementById("storestockbreakdown");
+
+  let breakdownHTML = "";
+  stores.forEach(store => {
+    breakdownHTML += `<div class="store-card"><h3>🏢 ${store}</h3><ul style="margin:0;padding-left:18px;font-size:12px;">`;
+    
+    let hasItems = false;
+    data.forEach(p => {
+      const qty = getStoreStock(store, p.id);
+      if(qty > 0){
+        hasItems = true;
+        const label = p.variant ? `${p.name} (${p.variant})` : p.name;
+        breakdownHTML += `<li>${label}: <b>${qty}</b></li>`;
+      }
+    });
+
+    if(!hasItems){
+      breakdownHTML += `<li style="color:#888;">Seidauk iha stock</li>`;
+    }
+
+    breakdownHTML += `</ul></div>`;
+  });
+
+  breakdownEl.innerHTML = breakdownHTML;
 
 
   const available =
