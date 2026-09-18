@@ -341,28 +341,17 @@ th{
   margin-left: 5px;
 }
 
-/* KHUSUS CETAK/PRINT INVOICE */
+/* PERBAIKAN PRINT / CETAK DI MOBILE */
 @media print{
-  body{
-    background:#fff;
-    color:#000;
-  }
-  .side, .top, button, .print-btn, .form, input, select, section:not(#invoice-section){
-    display:none!important;
-  }
-  .app{
-    display:block!important;
-  }
-  .main{
-    padding:0!important;
-    overflow:visible!important;
-  }
-  #invoice-section{
-    display:block!important;
-    background:#fff !important;
-    padding:0 !important;
-    box-shadow:none !important;
-  }
+  body { background: #fff !important; color: #000 !important; }
+  .side, .top, button, .print-btn, .invoice-btn, .btn-lunas, .form { display: none !important; }
+  .app { display: block !important; }
+  .main { padding: 0 !important; overflow: visible !important; width: 100% !important; }
+  section { display: none !important; }
+  section:not(.hidden) { display: block !important; }
+  .panel { box-shadow: none !important; padding: 0 !important; border: 0 !important; }
+  table { width: 100% !important; border-collapse: collapse !important; }
+  th, td { border: 1px solid #999 !important; padding: 6px !important; font-size: 11px !important; }
 }
 </style>
 </head>
@@ -1117,6 +1106,7 @@ updateDash = function(){
     if(!hasItems) breakdownHTML += `<li style="color:#888;">Seidauk iha stock</li>`;
     breakdownHTML += `</ul></div>`;
   });
+  breakdownHTML += `</ul></div>`;
   breakdownEl.innerHTML = breakdownHTML;
 
   const available = data.filter(x => Number(x.stock || 0) > 3).length;
