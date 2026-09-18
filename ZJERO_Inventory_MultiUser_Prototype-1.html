@@ -561,7 +561,6 @@ th{
 
             <thead>
               <tr>
-                <th>Tempu</th>
                 <th>Loja</th>
                 <th>Modelu Kaixao</th>
                 <th>Kuantidade</th>
@@ -1031,7 +1030,7 @@ async function loadData(){
 
       qty:Number(h.quantity || 0),
 
-      dest:h.objetivu_sai || "—",
+      dest: h.transaction_type === "in" ? "(Sasan Tama)" : (h.objetivu_sai || "—"),
 
       note:h.notes || "",
 
@@ -1757,7 +1756,6 @@ updateDash = function(){
 
         return `
           <tr>
-            <td>${h.time}</td>
             <td><b>${h.store}</b></td>
             <td>${h.name}</td>
             <td>${h.qty}</td>
@@ -1768,7 +1766,7 @@ updateDash = function(){
       }).join("")
       ||
       `<tr>
-        <td colspan="5">
+        <td colspan="4">
           Seidauk iha transaksaun.
         </td>
       </tr>`;
