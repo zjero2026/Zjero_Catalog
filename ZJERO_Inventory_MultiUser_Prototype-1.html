@@ -535,15 +535,18 @@ th{
           <div id="outstockinfo" class="stock-info">📦 Stock iha loja ne'e: 0</div>
           <label>Kuantidade Sai</label>
           <input id="outqty" type="number" min="1" placeholder="Egzemplu: 2">
-          <label>Harga Kaixao ($)</label>
+          
+          <label>Presu Kaixao ($)</label>
           <input id="outboxprice" type="number" min="0" step="0.01" placeholder="Egzemplu: 500">
-          <label>Harga Ambulansia</label>
+          
+          <label>Presu Ambulansia</label>
           <select id="outambulance">
             <option value="0">Gratuita (Pakote) - $0</option>
             <option value="50">1 loron - $50 (Dili laran)</option>
             <option value="190">1 loron - $190 (Municipiu)</option>
           </select>
-          <label>Harga Freezer</label>
+          
+          <label>Presu Freezer</label>
           <select id="outfreezer">
             <option value="0">Gratuita (Pakote) - $0</option>
             <option value="100">1 loron - $100 (Dili laran)</option>
@@ -553,19 +556,24 @@ th{
             <option value="300">2 loron - $300 (Municipiu)</option>
             <option value="450">3 loron - $450 (Municipiu)</option>
           </select>
-          <label>Opsi Pembayaran</label>
+          
+          <label>Opsaun ba Pagamentu</label>
           <select id="outpaytype" onchange="toggleDPField()">
             <option value="lunas">Cash Lunas</option>
             <option value="dp">Down Payment (DP)</option>
           </select>
+          
           <div id="dpcontainer" class="hidden">
             <label>Down Payment / DP ($)</label>
             <input id="outdp" type="number" min="0" step="0.01" placeholder="Egzemplu: 200">
           </div>
+          
           <label>Objetivu Sai / Hatama ba Fatin Ne'ebé</label>
           <input id="outdest" type="text" placeholder="Egzemplu: RSUD / Filial / Uma Duka">
+          
           <label>Komentáriu / Notas</label>
           <textarea id="outnote" rows="3" placeholder="Egzemplu: Staff : Aldo"></textarea>
+          
           <button type="button" class="danger" onclick="transact('out')">Rejistu Sasan Sai</button>
         </div>
       </div>
@@ -986,7 +994,6 @@ async function updatePaymentStatus(txId) {
       body: JSON.stringify({ payment_status: "LUNAS" })
     });
 
-    // Refresh data otomatis secara instan setelah sukses
     await loadData();
     renderHistory();
     updateDash();
@@ -1011,9 +1018,9 @@ function showInvoice(txId) {
     <hr style="border:0; border-top:1px solid #ddd; margin:10px 0;">
     <p><b>RINCIAN BIAYA:</b></p>
     <ul style="padding-left:15px; margin:5px 0;">
-      <li>Harga Kaixao: $${h.boxPrice}</li>
-      <li>Ambulansia: $${h.ambulancePrice}</li>
-      <li>Freezer: $${h.freezerPrice}</li>
+      <li>Presu Kaixao: $${h.boxPrice}</li>
+      <li>Presu Ambulansia: $${h.ambulancePrice}</li>
+      <li>Presu Freezer: $${h.freezerPrice}</li>
     </ul>
     <hr style="border:0; border-top:1px solid #ddd; margin:10px 0;">
     <p style="font-size:15px;"><b>TOTAL KESELURUHAN: $${h.totalPrice}</b></p>
