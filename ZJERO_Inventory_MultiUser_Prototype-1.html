@@ -480,11 +480,11 @@ th{
     </div>
 
     <div class="nav" onclick="page('in',this)">
-      ↓ <span>Barang Tama</span>
+      ↓ <span>Sasan Tama</span>
     </div>
 
     <div class="nav" onclick="page('out',this)">
-      ↑ <span>Barang Sai</span>
+      ↑ <span>Sasan Sai</span>
     </div>
 
     <div class="nav" onclick="page('history',this)">
@@ -539,12 +539,12 @@ th{
         </div>
 
         <div class="card">
-          <div class="label">Barang Tama</div>
+          <div class="label">Sasan Tama</div>
           <div class="num green" id="cin">0</div>
         </div>
 
         <div class="card">
-          <div class="label">Barang Sai</div>
+          <div class="label">Sasan Sai</div>
           <div class="num red" id="cout">0</div>
         </div>
 
@@ -648,12 +648,12 @@ th{
     </section>
 
 
-    <!-- BARANG MASUK -->
+    <!-- SASAN TAMA -->
     <section id="in" class="hidden">
 
       <div class="panel" style="max-width:650px">
 
-        <h2>Barang Tama</h2>
+        <h2>Sasan Tama</h2>
 
         <div class="form">
 
@@ -691,7 +691,7 @@ th{
           ></textarea>
 
           <button type="button" onclick="transact('in')">
-            Rejistu Barang Tama
+            Rejistu Sasan Tama
           </button>
 
         </div>
@@ -701,16 +701,16 @@ th{
     </section>
 
 
-    <!-- BARANG KELUAR -->
+    <!-- SASAN SAI -->
     <section id="out" class="hidden">
 
       <div class="panel" style="max-width:650px">
 
-        <h2>Barang Sai</h2>
+        <h2>Sasan Sai</h2>
 
         <div class="form">
 
-          <label>Hili Loja Asal Barang</label>
+          <label>Hili Loja Asal Sasan</label>
           <select id="outstore" onchange="updateStoreStock('out')">
             <option value="Loja Rebal">Loja Rebal</option>
             <option value="Loja Bairopite">Loja Bairopite</option>
@@ -755,7 +755,7 @@ th{
             class="danger"
             onclick="transact('out')"
           >
-            Rejistu Barang Sai
+            Rejistu Sasan Sai
           </button>
 
         </div>
@@ -832,7 +832,7 @@ th{
               <td>gudang</td>
               <td>Gudang</td>
               <td>
-                Dadus Kaixao, Barang Tama, Barang Sai, Istoria
+                Dadus Kaixao, Sasan Tama, Sasan Sai, Istoria
               </td>
             </tr>
 
@@ -1026,8 +1026,8 @@ async function loadData(){
 
       type:
         h.transaction_type === "in"
-        ? "Barang Tama"
-        : "Barang Sai",
+        ? "Sasan Tama"
+        : "Sasan Sai",
 
       qty:Number(h.quantity || 0),
 
@@ -1201,9 +1201,9 @@ function getStoreStock(storeName, productId){
   const storeTransactions = history.filter(h => h.store === storeName && h.productId === productId);
   let storeStock = 0;
   storeTransactions.forEach(h => {
-    if(h.type === "Barang Tama"){
+    if(h.type === "Sasan Tama"){
       storeStock += h.qty;
-    }else if(h.type === "Barang Sai"){
+    }else if(h.type === "Sasan Sai"){
       storeStock -= h.qty;
     }
   });
@@ -1323,9 +1323,9 @@ function page(id,el){
 
     data:"Dadus Kaixao",
 
-    in:"Barang Tama",
+    in:"Sasan Tama",
 
-    out:"Barang Sai",
+    out:"Sasan Sai",
 
     history:"Istoria Transaksaun",
 
@@ -1712,7 +1712,7 @@ updateDash = function(){
 
   const totalIn =
     history
-      .filter(h => h.type === "Barang Tama")
+      .filter(h => h.type === "Sasan Tama")
       .reduce(
         (total,h) =>
           total + Number(h.qty || 0),
@@ -1722,7 +1722,7 @@ updateDash = function(){
 
   const totalOut =
     history
-      .filter(h => h.type === "Barang Sai")
+      .filter(h => h.type === "Sasan Sai")
       .reduce(
         (total,h) =>
           total + Number(h.qty || 0),
@@ -1774,7 +1774,7 @@ updateDash = function(){
       </tr>`;
 
 
-  // Rincian Stock per Loja (Termasuk Loja Baru)
+  // Rincian Stock per Loja
   const stores = [
     "Loja Rebal", 
     "Loja Bairopite", 
