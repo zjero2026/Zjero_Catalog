@@ -1022,6 +1022,7 @@ function showInvoice(txId) {
   document.querySelectorAll("main section").forEach(s => s.classList.add("hidden"));
   document.getElementById("invoice-section").classList.remove("hidden");
   document.getElementById("title").textContent = "Invoice / Nota";
+  window.scrollTo(0, 0);
 }
 
 function renderHistory(){
