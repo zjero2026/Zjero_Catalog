@@ -342,7 +342,114 @@ th{
   cursor: pointer;
 }
 
-/* KHUSUS CETAK/PRINT */
+/* KHUSUS DESAIN PROFESIONAL CETAK INVOICE */
+#invoice-section {
+  background: #fff;
+  border: 1px solid #e5e0d8;
+  border-radius: 12px;
+  padding: 30px !important;
+}
+
+.invoice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #211e1a;
+  padding-bottom: 15px;
+  margin-bottom: 20px;
+}
+
+.invoice-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.invoice-brand img {
+  width: 55px;
+  height: 55px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.invoice-brand h2 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: 2px;
+  color: #211e1a;
+}
+
+.invoice-brand small {
+  display: block;
+  font-size: 10px;
+  color: #a77c1e;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.invoice-meta {
+  text-align: right;
+  font-size: 12px;
+  color: #555;
+  line-height: 1.5;
+}
+
+.invoice-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  background: #fdfbf7;
+  padding: 12px 15px;
+  border-radius: 8px;
+  border: 1px solid #f0eae1;
+  margin-bottom: 20px;
+  font-size: 12px;
+}
+
+.invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  font-size: 12px;
+}
+
+.invoice-table th {
+  background: #211e1a;
+  color: #fff;
+  padding: 10px;
+  text-align: left;
+}
+
+.invoice-table td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.invoice-summary-box {
+  background: #fcf9f2;
+  border: 1px solid #e6dec5;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.invoice-summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.invoice-summary-row.total {
+  font-size: 16px;
+  font-weight: bold;
+  color: #211e1a;
+  border-top: 1px dashed #ccc;
+  padding-top: 8px;
+  margin-top: 6px;
+}
+
+/* CSS MEDIA PRINT KHUSUS INVOICE BERSIH */
 @media print{
   body { background: #fff !important; color: #000 !important; }
   .side, .top, button, .print-btn, .invoice-btn, .btn-lunas, .form { display: none !important; }
@@ -350,7 +457,7 @@ th{
   .main { padding: 0 !important; overflow: visible !important; width: 100% !important; }
   section { display: none !important; }
   section#invoice-section { display: block !important; }
-  #invoice-section { border: 0 !important; box-shadow: none !important; padding: 0 !important; }
+  #invoice-section { border: 0 !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; width: 100% !important; }
 }
 </style>
 </head>
@@ -589,16 +696,84 @@ th{
       </div>
     </section>
 
-    <!-- INVOICE KHUSUS CETAK -->
-    <section id="invoice-section" class="panel hidden" style="max-width:650px; margin:auto;">
-      <div style="text-align:center; border-bottom:2px dashed #ccc; padding-bottom:15px; margin-bottom:15px;">
-        <h2 style="margin:0; letter-spacing:3px;">ZJERO</h2>
-        <small style="color:#a77c1e; font-weight:bold;">OFFICIAL INVOICE / NOTA PENJUALAN</small>
+    <!-- INVOICE PROFESIONAL DENGAN LOGO -->
+    <section id="invoice-section" class="panel hidden" style="max-width:700px; margin:auto;">
+      <div class="invoice-header">
+        <div class="invoice-brand">
+          <img src="logo.png" alt="ZJERO Logo" onerror="this.style.display='none'">
+          <div>
+            <h2>ZJERO</h2>
+            <small>INVENTORY & FUNERAL SERVICES</small>
+          </div>
+        </div>
+        <div class="invoice-meta">
+          <strong>OFFICIAL INVOICE</strong><br>
+          <span id="inv-id">No: #ZJ-000</span><br>
+          <span id="inv-date">Data: —</span>
+        </div>
       </div>
-      <div id="invoice-content" style="font-size:13px; line-height:1.6;"></div>
-      <div style="margin-top:20px; text-align:center;">
-        <button type="button" onclick="window.print()" class="print-btn">🖨️ Cetak / Download Invoice</button>
-        <button type="button" class="secondary" onclick="page('history', document.querySelectorAll('.nav')[4])" style="margin-left:10px;">Kembali ke Riwayat</button>
+
+      <div class="invoice-details-grid">
+        <div>
+          <p style="margin:0 0 4px 0; color:#777;">Fatin / Loja Asal:</p>
+          <strong id="inv-store" style="font-size:13px;">—</strong>
+        </div>
+        <div>
+          <p style="margin:0 0 4px 0; color:#777;">Objetivu / Fatin Hatama:</p>
+          <strong id="inv-dest" style="font-size:13px;">—</strong>
+        </div>
+      </div>
+
+      <table class="invoice-table">
+        <thead>
+          <tr>
+            <th>Deskrisaun Sasan & Servisu</th>
+            <th style="text-align:center;">Kuantidade</th>
+            <th style="text-align:right;">Presu ($)</th>
+          </tr>
+        </thead>
+        <tbody id="inv-items-body">
+          <!-- Dinamis diisi JS -->
+        </tbody>
+      </table>
+
+      <div class="invoice-summary-box">
+        <div class="invoice-summary-row">
+          <span>Subtotal Kaixao:</span>
+          <span id="inv-subbox">$0.00</span>
+        </div>
+        <div class="invoice-summary-row">
+          <span>Presu Ambulansia:</span>
+          <span id="inv-subamb">$0.00</span>
+        </div>
+        <div class="invoice-summary-row">
+          <span>Presu Freezer:</span>
+          <span id="inv-subfrz">$0.00</span>
+        </div>
+        <div class="invoice-summary-row total">
+          <span>Total Keseluruhan:</span>
+          <span id="inv-total" style="color:#a77c1e;">$0.00</span>
+        </div>
+        <div class="invoice-summary-row" style="margin-top:10px; font-size:12px;">
+          <span>Opsaun Pagamentu:</span>
+          <strong id="inv-paystatus">—</strong>
+        </div>
+        <div id="inv-dp-row" class="invoice-summary-row" style="font-size:12px; margin-top:4px;">
+          <span>DP & Sisa Kekurangan:</span>
+          <span id="inv-dp-detail">—</span>
+        </div>
+      </div>
+
+      <div id="inv-note-box" style="font-size:12px; color:#555; background:#faf8f5; padding:10px; border-radius:6px; margin-bottom:20px;">
+        <strong>Komentáriu / Notas:</strong> <span id="inv-note-text">—</span>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #eee; padding-top:15px;">
+        <small style="color:#888;">Tratamentu di'ak no kmanek husi ZJERO.</small>
+        <div>
+          <button type="button" onclick="window.print()" class="print-btn" style="margin:0;">🖨️ Cetak / Download Invoice</button>
+          <button type="button" class="secondary" onclick="page('history', document.querySelectorAll('.nav')[4])" style="margin-left:8px;">Fali ba Istoria</button>
+        </div>
       </div>
     </section>
 
@@ -1008,27 +1183,66 @@ function showInvoice(txId) {
     return;
   }
 
-  const sisa = h.totalPrice - h.dpAmount;
-  const invoiceHtml = `
-    <p><b>Tempu Transaksaun:</b> ${h.time}</p>
-    <p><b>Loja / Fatin:</b> ${h.store}</p>
-    <p><b>Modelu Kaixao:</b> ${h.name} (Kuantidade: ${h.qty})</p>
-    <p><b>Objetivu / Fatin:</b> ${h.dest}</p>
-    <hr style="border:0; border-top:1px solid #ddd; margin:10px 0;">
-    <p><b>RINCIAN BIAYA:</b></p>
-    <ul style="padding-left:15px; margin:5px 0;">
-      <li>Presu Kaixao: $${h.boxPrice}</li>
-      <li>Presu Ambulansia: $${h.ambulancePrice}</li>
-      <li>Presu Freezer: $${h.freezerPrice}</li>
-    </ul>
-    <hr style="border:0; border-top:1px solid #ddd; margin:10px 0;">
-    <p style="font-size:15px;"><b>TOTAL KESELURUHAN: $${h.totalPrice}</b></p>
-    <p><b>Status Pembayaran:</b> <span style="color:${h.paymentStatus === 'LUNAS' ? '#39704c' : '#a8483e'}; font-weight:bold;">${h.paymentStatus}</span></p>
-    ${h.paymentStatus !== 'LUNAS' ? `<p><b>DP Dibayar:</b> $${h.dpAmount} \vert{} <b>Sisa Kekurangan:</b>$${sisa > 0 ? sisa : 0}</p>` : `<p><i>(Pembayaran lunas penuh secara Cash)</i></p>`}
-    ${h.note ? `<p><b>Komentáriu / Notas:</b> ${h.note}</p>` : ''}
-  `;
+  document.getElementById("inv-id").textContent = "No: #" + String(h.id).slice(-5);
+  document.getElementById("inv-date").textContent = "Data: " + h.time;
+  document.getElementById("inv-store").textContent = h.store;
+  document.getElementById("inv-dest").textContent = h.dest;
 
-  document.getElementById("invoice-content").innerHTML = invoiceHtml;
+  let itemsHtml = `
+    <tr>
+      <td><b>Kaixao:</b> ${h.name}</td>
+      <td style="text-align:center;">${h.qty}</td>
+      <td style="text-align:right;">$${h.boxPrice.toFixed(2)}</td>
+    </tr>
+  `;
+  if(h.ambulancePrice > 0){
+    itemsHtml += `
+      <tr>
+        <td><b>Servisu Ambulansia</b></td>
+        <td style="text-align:center;">1</td>
+        <td style="text-align:right;">$${h.ambulancePrice.toFixed(2)}</td>
+      </tr>
+    `;
+  }
+  if(h.freezerPrice > 0){
+    itemsHtml += `
+      <tr>
+        <td><b>Sewa Freezer</b></td>
+        <td style="text-align:center;">1</td>
+        <td style="text-align:right;">$${h.freezerPrice.toFixed(2)}</td>
+      </tr>
+    `;
+  }
+  document.getElementById("inv-items-body").innerHTML = itemsHtml;
+
+  document.getElementById("inv-subbox").textContent = "$" + h.boxPrice.toFixed(2);
+  document.getElementById("inv-subamb").textContent = "$" + h.ambulancePrice.toFixed(2);
+  document.getElementById("inv-subfrz").textContent = "$" + h.freezerPrice.toFixed(2);
+  document.getElementById("inv-total").textContent = "$" + h.totalPrice.toFixed(2);
+
+  const payStatusEl = document.getElementById("inv-paystatus");
+  const dpRow = document.getElementById("inv-dp-row");
+  const dpDetail = document.getElementById("inv-dp-detail");
+
+  if(h.paymentStatus === "LUNAS"){
+    payStatusEl.innerHTML = `<span style="color:#39704c; font-weight:bold;">LUNAS (Cash)</span>`;
+    dpRow.style.display = "none";
+  } else {
+    const sisa = h.totalPrice - h.dpAmount;
+    payStatusEl.innerHTML = `<span style="color:#a8483e; font-weight:bold;">SEIDAUK LUNAS (DP)</span>`;
+    dpRow.style.display = "flex";
+    dpDetail.innerHTML = `DP: <b>$${h.dpAmount.toFixed(2)}</b> | Sisa Kekurangan: <b style="color:#a8483e;">$${sisa > 0 ? sisa.toFixed(2) : '0.00'}</b>`;
+  }
+
+  const noteBox = document.getElementById("inv-note-box");
+  const noteText = document.getElementById("inv-note-text");
+  if(h.note){
+    noteBox.style.display = "block";
+    noteText.textContent = h.note;
+  } else {
+    noteBox.style.display = "none";
+  }
+
   document.querySelectorAll("main section").forEach(s => s.classList.add("hidden"));
   document.getElementById("invoice-section").classList.remove("hidden");
   document.getElementById("title").textContent = "Invoice / Nota";
