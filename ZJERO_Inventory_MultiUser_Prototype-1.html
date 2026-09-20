@@ -198,6 +198,7 @@ button{
 .danger{background:#a8483e}
 .print-btn{background:#39734e;margin-bottom:14px;}
 .invoice-btn{background:#211e1a;padding:6px 10px;font-size:11px;margin-left:5px;cursor:pointer;}
+.update-stock-btn{background:#39734e;padding:4px 8px;font-size:11px;margin-left:5px;}
 
 table{
   width:100%;
@@ -555,7 +556,7 @@ th{
       </div>
     </section>
 
-    <!-- DATA KAIXAO -->
+    <!-- DATA KAIXAO (DENGAN FITUR UPDATE STOK CEPAT) -->
     <section id="data" class="hidden">
       <div class="panel">
         <button type="button" class="print-btn" onclick="window.print()">🖨️ Imprime / Download PDF Dadus Kaixao</button>
@@ -574,8 +575,8 @@ th{
               <th>Kode</th>
               <th>Type</th>
               <th>Modelu Kaixao / Varian</th>
-              <th>Stock</th>
-              <th>Estadu</th>
+              <th>Stock Aktual</th>
+              <th>Aksi / Update Stock</th>
             </tr>
           </thead>
           <tbody id="datatable"></tbody>
@@ -1050,18 +1051,50 @@ function renderData(){
 
   table.innerHTML = filtered.map(x => {
     const stock = Number(x.stock || 0);
-    let status = stock === 0 ? "Hotu ona" : (stock <= 3 ? "Menus" : "Disponível");
     const label = x.variant ? x.name + " — " + x.variant : x.name;
     return `
       <tr>
         <td>${x.code || "—"}</td>
         <td>${x.type || "—"}</td>
         <td><b>${label}</b></td>
-        <td>${stock}</td>
-        <td><span class="pill ${status !== "Disponível" ? "warn" : ""}">${status}</span></td>
+        <td><input id="stock-input-${x.id}" type="number" value="${stock}" style="width:70px; padding:5px; text-align:center;"></td>
+        <td>
+          <button type="button" class="update-stock-btn" onclick="updateDirectStock('${x.id}')">💾 Update Stock</button>
+        </td>
       </tr>
     `;
   }).join("");
+}
+
+async function updateDirectStock(productId) {
+  const inputEl = document.getElementById("stock-input-" + productId);
+  if(!inputEl) return;
+  const newStock = Number(inputEl.value);
+
+  if(isNaN(newStock) || newStock < 0) {
+    alert("Favor hatama numeru stock ne'ebé loloos.");
+    return;
+  }
+
+  if(!confirm("Muda stock ba " + newStock + "?")) return;
+
+  let newStatus = newStock === 0 ? "out_of_stock" : (newStock <= 3 ? "low_stock" : "available");
+
+  try {
+    await api("products?id=eq." + productId, {
+      method: "PATCH",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({ stock: newStock, status: newStatus })
+    });
+
+    await loadData();
+    renderData();
+    updateDash();
+    alert("Stock atualiza ona ho susesu!");
+  } catch(error) {
+    console.error(error);
+    alert("La konsege atualiza stock.\n\n" + error.message);
+  }
 }
 
 async function transact(kind){
@@ -1102,7 +1135,7 @@ async function transact(kind){
     return;
   }
   if(!qty || qty < 1){
-    alert("Favoor hatama kuantidade ne'ebé loloos.");
+    alert("Favor hatama kuantidade ne'ebé loloos.");
     return;
   }
   if(kind === "out" && qty > Number(product.stock || 0)){
@@ -1111,7 +1144,7 @@ async function transact(kind){
   }
 
   try{
-    // 1. Catat transaksi ke Supabase
+    // 1. Simpan transaksi ke Supabase
     await api("stock_transactions", {
       method: "POST",
       headers: { "Prefer": "return=minimal" },
@@ -1130,7 +1163,7 @@ async function transact(kind){
       })
     });
 
-    // 2. OTOMATIS UPDATE TOTAL STOK DI TABEL PRODUCTS SUPABASE (Agar Katalog Publik ikut berubah)
+    // 2. OTOMATIS UPDATE TOTAL STOK DI SUPABASE (Agar Katalog Publik ikut ter-update)
     const newStock = Number(product.stock || 0) + (kind === "in" ? qty : -qty);
     let newStatus = newStock === 0 ? "out_of_stock" : (newStock <= 3 ? "low_stock" : "available");
 
@@ -1357,10 +1390,6 @@ function logout(){
   document.getElementById("err").textContent = "";
 }
 
-document.getElementById("password").addEventListener("keydown", function(event){
-  if(event.key === "Enter") login();
-});
-
 document.addEventListener("DOMContentLoaded", function(){
   const savedUser = localStorage.getItem("zjero_user");
   if(savedUser){
@@ -1370,6 +1399,13 @@ document.addEventListener("DOMContentLoaded", function(){
     }catch(e){
       localStorage.removeItem("zjero_user");
     }
+  }
+
+  const pwdInput = document.getElementById("password");
+  if(pwdInput){
+    pwdInput.addEventListener("keydown", function(event){
+      if(event.key === "Enter") login();
+    });
   }
 });
 </script>
