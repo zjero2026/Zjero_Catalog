@@ -145,9 +145,9 @@ const HEADERS = {
 
 const wa='67076312111';
 
-// Daftar master data lengkap dengan gambar lokal yang sudah dipastikan jalurnya
+// Daftar master data lengkap dengan gambar lokal
 const masterProducts = [
-  {name: "SUMMERVILLE", type: "AMERICAN STYLE", images: ["Images/AM_01.jpg", "Images/AM_01b.png"]},
+  {name: "SUMMERVILE", type: "AMERICAN STYLE", images: ["Images/AM_01.jpg", "Images/AM_01b.png"]},
   {name: "DOMMINION", type: "AMERICAN STYLE", images: ["Images/AM_02.jpg", "Images/AM_02b.jpg"]},
   {name: "ELEANOR", type: "AMERICAN STYLE", images: ["Images/AM_03.jpg", "Images/AM_03b.jpg"]},
   {name: "WESTON", type: "AMERICAN STYLE", images: ["Images/AM_04.jpg", "Images/AM_04b.jpg"]},
@@ -205,10 +205,11 @@ async function loadCatalog() {
     }
 
     products = masterProducts.map((item, idx) => {
-      // Cari data stok dari Supabase berdasarkan kecocokan nama
+      // Pencocokan fleksibel tingkat lanjut (mengabaikan spasi, huruf besar/kecil, dan pencocokan sebagian kata)
       let match = dbRows.find(r => {
-        let dbName = (r.name || "").trim().toUpperCase();
-        return dbName === item.name.toUpperCase();
+        let dbName = (r.name || "").trim().toUpperCase().replace(/\s+/g, ' ');
+        let catalogName = item.name.trim().toUpperCase().replace(/\s+/g, ' ');
+        return dbName === catalogName || dbName.includes(catalogName) || catalogName.includes(dbName);
       });
 
       let stockVal = match ? Number(match.stock || 0) : 0;
@@ -227,7 +228,6 @@ async function loadCatalog() {
 
   } catch(e) {
     console.error("Gagal sinkronisasi stok:", e);
-    // Fallback jika gagal konek
     products = masterProducts.map((item, idx) => ({
       id: "prod-" + idx,
       type: item.type,
@@ -298,7 +298,6 @@ function moveSlide(productId, direction){
   imgs[newIndex].classList.add('active');
 }
 
-// Muat data katalog dan stok live
 loadCatalog();
 </script>
 </body>
