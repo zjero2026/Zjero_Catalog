@@ -145,7 +145,7 @@ const HEADERS = {
 
 const wa='67076312111';
 
-// Daftar produk dasar beserta gambar lokal yang aman
+// Daftar produk dasar lengkap dengan gambar lokal amannya
 let baseProducts=[
   {"id": "AM01", "type": "AMERICAN STYLE", "name": "SUMMERVILLE", "price": 0, "currency": "USD", "images": ["Images/AM_01.jpg", "Images/AM_01b.png"]},
   {"id": "AM02", "type": "AMERICAN STYLE", "name": "DOMMINION", "price": 0, "currency": "USD", "images": ["Images/AM_02.jpg", "Images/AM_02b.jpg"]},
@@ -193,8 +193,6 @@ let baseProducts=[
 
 let products = [...baseProducts];
 
-function esc(s){return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
-
 async function loadLiveStock() {
   try {
     const response = await fetch(SUPABASE_URL + "/rest/v1/products?select=name,stock", {
@@ -203,11 +201,11 @@ async function loadLiveStock() {
     if(response.ok) {
       const rows = await response.json();
       products = baseProducts.map(p => {
-        // Cek pencocokan fleksibel (mengabaikan spasi berlebih dan huruf besar/kecil)
+        // Pencocokan nama produk yang lebih luas (mengabaikan spasi/huruf besar-kecil)
         let match = rows.find(r => {
           let dbName = (r.name || "").trim().replace(/\s+/g, ' ').toUpperCase();
           let catalogName = p.name.trim().replace(/\s+/g, ' ').toUpperCase();
-          return dbName === catalogName;
+          return dbName === catalogName || catalogName.includes(dbName) || dbName.includes(catalogName);
         });
         
         let stockVal = match ? Number(match.stock || 0) : 0;
@@ -226,6 +224,8 @@ async function loadLiveStock() {
   let savedCat = localStorage.getItem('selectedCategory') || 'SEMUA';
   show(savedCat, null, false);
 }
+
+function esc(s){return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
 
 function show(cat,btn,save=true){
   if(save){localStorage.setItem('selectedCategory',cat);}
