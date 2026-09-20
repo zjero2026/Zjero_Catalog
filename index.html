@@ -131,7 +131,7 @@ body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#222}
   <button onclick="show('JATI STANDARD',this)">JATI STANDARD</button>
 </div>
 
-<div id="grid" class="grid"><div class="empty">Halai da'uk hela dadus husi Supabase...</div></div>
+<div id="grid" class="grid"><div class="empty">Halai da'uk hela dadus no stock...</div></div>
 <div class="footer">ZJERO Catalogue &copy; 2026</div>
 
 <script>
@@ -144,83 +144,99 @@ const HEADERS = {
 };
 
 const wa='67076312111';
+
+// Daftar master data lengkap dengan gambar lokal yang sudah dipastikan jalurnya
+const masterProducts = [
+  {name: "SUMMERVILLE", type: "AMERICAN STYLE", images: ["Images/AM_01.jpg", "Images/AM_01b.png"]},
+  {name: "DOMMINION", type: "AMERICAN STYLE", images: ["Images/AM_02.jpg", "Images/AM_02b.jpg"]},
+  {name: "ELEANOR", type: "AMERICAN STYLE", images: ["Images/AM_03.jpg", "Images/AM_03b.jpg"]},
+  {name: "WESTON", type: "AMERICAN STYLE", images: ["Images/AM_04.jpg", "Images/AM_04b.jpg"]},
+  {name: "PRESIDENT", type: "AMERICAN STYLE", images: ["Images/AM_05.jpg", "Images/AM_05b.jpg"]},
+  {name: "KENWOOD", type: "AMERICAN STYLE", images: ["Images/AM_06.jpg", "Images/AM_06b.jpg"]},
+  {name: "EMPEROR", type: "AMERICAN STYLE", images: ["Images/AM_07.jpg", "Images/AM_07b.jpg"]},
+  {name: "FEMALE ESTHER CERRY", type: "AMERICAN STYLE", images: ["Images/AM_08.jpg", "Images/AM_08b.jpg"]},
+  {name: "NEW HOPE", type: "AMERICAN STYLE", images: ["Images/AM_09.jpg", "Images/AM_09b.jpg"]},
+  {name: "REMEMBRENCE", type: "AMERICAN STYLE", images: ["Images/AM_10.jpg", "Images/AM_10b.jpg"]},
+  {name: "UNITY", type: "AMERICAN STYLE", images: ["Images/AM_11.jpg", "Images/AM_11b.jpg"]},
+  {name: "TIGER WOOD", type: "AMERICAN STYLE", images: ["Images/AM_12.jpg", "Images/AM_12b.jpg"]},
+  {name: "SENATOR", type: "AMERICAN STYLE", images: ["Images/AM_13.jpg", "Images/AM_13b.jpg"]},
+  {name: "TUSCANY", type: "AMERICAN STYLE", images: ["Images/AM_14.jpg", "Images/AM_14b.jpg"]},
+  {name: "WILLOW BROOK", type: "AMERICAN STYLE", images: ["Images/AM_15.jpg", "Images/AM_15b.jpg"]},
+  {name: "MAGISTRATE RED", type: "AMERICAN STYLE", images: ["Images/AM_16.jpg", "Images/AM_16b.jpg"]},
+  {name: "OAK MANOR", type: "AMERICAN STYLE", images: ["Images/AM_17.jpg", "Images/AM_17b.jpg"]},
+  {name: "GLORIFY", type: "AMERICAN STYLE", images: ["Images/AM_18.png", "Images/AM_18b.jpg"]},
+  {name: "ROVEN", type: "AMERICAN STYLE", images: ["Images/AM_19.png", "Images/AM_19b.jpg"]},
+  {name: "GRANDIA", type: "AMERICAN STYLE", images: ["Images/AM_20.jpg", "Images/AM_20b.jpg"]},
+  {name: "PEACE", type: "AMERICAN STYLE", images: ["Images/AM_21.png", "Images/AM_21b.jpg"]},
+  {name: "LUMINOR", type: "ASIA STYLE", images: ["Images/AS_01.jpg", "Images/AS_01b.jpg", "Images/AS_01_3.png"]},
+  {name: "SYLVAN", type: "ASIA STYLE", images: ["Images/AS_02.png", "Images/AS_02b.jpg"]},
+  {name: "GOLDEN", type: "ASIA STYLE", images: ["Images/AS_03.png", "Images/AS_03b.jpg", "Images/AS_03_3.png"]},
+  {name: "GILSON", type: "ASIA STYLE", images: ["Images/AS_04.png", "Images/AS_04b.jpg", "Images/AS_04_3.png"]},
+  {name: "IVORY", type: "ASIA STYLE", images: ["Images/AS_05.jpg", "Images/AS_05b.jpg", "Images/AS_05_3.jpg"]},
+  {name: "MONTANA", type: "ASIA STYLE", images: ["Images/AS_06.png", "Images/AS_06b.jpg", "Images/AS_06_3.png"]},
+  {name: "VESTO", type: "ASIA STYLE", images: ["Images/AS_07.jpg", "Images/AS_07b.jpg", "Images/AS_07_3.jpg"]},
+  {name: "MAVIS", type: "ASIA STYLE", images: ["Images/AS_08.jpg", "Images/AS_08b.jpg", "Images/AS_08_3.jpg"]},
+  {name: "BRYON", type: "ASIA STYLE", images: ["Images/AS_09.jpg", "Images/AS_09a.png", "Images/AS_09_3.jpg"]},
+  {name: "THERION", type: "ASIA STYLE", images: ["Images/AS_10.jpg", "Images/AS_10ja.jpg", "Images/AS_10jb.jpg"]},
+  {name: "VESPER", type: "ASIA STYLE", images: ["Images/AS_11.jpg", "Images/AS_11a.jpg", "Images/AS_11_3.jpg"]},
+  {name: "AVALON", type: "ASIA STYLE", images: ["Images/AS_13.jpg", "Images/AS_13_2.jpg", "Images/AS_13_3.jpg"]},
+  {name: "ORION", type: "ASIA STYLE", images: ["Images/AS_17.jpg", "Images/AS_17_2.jpg", "Images/AS_17_3.jpg"]},
+  {name: "LEGACY", type: "ASIA STYLE", images: ["Images/AS_18.jpg", "Images/AS_18_2.jpg", "Images/AS_18_3.jpg"]},
+  {name: "UPDATE", type: "ASIA STYLE", images: ["Images/AS_19.jpg", "Images/AS_19_2.jpg", "Images/AS_19_3.jpg"]},
+  {name: "JEPARA", type: "ASIA STYLE", images: ["Images/AS_20.jpg", "Images/AS_20a.jpg", "Images/AS_20b.jpg"]},
+  {name: "SURABAYA", type: "ASIA STYLE", images: ["Images/AS_21b.jpg", "Images/AS_21c.jpg", "Images/AS_21.jpg"]},
+  {name: "KAIXAO KIK", type: "ASIA STYLE", images: ["Images/AS_22a.jpg", "Images/AS_22b.jpg", "Images/AS_22_3.jpg"]},
+  {name: "TRINITY", type: "ASIA STYLE", images: ["Images/AS_24.jpg", "Images/AS_24_2.jpg", "Images/AS_24_3.jpg"]},
+  {name: "OKTAV", type: "ASIA STYLE", images: ["Images/AS_25.jpg", "Images/AS_25_2.jpg", "Images/AS_25_3.jpg"]},
+  {name: "POLARIS ZJERO", type: "JATI STANDARD", images: ["Images/JS_01.jpg", "Images/JS_01a.jpg", "Images/JS_01_3.png"]}
+];
+
 let products = [];
 
-// Pemetaan gambar berdasarkan urutan nama produk standar Anda
-const imageMap = {
-  "SUMMERVILLE": ["Images/AM_01.jpg", "Images/AM_01b.png"],
-  "DOMMINION": ["Images/AM_02.jpg", "Images/AM_02b.jpg"],
-  "ELEANOR": ["Images/AM_03.jpg", "Images/AM_03b.jpg"],
-  "WESTON": ["Images/AM_04.jpg", "Images/AM_04b.jpg"],
-  "PRESIDENT": ["Images/AM_05.jpg", "Images/AM_05b.jpg"],
-  "KENWOOD": ["Images/AM_06.jpg", "Images/AM_06b.jpg"],
-  "EMPEROR": ["Images/AM_07.jpg", "Images/AM_07b.jpg"],
-  "FEMALE ESTHER CERRY": ["Images/AM_08.jpg", "Images/AM_08b.jpg"],
-  "NEW HOPE": ["Images/AM_09.jpg", "Images/AM_09b.jpg"],
-  "REMEMBRENCE": ["Images/AM_10.jpg", "Images/AM_10b.jpg"],
-  "UNITY": ["Images/AM_11.jpg", "Images/AM_11b.jpg"],
-  "TIGER WOOD": ["Images/AM_12.jpg", "Images/AM_12b.jpg"],
-  "SENATOR": ["Images/AM_13.jpg", "Images/AM_13b.jpg"],
-  "TUSCANY": ["Images/AM_14.jpg", "Images/AM_14b.jpg"],
-  "WILLOW BROOK": ["Images/AM_15.jpg", "Images/AM_15b.jpg"],
-  "MAGISTRATE RED": ["Images/AM_16.jpg", "Images/AM_16b.jpg"],
-  "OAK MANOR": ["Images/AM_17.jpg", "Images/AM_17b.jpg"],
-  "GLORIFY": ["Images/AM_18.png", "Images/AM_18b.jpg"],
-  "ROVEN": ["Images/AM_19.png", "Images/AM_19b.jpg"],
-  "GRANDIA": ["Images/AM_20.jpg", "Images/AM_20b.jpg"],
-  "PEACE": ["Images/AM_21.png", "Images/AM_21b.jpg"],
-  "LUMINOR": ["Images/AS_01.jpg", "Images/AS_01b.jpg", "Images/AS_01_3.png"],
-  "SYLVAN": ["Images/AS_02.png", "Images/AS_02b.jpg"],
-  "GOLDEN": ["Images/AS_03.png", "Images/AS_03b.jpg", "Images/AS_03_3.png"],
-  "GILSON": ["Images/AS_04.png", "Images/AS_04b.jpg", "Images/AS_04_3.png"],
-  "IVORY": ["Images/AS_05.jpg", "Images/AS_05b.jpg", "Images/AS_05_3.jpg"],
-  "MONTANA": ["Images/AS_06.png", "Images/AS_06b.jpg", "Images/AS_06_3.png"],
-  "VESTO": ["Images/AS_07.jpg", "Images/AS_07b.jpg", "Images/AS_07_3.jpg"],
-  "MAVIS": ["Images/AS_08.jpg", "Images/AS_08b.jpg", "Images/AS_08_3.jpg"],
-  "BRYON": ["Images/AS_09.jpg", "Images/AS_09a.png", "Images/AS_09_3.jpg"],
-  "THERION": ["Images/AS_10.jpg", "Images/AS_10ja.jpg", "Images/AS_10jb.jpg"],
-  "VESPER": ["Images/AS_11.jpg", "Images/AS_11a.jpg", "Images/AS_11_3.jpg"],
-  "AVALON": ["Images/AS_13.jpg", "Images/AS_13_2.jpg", "Images/AS_13_3.jpg"],
-  "ORION": ["Images/AS_17.jpg", "Images/AS_17_2.jpg", "Images/AS_17_3.jpg"],
-  "LEGACY": ["Images/AS_18.jpg", "Images/AS_18_2.jpg", "Images/AS_18_3.jpg"],
-  "UPDATE": ["Images/AS_19.jpg", "Images/AS_19_2.jpg", "Images/AS_19_3.jpg"],
-  "JEPARA": ["Images/AS_20.jpg", "Images/AS_20a.jpg", "Images/AS_20b.jpg"],
-  "SURABAYA": ["Images/AS_21b.jpg", "Images/AS_21c.jpg", "Images/AS_21.jpg"],
-  "KAIXAO KIK": ["Images/AS_22a.jpg", "Images/AS_22b.jpg", "Images/AS_22_3.jpg"],
-  "TRINITY": ["Images/AS_24.jpg", "Images/AS_24_2.jpg", "Images/AS_24_3.jpg"],
-  "OKTAV": ["Images/AS_25.jpg", "Images/AS_25_2.jpg", "Images/AS_25_3.jpg"],
-  "POLARIS ZJERO": ["Images/JS_01.jpg", "Images/JS_01a.jpg", "Images/JS_01_3.png"]
-};
-
-async function fetchLiveCatalog() {
+async function loadCatalog() {
   try {
-    const response = await fetch(SUPABASE_URL + "/rest/v1/products?select=id,code,name,style,variant,stock&order=id", {
+    const response = await fetch(SUPABASE_URL + "/rest/v1/products?select=name,style,variant,stock", {
       headers: HEADERS
     });
-    if(!response.ok) throw new Error("Gagal ambil data");
-    const rows = await response.json();
+    
+    let dbRows = [];
+    if(response.ok) {
+      dbRows = await response.json();
+    }
 
-    products = rows.map(x => {
-      let cleanName = (x.name || "").trim();
-      let fullName = x.variant ? cleanName + " — " + x.variant : cleanName;
-      let stockVal = Number(x.stock || 0);
+    products = masterProducts.map((item, idx) => {
+      // Cari data stok dari Supabase berdasarkan kecocokan nama
+      let match = dbRows.find(r => {
+        let dbName = (r.name || "").trim().toUpperCase();
+        return dbName === item.name.toUpperCase();
+      });
+
+      let stockVal = match ? Number(match.stock || 0) : 0;
       let stockDesc = stockVal === 0 ? "⚠️ Stock Hotu Ona (Habis)" : (stockVal <= 3 ? "⚠️ Stock Menus: " + stockVal : "📦 Stock Tersedia: " + stockVal);
-      
-      // Ambil gambar berdasarkan nama produk
-      let imgs = imageMap[cleanName.toUpperCase()] || ["Images/default.jpg"];
 
       return {
-        id: x.code || x.id,
-        type: x.style || "AMERICAN STYLE",
-        name: fullName,
+        id: "prod-" + idx,
+        type: item.type,
+        name: item.name,
         desc: stockDesc,
         price: 0,
         currency: "USD",
-        images: imgs
+        images: item.images
       };
     });
+
   } catch(e) {
-    console.error("Error fetching Supabase:", e);
+    console.error("Gagal sinkronisasi stok:", e);
+    // Fallback jika gagal konek
+    products = masterProducts.map((item, idx) => ({
+      id: "prod-" + idx,
+      type: item.type,
+      name: item.name,
+      desc: "Estoku disponivel",
+      price: 0,
+      currency: "USD",
+      images: item.images
+    }));
   }
 
   let savedCat = localStorage.getItem('selectedCategory') || 'SEMUA';
@@ -239,34 +255,51 @@ function show(cat,btn,save=true){
   }else{
     btn.classList.add('active');
   }
-  let list=cat==='SEMUA'?products:products.filter(p=>p.type===cat);
-  
+
+  let list = cat==='SEMUA' ? products : products.filter(p => p.type === cat);
+
   if(!list.length){
     document.getElementById('grid').innerHTML=`<div class="empty">Seidauk iha produtu iha categoria ne'e.</div>`;
     return;
   }
 
-  document.getElementById('grid').innerHTML=list.map(p=>{
-    let price=p.price>0?new Intl.NumberFormat('en-US',{style:'currency',currency:p.currency}).format(p.price):'Presu, kontaktu ami';
-    let msg=encodeURIComponent('Halo ZJERO, Ha’u interese ho produtu ida-ne’e '+p.name);
-    let imgs=p.images.map((img,i)=>`<img src="${esc(img)}" class="${i===0?'active':''}" alt="${esc(p.name)}" onerror="this.onerror=null;this.src='logo.png';">`).join('');
-    return `<div class="card"><div class="slider" id="slider-${p.id}">${imgs}<button class="slider-btn prev" onclick="moveSlide('${p.id}', -1)">‹</button><button class="slider-btn next" onclick="moveSlide('${p.id}', 1)">›</button></div><div class="body"><div class="type">${esc(p.type)}</div><div class="name">${esc(p.name)}</div><div class="desc">${esc(p.desc)}</div><div class="price">${price}</div><a class="wa" href="https://wa.me/${wa}?text=${msg}" target="_blank">Husu liu husi WhatsApp</a></div></div>`
-  }).join('')
+  document.getElementById('grid').innerHTML = list.map(p => {
+    let price = 'Presu, kontaktu ami';
+    let msg = encodeURIComponent('Halo ZJERO, Ha’u interese ho produtu ida-ne’e ' + p.name);
+    let imgs = p.images.map((img, i) => `<img src="${esc(img)}" class="${i===0?'active':''}" alt="${esc(p.name)}" onerror="this.onerror=null;this.src='logo.png';">`).join('');
+    
+    return `
+      <div class="card">
+        <div class="slider" id="slider-${p.id}">
+          ${imgs}
+          <button class="slider-btn prev" onclick="moveSlide('${p.id}', -1)">‹</button>
+          <button class="slider-btn next" onclick="moveSlide('${p.id}', 1)">›</button>
+        </div>
+        <div class="body">
+          <div class="type">${esc(p.type)}</div>
+          <div class="name">${esc(p.name)}</div>
+          <div class="desc">${esc(p.desc)}</div>
+          <div class="price">${price}</div>
+          <a class="wa" href="https://wa.me/${wa}?text=${msg}" target="_blank">Husu liu husi WhatsApp</a>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 function moveSlide(productId, direction){
-  let slider=document.getElementById(`slider-${productId}`);
+  let slider = document.getElementById(`slider-${productId}`);
   if(!slider) return;
-  let imgs=slider.querySelectorAll('img');
-  let activeIndex=Array.from(imgs).findIndex(img=>img.classList.contains('active'));
+  let imgs = slider.querySelectorAll('img');
+  let activeIndex = Array.from(imgs).findIndex(img => img.classList.contains('active'));
   if(activeIndex === -1) return;
   imgs[activeIndex].classList.remove('active');
-  let newIndex=(activeIndex+direction+imgs.length)%imgs.length;
+  let newIndex = (activeIndex + direction + imgs.length) % imgs.length;
   imgs[newIndex].classList.add('active');
 }
 
-// Jalankan pengambilan data langsung dari database Supabase
-fetchLiveCatalog();
+// Muat data katalog dan stok live
+loadCatalog();
 </script>
 </body>
 </html>
