@@ -145,7 +145,7 @@ const HEADERS = {
 
 const wa='67076312111';
 
-// Daftar produk dasar dan gambar lokal Anda
+// Daftar produk dasar beserta gambar lokal yang aman
 let baseProducts=[
   {"id": "AM01", "type": "AMERICAN STYLE", "name": "SUMMERVILLE", "price": 0, "currency": "USD", "images": ["Images/AM_01.jpg", "Images/AM_01b.png"]},
   {"id": "AM02", "type": "AMERICAN STYLE", "name": "DOMMINION", "price": 0, "currency": "USD", "images": ["Images/AM_02.jpg", "Images/AM_02b.jpg"]},
@@ -195,19 +195,19 @@ let products = [...baseProducts];
 
 function esc(s){return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
 
-// Ambil stok dari Supabase berdasarkan kecocokan NAMA produk
 async function loadLiveStock() {
   try {
-    const response = await fetch(SUPABASE_URL + "/rest/v1/products?select=name,variant,stock", {
+    const response = await fetch(SUPABASE_URL + "/rest/v1/products?select=name,stock", {
       headers: HEADERS
     });
     if(response.ok) {
       const rows = await response.json();
       products = baseProducts.map(p => {
-        // Cari data di Supabase berdasarkan nama produk yang sama persis
+        // Cek pencocokan fleksibel (mengabaikan spasi berlebih dan huruf besar/kecil)
         let match = rows.find(r => {
-          let dbName = r.variant ? r.name + " — " + r.variant : r.name;
-          return dbName && dbName.trim().toUpperCase() === p.name.trim().toUpperCase();
+          let dbName = (r.name || "").trim().replace(/\s+/g, ' ').toUpperCase();
+          let catalogName = p.name.trim().replace(/\s+/g, ' ').toUpperCase();
+          return dbName === catalogName;
         });
         
         let stockVal = match ? Number(match.stock || 0) : 0;
@@ -221,7 +221,6 @@ async function loadLiveStock() {
     }
   } catch(e) {
     console.error("Gagal ambil stok live:", e);
-    products = baseProducts.map(p => ({...p, desc: "Estoku disponivel"}));
   }
   
   let savedCat = localStorage.getItem('selectedCategory') || 'SEMUA';
@@ -264,7 +263,6 @@ function moveSlide(productId, direction){
   imgs[newIndex].classList.add('active');
 }
 
-// Jalankan pemuatan stok live berdasarkan nama produk
 loadLiveStock();
 </script>
 </body>
