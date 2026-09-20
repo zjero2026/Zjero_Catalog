@@ -146,22 +146,51 @@ const HEADERS = {
 const wa = '67076312111';
 let products = [];
 
-// Mapping gambar berdasarkan kode produk atau nama jika gambar lokal Anda menggunakan pola tertentu
-// Format gambar disesuaikan dengan folder Images/ di GitHub Anda
-function getProductImages(code, name) {
-  // Anda bisa menyesuaikan pemetaan folder gambar di sini jika diperlukan
-  // Contoh standar berdasarkan data sebelumnya:
-  if(code.startsWith("AM")) {
-    let num = code.replace("AM", "");
-    return [`Images/AM_${num}.jpg`, `Images/AM_${num}b.jpg`];
-  } else if(code.startsWith("AS")) {
-    let num = code.replace("AS", "");
-    return [`Images/AS_${num}.jpg`, `Images/AS_${num}b.jpg`];
-  } else if(code.startsWith("JS")) {
-    return [`Images/JS_01.jpg`, `Images/JS_01a.jpg`];
-  }
-  return [`Images/default.jpg`];
-}
+// Daftar gambar produk bawaan yang akurat sesuai file di folder GitHub Anda
+const presetImages = {
+  "AM01": ["Images/AM_01.jpg", "Images/AM_01b.png"],
+  "AM02": ["Images/AM_02.jpg", "Images/AM_02b.jpg"],
+  "AM03": ["Images/AM_03.jpg", "Images/AM_03b.jpg"],
+  "AM04": ["Images/AM_04.jpg", "Images/AM_04b.jpg"],
+  "AM05": ["Images/AM_05.jpg", "Images/AM_05b.jpg"],
+  "AM06": ["Images/AM_06.jpg", "Images/AM_06b.jpg"],
+  "AM07": ["Images/AM_07.jpg", "Images/AM_07b.jpg"],
+  "AM08": ["Images/AM_08.jpg", "Images/AM_08b.jpg"],
+  "AM09": ["Images/AM_09.jpg", "Images/AM_09b.jpg"],
+  "AM10": ["Images/AM_10.jpg", "Images/AM_10b.jpg"],
+  "AM11": ["Images/AM_11.jpg", "Images/AM_11b.jpg"],
+  "AM12": ["Images/AM_12.jpg", "Images/AM_12b.jpg"],
+  "AM13": ["Images/AM_13.jpg", "Images/AM_13b.jpg"],
+  "AM14": ["Images/AM_14.jpg", "Images/AM_14b.jpg"],
+  "AM15": ["Images/AM_15.jpg", "Images/AM_15b.jpg"],
+  "AM16": ["Images/AM_16.jpg", "Images/AM_16b.jpg"],
+  "AM17": ["Images/AM_17.jpg", "Images/AM_17b.jpg"],
+  "AM18": ["Images/AM_18.png", "Images/AM_18b.jpg"],
+  "AM19": ["Images/AM_19.png", "Images/AM_19b.jpg"],
+  "AM20": ["Images/AM_20.jpg", "Images/AM_20b.jpg"],
+  "AM21": ["Images/AM_21.png", "Images/AM_21b.jpg"],
+  "AS01": ["Images/AS_01.jpg", "Images/AS_01b.jpg", "Images/AS_01_3.png"],
+  "AS02": ["Images/AS_02.png", "Images/AS_02b.jpg"],
+  "AS03": ["Images/AS_03.png", "Images/AS_03b.jpg", "Images/AS_03_3.png"],
+  "AS04": ["Images/AS_04.png", "Images/AS_04b.jpg", "Images/AS_04_3.png"],
+  "AS05": ["Images/AS_05.jpg", "Images/AS_05b.jpg", "Images/AS_05_3.jpg"],
+  "AS06": ["Images/AS_06.png", "Images/AS_06b.jpg", "Images/AS_06_3.png"],
+  "AS07": ["Images/AS_07.jpg", "Images/AS_07b.jpg", "Images/AS_07_3.jpg"],
+  "AS08": ["Images/AS_08.jpg", "Images/AS_08b.jpg", "Images/AS_08_3.jpg"],
+  "AS09": ["Images/AS_09.jpg", "Images/AS_09a.png", "Images/AS_09_3.jpg"],
+  "AS10": ["Images/AS_10.jpg", "Images/AS_10ja.jpg", "Images/AS_10jb.jpg"],
+  "AS11": ["Images/AS_11.jpg", "Images/AS_11a.jpg", "Images/AS_11_3.jpg"],
+  "AS13": ["Images/AS_13.jpg", "Images/AS_13_2.jpg", "Images/AS_13_3.jpg"],
+  "AS17": ["Images/AS_17.jpg", "Images/AS_17_2.jpg", "Images/AS_17_3.jpg"],
+  "AS18": ["Images/AS_18.jpg", "Images/AS_18_2.jpg", "Images/AS_18_3.jpg"],
+  "AS19": ["Images/AS_19.jpg", "Images/AS_19_2.jpg", "Images/AS_19_3.jpg"],
+  "AS20": ["Images/AS_20.jpg", "Images/AS_20a.jpg", "Images/AS_20b.jpg"],
+  "AS21": ["Images/AS_21b.jpg", "Images/AS_21c.jpg", "Images/AS_21.jpg"],
+  "AS22": ["Images/AS_22a.jpg", "Images/AS_22b.jpg", "Images/AS_22_3.jpg"],
+  "AS24": ["Images/AS_24.jpg", "Images/AS_24_2.jpg", "Images/AS_24_3.jpg"],
+  "AS25": ["Images/AS_25.jpg", "Images/AS_25_2.jpg", "Images/AS_25_3.jpg"],
+  "JS01": ["Images/JS_01.jpg", "Images/JS_01a.jpg", "Images/JS_01_3.png"]
+};
 
 async function fetchCatalogData() {
   try {
@@ -176,15 +205,17 @@ async function fetchCatalogData() {
       let stockVal = Number(x.stock || 0);
       let stockDesc = stockVal === 0 ? "⚠️ Stock Hotu Ona (Habis)" : (stockVal <= 3 ? "⚠️ Stock Menus: " + stockVal : "📦 Stock Tersedia: " + stockVal);
       
+      let codeKey = x.code || "";
+      let imgs = presetImages[codeKey] || ["Images/default.jpg"];
+
       return {
-        id: x.code || x.id,
-        dbId: x.id,
+        id: codeKey || x.id,
         type: x.style || "AMERICAN STYLE",
         name: fullName,
         desc: stockDesc,
         price: 0,
         currency: "USD",
-        images: getProductImages(x.code || "", x.name)
+        images: imgs
       };
     });
 
@@ -219,7 +250,7 @@ function show(cat,btn,save=true){
   document.getElementById('grid').innerHTML=list.map(p=>{
     let price='Presu, kontaktu ami';
     let msg=encodeURIComponent('Halo ZJERO, Ha’u interese ho produtu ida-ne’e '+p.name);
-    let imgs=p.images.map((img,i)=>`<img src="${esc(img)}" class="${i===0?'active':''}" alt="${esc(p.name)}" onerror="this.src='logo.png'">`).join('');
+    let imgs=p.images.map((img,i)=>`<img src="${esc(img)}" class="${i===0?'active':''}" alt="${esc(p.name)}" onerror="this.style.display='none'">`).join('');
     return `<div class="card"><div class="slider" id="slider-${p.id}">${imgs}<button class="slider-btn prev" onclick="moveSlide('${p.id}', -1)">‹</button><button class="slider-btn next" onclick="moveSlide('${p.id}', 1)">›</button></div><div class="body"><div class="type">${esc(p.type)}</div><div class="name">${esc(p.name)}</div><div class="desc">${esc(p.desc)}</div><div class="price">${price}</div><a class="wa" href="https://wa.me/${wa}?text=${msg}" target="_blank">Husu liu husi WhatsApp</a></div></div>`
   }).join('')
 }
@@ -229,12 +260,12 @@ function moveSlide(productId, direction){
   if(!slider) return;
   let imgs=slider.querySelectorAll('img');
   let activeIndex=Array.from(imgs).findIndex(img=>img.classList.contains('active'));
+  if(activeIndex === -1) return;
   imgs[activeIndex].classList.remove('active');
   let newIndex=(activeIndex+direction+imgs.length)%imgs.length;
   imgs[newIndex].classList.add('active');
 }
 
-// Muat data dari Supabase saat halaman dibuka
 fetchCatalogData();
 </script>
 </body>
