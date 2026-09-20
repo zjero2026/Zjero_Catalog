@@ -556,7 +556,7 @@ th{
       </div>
     </section>
 
-    <!-- DATA KAIXAO (DENGAN FITUR UPDATE STOK CEPAT) -->
+    <!-- DATA KAIXAO -->
     <section id="data" class="hidden">
       <div class="panel">
         <button type="button" class="print-btn" onclick="window.print()">🖨️ Imprime / Download PDF Dadus Kaixao</button>
@@ -1144,7 +1144,7 @@ async function transact(kind){
   }
 
   try{
-    // 1. Simpan transaksi ke Supabase
+    // 1. Simpan riwayat transaksi ke Supabase
     await api("stock_transactions", {
       method: "POST",
       headers: { "Prefer": "return=minimal" },
@@ -1163,10 +1163,12 @@ async function transact(kind){
       })
     });
 
-    // 2. OTOMATIS UPDATE TOTAL STOK DI SUPABASE (Agar Katalog Publik ikut ter-update)
-    const newStock = Number(product.stock || 0) + (kind === "in" ? qty : -qty);
+    // 2. Hitung total stok baru secara akurat berdasarkan data produk valid dari Supabase
+    const currentStock = Number(product.stock || 0);
+    const newStock = kind === "in" ? (currentStock + qty) : (currentStock - qty);
     let newStatus = newStock === 0 ? "out_of_stock" : (newStock <= 3 ? "low_stock" : "available");
 
+    // 3. Perbarui langsung tabel products di Supabase agar katalog web ikut berubah
     await api("products?id=eq." + product.id, {
       method: "PATCH",
       headers: { "Prefer": "return=minimal" },
@@ -1184,7 +1186,7 @@ async function transact(kind){
     toggleDPField();
     if(noteElement) noteElement.value = "";
 
-    alert("Transaksaun Rai ona ba Supabase ho susesu. Katalog web awan awan ikut ter-update! Total: $" + totalPrice);
+    alert("Transaksaun Rai ona ba Supabase ho susesu! Stock iha katalog web mós agora foin atualiza ona.");
   }catch(error){
     console.error(error);
     alert("Transaksaun la konsege rai ba Supabase.\n\n" + error.message);
