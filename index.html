@@ -145,7 +145,6 @@ const HEADERS = {
 
 const wa='67076312111';
 
-// Master data katalog lengkap
 const masterProducts = [
   {codes: ["AM01"], name: "SUMMERVILLE", type: "AMERICAN STYLE", images: ["Images/AM_01.jpg", "Images/AM_01b.png"]},
   {codes: ["AM02"], name: "DOMMINION", type: "AMERICAN STYLE", images: ["Images/AM_02.jpg", "Images/AM_02b.jpg"]},
@@ -215,8 +214,8 @@ async function loadCatalog() {
         let dbName = (r.name || "").trim().toUpperCase();
         let targetCode = c.trim().toUpperCase();
         
-        // Pencocokan fleksibel berdasarkan kode ATAU nama produk
-        return dbCode === targetCode || (item.name === "THERION" && dbName.includes("THERION"));
+        // Pencocokan fleksibel: mencocokkan kode AS10/AS11 ATAU mencocokkan nama THERION
+        return dbCode === targetCode || (item.name === "THERION" && (dbName.includes("THERION") || dbCode === "AS10" || dbCode === "AS11"));
       });
       
       if(match) {
