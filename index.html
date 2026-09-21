@@ -145,7 +145,7 @@ const HEADERS = {
 
 const wa='67076312111';
 
-// Master data katalog yang disesuaikan persis dengan kode AS10 dan AS11 di Supabase
+// Master data katalog lengkap
 const masterProducts = [
   {codes: ["AM01"], name: "SUMMERVILLE", type: "AMERICAN STYLE", images: ["Images/AM_01.jpg", "Images/AM_01b.png"]},
   {codes: ["AM02"], name: "DOMMINION", type: "AMERICAN STYLE", images: ["Images/AM_02.jpg", "Images/AM_02b.jpg"]},
@@ -177,7 +177,6 @@ const masterProducts = [
   {codes: ["AS07"], name: "VESTO", type: "ASIA STYLE", images: ["Images/AS_07.jpg", "Images/AS_07b.jpg", "Images/AS_07_3.jpg"]},
   {codes: ["AS08"], name: "MAVIS", type: "ASIA STYLE", images: ["Images/AS_08.jpg", "Images/AS_08b.jpg", "Images/AS_08_3.jpg"]},
   {codes: ["AS09"], name: "BRYON", type: "ASIA STYLE", images: ["Images/AS_09.jpg", "Images/AS_09a.png", "Images/AS_09_3.jpg"]},
-  // THERION menggabungkan kode AS10 dan AS11 dari Supabase agar total stoknya akurat dan fotonya bisa di-slide
   {codes: ["AS10", "AS11"], name: "THERION", type: "ASIA STYLE", images: ["Images/AS_10.jpg", "Images/AS_10ja.jpg", "Images/AS_10jb.jpg"]},
   {codes: ["AS12"], name: "VESPER", type: "ASIA STYLE", images: ["Images/AS_11.jpg", "Images/AS_11a.jpg", "Images/AS_11_3.jpg"]},
   {codes: ["AS13"], name: "AVALON", type: "ASIA STYLE", images: ["Images/AS_13.jpg", "Images/AS_13_2.jpg", "Images/AS_13_3.jpg"]},
@@ -197,7 +196,7 @@ let products = [];
 async function loadCatalog() {
   let dbRows = [];
   try {
-    const response = await fetch(SUPABASE_URL + "/rest/v1/products?select=code,stock", {
+    const response = await fetch(SUPABASE_URL + "/rest/v1/products?select=code,name,stock", {
       headers: HEADERS
     });
     if(response.ok) {
@@ -209,8 +208,17 @@ async function loadCatalog() {
 
   products = masterProducts.map((item, idx) => {
     let totalStock = 0;
+    
     item.codes.forEach(c => {
-      let match = dbRows.find(r => (r.code || "").trim().toUpperCase() === c.toUpperCase());
+      let match = dbRows.find(r => {
+        let dbCode = (r.code || "").trim().toUpperCase();
+        let dbName = (r.name || "").trim().toUpperCase();
+        let targetCode = c.trim().toUpperCase();
+        
+        // Pencocokan fleksibel berdasarkan kode ATAU nama produk
+        return dbCode === targetCode || (item.name === "THERION" && dbName.includes("THERION"));
+      });
+      
       if(match) {
         totalStock += Number(match.stock || 0);
       }
