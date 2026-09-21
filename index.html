@@ -81,13 +81,13 @@ body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#222}
   margin-bottom:2px;
 }
 
-/* Filter Utama */
+/* Filter Utama dengan Slide Horizontal */
 .filters{
   display:flex;
   gap:8px;
   overflow-x:auto;
   white-space:nowrap;
-  padding:20px 16px 10px;
+  padding:20px 16px 15px;
   scroll-behavior:smooth;
   -webkit-overflow-scrolling:touch;
 }
@@ -107,30 +107,6 @@ body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#222}
 }
 .filters button.active{background:#111;color:#fff}
 
-/* Kotak Dropdown Sub Kategori */
-.sub-dropdown-container {
-  display: none;
-  padding: 0 16px 15px;
-  max-width: 300px;
-  margin: 0 auto;
-}
-.sub-dropdown-container.show {
-  display: block;
-}
-.sub-dropdown {
-  width: 100%;
-  padding: 10px 14px;
-  border-radius: 20px;
-  border: 1px solid #ccc;
-  background-color: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  color: #333;
-  outline: none;
-  cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-}
-
 .grid{max-width:1200px;margin:auto;padding:10px 16px 40px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
 .card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px #0001;display:flex;flex-direction:column;}
 .slider{position:relative;width:100%;aspect-ratio:4/3;background:#eee;overflow:hidden}
@@ -145,6 +121,22 @@ body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#222}
 .name{font-size:18px;font-weight:700;margin:5px 0;color:#111}
 .desc{font-size:12px;color:#39704c;font-weight:bold;margin-top:4px;}
 .price{font-size:16px;font-weight:700;margin:10px 0;color:#c59a38}
+
+/* Styling Dropdown di dalam Kartu */
+.card-select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background-color: #fafafa;
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10px;
+  outline: none;
+  cursor: pointer;
+}
+
 .wa{display:block;text-align:center;text-decoration:none;background:#111;color:#fff;padding:10px;border-radius:9px;font-size:13px;font-weight:bold;margin-top:auto;transition:background 0.2s}
 .wa:hover{background:#333}
 
@@ -170,19 +162,12 @@ body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#222}
   </div>
 </div>
 
-<!-- Filter Utama -->
+<!-- Filter Utama Bisa Digeser (Slide) -->
 <div class="filters">
-  <button onclick="filterMain('SEMUA',this)">ALL DATA</button>
-  <button onclick="filterMain('AMERICAN STYLE',this)">AMERICAN STYLE</button>
-  <button onclick="filterMain('ASIA STYLE',this)">ASIA STYLE</button>
-  <button onclick="filterMain('JATI STANDARD',this)">JATI STANDARD</button>
-</div>
-
-<!-- Dropdown Sub Kategori (Hanya muncul untuk Asia & Jati Standard) -->
-<div id="subDropdownContainer" class="sub-dropdown-container">
-  <select id="subSelect" class="sub-dropdown" onchange="filterSubDropdown(this.value)">
-    <!-- Opsi akan terisi otomatis lewat JS -->
-  </select>
+  <button onclick="show('SEMUA',this)">ALL DATA</button>
+  <button onclick="show('AMERICAN STYLE',this)">AMERICAN STYLE</button>
+  <button onclick="show('ASIA STYLE',this)">ASIA STYLE</button>
+  <button onclick="show('JATI STANDARD',this)">JATI STANDARD</button>
 </div>
 
 <div id="grid" class="grid"><div class="empty">Halai da'uk hela dadus no stock...</div></div>
@@ -198,6 +183,15 @@ const HEADERS = {
 };
 
 const wa='67076312111';
+
+// Daftar sub-varian khusus untuk produk tertentu
+const productSubOptions = {
+  "SURABAYA": ["Surabaya B", "Surabaya C"],
+  "JEPARA": ["Jepara VVIP A", "Jepara VVIP B", "Jepara A", "Jepara B", "Jepara C"],
+  "KAIXAO KIK": ["Kaixao Kik A", "Kaixao Kik B"],
+  "BRYON": ["Bryon Surabaya A", "Bryon Surabaya B"],
+  "THERION": ["Therion Jepara A", "Therion Jepara B"]
+};
 
 const masterProducts = [
   {codes: ["AM01"], name: "SUMMERVILLE", type: "AMERICAN STYLE", images: ["Images/AM_01.jpg", "Images/AM_01b.png"]},
@@ -245,8 +239,6 @@ const masterProducts = [
 ];
 
 let products = [];
-let currentMainCat = 'SEMUA';
-let currentSubCat = 'SEMUA';
 
 async function loadCatalog() {
   let dbRows = [];
@@ -263,9 +255,12 @@ async function loadCatalog() {
 
   products = masterProducts.map((item, idx) => {
     let totalStock = 0;
+    
     item.codes.forEach(c => {
       let found = dbRows.find(r => (r.code || "").trim().toUpperCase() === c.toUpperCase());
-      if(found) totalStock += Number(found.stock || 0);
+      if(found) {
+        totalStock += Number(found.stock || 0);
+      }
     });
 
     if(totalStock === 0) {
@@ -290,107 +285,73 @@ async function loadCatalog() {
   });
 
   let savedCat = localStorage.getItem('selectedCategory') || 'SEMUA';
-  let savedSub = localStorage.getItem('selectedSubCategory') || 'SEMUA';
-  
-  let targetBtn = null;
-  document.querySelectorAll('.filters button').forEach(b => {
-    let text = b.textContent.trim();
-    if(text === (savedCat === 'SEMUA' ? 'ALL DATA' : savedCat)) targetBtn = b;
-  });
-
-  filterMain(savedCat, targetBtn, false);
-  if(savedCat === 'ASIA STYLE' || savedCat === 'JATI STANDARD') {
-    currentSubCat = savedSub;
-    let selectElem = document.getElementById('subSelect');
-    if(selectElem) selectElem.value = savedSub;
-  }
+  show(savedCat, null, false);
 }
 
 function esc(s){return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
 
-function filterMain(cat, btn, save=true){
-  currentMainCat = cat;
-  currentSubCat = 'SEMUA';
-  if(save){
-    localStorage.setItem('selectedCategory', cat);
-    localStorage.setItem('selectedSubCategory', 'SEMUA');
-  }
-
-  document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active'));
+function show(cat,btn,save=true){
+  if(save){localStorage.setItem('selectedCategory',cat);}
+  document.querySelectorAll('.filters button').forEach(b=>b.classList.remove('active'));
   if(!btn){
-    document.querySelectorAll('.filters button').forEach(b => {
-      if(b.textContent.trim() === (cat === 'SEMUA' ? 'ALL DATA' : cat)) btn = b;
-    });
+    let buttons=document.querySelectorAll('.filters button');
+    buttons.forEach(b=>{if(b.textContent.trim()===(cat==='SEMUA'?'ALL DATA':cat)){btn=b;}});
+    if(btn)btn.classList.add('active');
+  }else{
+    btn.classList.add('active');
   }
-  if(btn) btn.classList.add('active');
 
-  let subContainer = document.getElementById('subDropdownContainer');
-  let selectElem = document.getElementById('subSelect');
+  let list = cat==='SEMUA' ? products : products.filter(p => p.type === cat);
 
-  if(cat === 'ASIA STYLE' || cat === 'JATI STANDARD') {
-    subContainer.classList.add('show');
+  document.getElementById('grid').innerHTML = list.map(p => {
+    let price = 'Presu, kontaktu ami';
+    let imgs = p.images.map((img, i) => `<img src="${esc(img)}" class="${i===0?'active':''}" alt="${esc(p.name)}" onerror="this.onerror=null;this.src='logo.png';">`).join('');
     
-    let subOptions = ['SEMUA'];
-    if(cat === 'ASIA STYLE') {
-      subOptions = ['SEMUA', 'SURABAYA', 'JEPARA', 'KAIXAO KIK', 'BRYON', 'THERION'];
-    } else if(cat === 'JATI STANDARD') {
-      subOptions = ['SEMUA', 'POLARIS ZJERO'];
+    // Cek apakah produk ini punya daftar sub-pilihan khusus
+    let subOptionsHtml = '';
+    if (productSubOptions[p.name]) {
+      let options = productSubOptions[p.name].map(opt => `<option value="${esc(opt)}">${esc(opt)}</option>`).join('');
+      subOptionsHtml = `
+        <select class="card-select" id="select-${p.id}" onchange="updateWaLink('${p.id}', '${esc(p.name)}')">
+          <option value="">-- Hili Varian / Model --</option>
+          ${options}
+        </select>
+      `;
     }
 
-    selectElem.innerHTML = subOptions.map(sub => `
-      <option value="${sub}">${sub === 'SEMUA' ? '-- Pilih Sub Kategori --' : sub}</option>
-    `).join('');
-    selectElem.value = 'SEMUA';
+    let initialMsg = encodeURIComponent('Halo ZJERO, Ha’u interese ho produtu ' + p.name);
 
-  } else {
-    subContainer.classList.remove('show');
-  }
-
-  renderProducts();
-}
-
-function filterSubDropdown(sub){
-  currentSubCat = sub;
-  localStorage.setItem('selectedSubCategory', sub);
-  renderProducts();
-}
-
-function renderProducts(){
-  let list = products.filter(p => {
-    let matchMain = (currentMainCat === 'SEMUA') || (p.type === currentMainCat);
-    let matchSub = (currentSubCat === 'SEMUA') || (p.name.toUpperCase().includes(currentSubCat.toUpperCase()));
-    return matchMain && matchSub;
-  });
-
-  let gridHTML = '';
-  if(list.length === 0) {
-    gridHTML = `<div class="empty">Koleksi kaixaun la iha ka stock mamuk...</div>`;
-  } else {
-    gridHTML = list.map(p => {
-      let price = 'Presu, kontaktu ami';
-      let msg = encodeURIComponent('Halo ZJERO, Ha’u interese ho produtu ida-ne’e ' + p.name);
-      let imgs = p.images.map((img, i) => `<img src="${esc(img)}" class="${i===0?'active':''}" alt="${esc(p.name)}" onerror="this.onerror=null;this.src='logo.png';">`).join('');
-      
-      return `
-        <div class="card">
-          <div class="slider" id="slider-${p.id}">
-            ${imgs}
-            <button class="slider-btn prev" onclick="moveSlide('${p.id}', -1)">‹</button>
-            <button class="slider-btn next" onclick="moveSlide('${p.id}', 1)">›</button>
-          </div>
-          <div class="body">
-            <div class="type">${esc(p.type)}</div>
-            <div class="name">${esc(p.name)}</div>
-            <div class="desc">${esc(p.desc)}</div>
-            <div class="price">${price}</div>
-            <a class="wa" href="https://wa.me/${wa}?text=${msg}" target="_blank">Husu liu husi WhatsApp</a>
-          </div>
+    return `
+      <div class="card">
+        <div class="slider" id="slider-${p.id}">
+          ${imgs}
+          <button class="slider-btn prev" onclick="moveSlide('${p.id}', -1)">‹</button>
+          <button class="slider-btn next" onclick="moveSlide('${p.id}', 1)">›</button>
         </div>
-      `;
-    }).join('');
-  }
+        <div class="body">
+          <div class="type">${esc(p.type)}</div>
+          <div class="name">${esc(p.name)}</div>
+          <div class="desc">${esc(p.desc)}</div>
+          <div class="price">${price}</div>
+          ${subOptionsHtml}
+          <a class="wa" id="wa-${p.id}" href="https://wa.me/${wa}?text=${initialMsg}" target="_blank">Husu liu husi WhatsApp</a>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
 
-  document.getElementById('grid').innerHTML = gridHTML;
+// Fungsi untuk memperbarui pesan WhatsApp secara otomatis saat varian di dropdown dipilih
+function updateWaLink(productId, productName) {
+  let selectElem = document.getElementById(`select-${productId}`);
+  let waLinkElem = document.getElementById(`wa-${productId}`);
+  let selectedVariant = selectElem.value;
+
+  let message = selectedVariant 
+    ? `Halo ZJERO, Ha’u interese ho produtu ${productName} - Varian: ${selectedVariant}`
+    : `Halo ZJERO, Ha’u interese ho produtu ${productName}`;
+
+  waLinkElem.href = `https://wa.me/${wa}?text=` + encodeURIComponent(message);
 }
 
 function moveSlide(productId, direction){
