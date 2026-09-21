@@ -81,9 +81,61 @@ body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#222}
   margin-bottom:2px;
 }
 
-.filters{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:20px 16px 10px}
-.filters button{border:0;padding:10px 18px;border-radius:20px;background:#ddd;cursor:pointer;font-size:13px;font-weight:600;transition:all 0.2s}
-.filters button.active{background:#111;color:#fff}
+/* Filter Utama */
+.filters{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  white-space:nowrap;
+  padding:20px 16px 5px;
+  scroll-behavior:smooth;
+  -webkit-overflow-scrolling:touch;
+}
+.filters::-webkit-scrollbar, .sub-filters::-webkit-scrollbar{display:none;}
+.filters, .sub-filters{-ms-overflow-style:none;scrollbar-width:none;}
+
+.filters button, .sub-filters button{
+  flex:0 0 auto;
+  border:0;
+  padding:8px 16px;
+  border-radius:20px;
+  background:#ddd;
+  cursor:pointer;
+  font-size:12px;
+  font-weight:600;
+  transition:all 0.2s;
+}
+.filters button.active, .sub-filters button.active{background:#111;color:#fff}
+
+/* Sub Kategori Slider (Hanya muncul jika Asia/Jati dipilih) */
+.sub-filters-container {
+  display: none; /* Default tersembunyi */
+  padding: 0 16px 15px;
+}
+.sub-filters-container.show {
+  display: block;
+}
+.sub-filters {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  white-space: nowrap;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  background: #eaeaea;
+  padding: 8px;
+  border-radius: 12px;
+}
+.sub-filters button {
+  background: #fff;
+  color: #333;
+  border: 1px solid #ccc;
+}
+.sub-filters button.active {
+  background: #c59a38;
+  color: #fff;
+  border-color: #c59a38;
+}
 
 .grid{max-width:1200px;margin:auto;padding:10px 16px 40px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
 .card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px #0001;display:flex;flex-direction:column;}
@@ -124,11 +176,19 @@ body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#222}
   </div>
 </div>
 
+<!-- Filter Utama -->
 <div class="filters">
-  <button onclick="show('SEMUA',this)">ALL DATA</button>
-  <button onclick="show('AMERICAN STYLE',this)">AMERICAN STYLE</button>
-  <button onclick="show('ASIA STYLE',this)">ASIA STYLE</button>
-  <button onclick="show('JATI STANDARD',this)">JATI STANDARD</button>
+  <button onclick="filterMain('SEMUA',this)">ALL DATA</button>
+  <button onclick="filterMain('AMERICAN STYLE',this)">AMERICAN STYLE</button>
+  <button onclick="filterMain('ASIA STYLE',this)">ASIA STYLE</button>
+  <button onclick="filterMain('JATI STANDARD',this)">JATI STANDARD</button>
+</div>
+
+<!-- Sub Kategori Slider Horizontal (Hanya muncul untuk Asia Style & Jati Standard) -->
+<div id="subCategoryContainer" class="sub-filters-container">
+  <div class="sub-filters" id="subFiltersList">
+    <!-- Tombol subkategori akan diisi otomatis lewat JavaScript berdasarkan kategori utama -->
+  </div>
 </div>
 
 <div id="grid" class="grid"><div class="empty">Halai da'uk hela dadus no stock...</div></div>
@@ -145,7 +205,6 @@ const HEADERS = {
 
 const wa='67076312111';
 
-// Master data katalog yang memetakan seluruh varian gabungan (Therion, Jepara, Surabaya, Kikaoxao Kik)
 const masterProducts = [
   {codes: ["AM01"], name: "SUMMERVILLE", type: "AMERICAN STYLE", images: ["Images/AM_01.jpg", "Images/AM_01b.png"]},
   {codes: ["AM02"], name: "DOMMINION", type: "AMERICAN STYLE", images: ["Images/AM_02.jpg", "Images/AM_02b.jpg"]},
@@ -192,6 +251,8 @@ const masterProducts = [
 ];
 
 let products = [];
+let currentMainCat = 'SEMUA';
+let currentSubCat = 'SEMUA';
 
 async function loadCatalog() {
   let dbRows = [];
@@ -208,16 +269,11 @@ async function loadCatalog() {
 
   products = masterProducts.map((item, idx) => {
     let totalStock = 0;
-    
-    // Menjumlahkan stok dari semua kode yang terdaftar di item ini
     item.codes.forEach(c => {
       let found = dbRows.find(r => (r.code || "").trim().toUpperCase() === c.toUpperCase());
-      if(found) {
-        totalStock += Number(found.stock || 0);
-      }
+      if(found) totalStock += Number(found.stock || 0);
     });
 
-    // Fallback pencocokan berdasarkan nama jika total stok masih 0 dan nama produk cocok
     if(totalStock === 0) {
       dbRows.forEach(r => {
         let dbName = (r.name || "").trim().toUpperCase();
@@ -235,53 +291,128 @@ async function loadCatalog() {
       type: item.type,
       name: item.name,
       desc: stockDesc,
-      price: 0,
-      currency: "USD",
       images: item.images
     };
   });
 
   let savedCat = localStorage.getItem('selectedCategory') || 'SEMUA';
-  show(savedCat, null, false);
+  let savedSub = localStorage.getItem('selectedSubCategory') || 'SEMUA';
+  
+  // Deteksi tombol utama yang aktif saat halaman dimuat
+  let targetBtn = null;
+  document.querySelectorAll('.filters button').forEach(b => {
+    let text = b.textContent.trim();
+    if(text === (savedCat === 'SEMUA' ? 'ALL DATA' : savedCat)) targetBtn = b;
+  });
+
+  filterMain(savedCat, targetBtn, false);
+  if(savedCat === 'ASIA STYLE' || savedCat === 'JATI STANDARD') {
+    filterSub(savedSub, false);
+  }
 }
 
 function esc(s){return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
 
-function show(cat,btn,save=true){
-  if(save){localStorage.setItem('selectedCategory',cat);}
-  document.querySelectorAll('.filters button').forEach(b=>b.classList.remove('active'));
-  if(!btn){
-    let buttons=document.querySelectorAll('.filters button');
-    buttons.forEach(b=>{if(b.textContent.trim()===(cat==='SEMUA'?'ALL DATA':cat)){btn=b;}});
-    if(btn)btn.classList.add('active');
-  }else{
-    btn.classList.add('active');
+// Fungsi Filter Utama
+function filterMain(cat, btn, save=true){
+  currentMainCat = cat;
+  currentSubCat = 'SEMUA';
+  if(save){
+    localStorage.setItem('selectedCategory', cat);
+    localStorage.setItem('selectedSubCategory', 'SEMUA');
   }
 
-  let list = cat==='SEMUA' ? products : products.filter(p => p.type === cat);
+  // Atur kelas aktif tombol utama
+  document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active'));
+  if(!btn){
+    document.querySelectorAll('.filters button').forEach(b => {
+      if(b.textContent.trim() === (cat === 'SEMUA' ? 'ALL DATA' : cat)) btn = b;
+    });
+  }
+  if(btn) btn.classList.add('active');
 
-  document.getElementById('grid').innerHTML = list.map(p => {
-    let price = 'Presu, kontaktu ami';
-    let msg = encodeURIComponent('Halo ZJERO, Ha’u interese ho produtu ida-ne’e ' + p.name);
-    let imgs = p.images.map((img, i) => `<img src="${esc(img)}" class="${i===0?'active':''}" alt="${esc(p.name)}" onerror="this.onerror=null;this.src='logo.png';">`).join('');
+  let subContainer = document.getElementById('subContainer') || document.getElementById('subCategoryContainer');
+  let subListDiv = document.getElementById('subFiltersList');
+
+  // Cek apakah kategori utama adalah ASIA STYLE atau JATI STANDARD
+  if(cat === 'ASIA STYLE' || cat === 'JATI STANDARD') {
+    subContainer.classList.add('show');
     
-    return `
-      <div class="card">
-        <div class="slider" id="slider-${p.id}">
-          ${imgs}
-          <button class="slider-btn prev" onclick="moveSlide('${p.id}', -1)">‹</button>
-          <button class="slider-btn next" onclick="moveSlide('${p.id}', 1)">›</button>
+    // Tentukan pilihan subkategori berdasarkan kategori utama
+    let subOptions = ['SEMUA'];
+    if(cat === 'ASIA STYLE') {
+      // Contoh subkategori khusus Asia Style (bisa Anda sesuaikan nama produk/subnya)
+      subOptions = ['SEMUA', 'LUMINOR', 'SYLVAN', 'GOLDEN', 'IVORY', 'THERION', 'JEPARA', 'SURABAYA'];
+    } else if(cat === 'JATI STANDARD') {
+      subOptions = ['SEMUA', 'POLARIS ZJERO'];
+    }
+
+    subListDiv.innerHTML = subOptions.map(sub => `
+      <button onclick="filterSub('${sub}', this)" class="${sub === 'SEMUA' ? 'active' : ''}">${sub}</button>
+    `).join('');
+
+  } else {
+    // Sembunyikan subkategori jika bukan Asia / Jati Standard
+    subContainer.classList.remove('show');
+  }
+
+  renderProducts();
+}
+
+// Fungsi Filter Subkategori yang bisa di-slide
+function filterSub(sub, btn, save=true){
+  currentSubCat = sub;
+  if(save) localStorage.setItem('selectedSubCategory', sub);
+
+  if(btn){
+    document.querySelectorAll('.sub-filters button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  } else {
+    document.querySelectorAll('.sub-filters button').forEach(b => {
+      if(b.textContent.trim() === sub) b.classList.add('active');
+    });
+  }
+
+  renderProducts();
+}
+
+// Render Produk ke Grid
+function renderProducts(){
+  let list = products.filter(p => {
+    let matchMain = (currentMainCat === 'SEMUA') || (p.type === currentMainCat);
+    let matchSub = (currentSubCat === 'SEMUA') || (p.name.toUpperCase().includes(currentSubCat.toUpperCase()));
+    return matchMain && matchSub;
+  });
+
+  let gridHTML = '';
+  if(list.length === 0) {
+    gridHTML = `<div class="empty">Koleksi kaixaun la iha ka stock mamuk...</div>`;
+  } else {
+    gridHTML = list.map(p => {
+      let price = 'Presu, kontaktu ami';
+      let msg = encodeURIComponent('Halo ZJERO, Ha’u interese ho produtu ida-ne’e ' + p.name);
+      let imgs = p.images.map((img, i) => `<img src="${esc(img)}" class="${i===0?'active':''}" alt="${esc(p.name)}" onerror="this.onerror=null;this.src='logo.png';">`).join('');
+      
+      return `
+        <div class="card">
+          <div class="slider" id="slider-${p.id}">
+            ${imgs}
+            <button class="slider-btn prev" onclick="moveSlide('${p.id}', -1)">‹</button>
+            <button class="slider-btn next" onclick="moveSlide('${p.id}', 1)">›</button>
+          </div>
+          <div class="body">
+            <div class="type">${esc(p.type)}</div>
+            <div class="name">${esc(p.name)}</div>
+            <div class="desc">${esc(p.desc)}</div>
+            <div class="price">${price}</div>
+            <a class="wa" href="https://wa.me/${wa}?text=${msg}" target="_blank">Husu liu husi WhatsApp</a>
+          </div>
         </div>
-        <div class="body">
-          <div class="type">${esc(p.type)}</div>
-          <div class="name">${esc(p.name)}</div>
-          <div class="desc">${esc(p.desc)}</div>
-          <div class="price">${price}</div>
-          <a class="wa" href="https://wa.me/${wa}?text=${msg}" target="_blank">Husu liu husi WhatsApp</a>
-        </div>
-      </div>
-    `;
-  }).join('');
+      `;
+    }).join('');
+  }
+
+  document.getElementById('grid').innerHTML = gridHTML;
 }
 
 function moveSlide(productId, direction){
