@@ -184,13 +184,13 @@ const HEADERS = {
 
 const wa='67076312111';
 
-// Daftar sub-varian produk beserta nama lengkapnya untuk Asia Style & Jati Standard
+// Daftar sub-varian produk beserta nama lengkapnya
 const productSubOptions = {
   "SURABAYA": ["Surabaya A Segi 4", "Surabaya B Segi 8"],
   "JEPARA": ["Jepara VIP", "Jepara A", "Jepara B", "Jepara C"],
   "KAIXAO KIK": ["Kaixao Kik 80cm", "Kaixao Kik 120cm"],
   "BRYON": ["Bryon Surabaya A", "Bryon Surabaya B"],
-  "LUMINOR": ["Luminor putih Non kaca", "Luminor Coklat Non Kaca"],
+  "LUMINOR": ["Luminor putih Non Kaca", "Luminor Cokelat Non Kaca"],
   "THERION": ["Therion Jepara A", "Therion Jepara B"],
   "POLARIS ZJERO": ["Jati Standard Zjero", "Jati Standard Full Kaca"]
 };
@@ -218,7 +218,6 @@ const masterProducts = [
   {codes: ["AM20"], name: "GRANDIA", type: "AMERICAN STYLE", images: ["Images/AM_20.jpg", "Images/AM_20b.jpg"]},
   {codes: ["AM21"], name: "PEACE", type: "AMERICAN STYLE", images: ["Images/AM_21.png", "Images/AM_21b.jpg"]},
   {codes: ["AS01", "AS02"], name: "LUMINOR", type: "ASIA STYLE", images: ["Images/AS_01.jpg", "Images/AS_01b.jpg", "Images/AS_01_3.png"]},
-  
   {codes: ["AS03"], name: "GOLDEN", type: "ASIA STYLE", images: ["Images/AS_03.png", "Images/AS_03b.jpg", "Images/AS_03_3.png"]},
   {codes: ["AS04"], name: "GILSON", type: "ASIA STYLE", images: ["Images/AS_04.png", "Images/AS_04b.jpg", "Images/AS_04_3.png"]},
   {codes: ["AS05"], name: "IVORY", type: "ASIA STYLE", images: ["Images/AS_05.jpg", "Images/AS_05b.jpg", "Images/AS_05_3.jpg"]},
@@ -309,7 +308,6 @@ function show(cat,btn,save=true){
     let price = 'Presu, kontaktu ami';
     let imgs = p.images.map((img, i) => `<img src="${esc(img)}" class="${i===0?'active':''}" alt="${esc(p.name)}" onerror="this.onerror=null;this.src='logo.png';">`).join('');
     
-    // Cek apakah produk ini memiliki sub-opsi dropdown
     let subOptionsHtml = '';
     if (productSubOptions[p.name]) {
       let options = productSubOptions[p.name].map(opt => `<option value="${esc(opt)}">${esc(opt)}</option>`).join('');
@@ -343,7 +341,6 @@ function show(cat,btn,save=true){
   }).join('');
 }
 
-// Fungsi untuk memperbarui nama produk di kartu dan tautan WhatsApp ketika varian dipilih
 function updateProductDisplay(productId, baseName) {
   let selectElem = document.getElementById(`select-${productId}`);
   let nameElem = document.getElementById(`name-${productId}`);
