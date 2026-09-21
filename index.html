@@ -145,50 +145,51 @@ const HEADERS = {
 
 const wa='67076312111';
 
-// Master data katalog lengkap berbasis kode
+// Master data produk dengan dukungan array kode (bisa 1 kode tunggal atau gabungan beberapa kode sekaligus)
 const masterProducts = [
-  {code: "AM01", name: "SUMMERVILLE", type: "AMERICAN STYLE", images: ["Images/AM_01.jpg", "Images/AM_01b.png"]},
-  {code: "AM02", name: "DOMMINION", type: "AMERICAN STYLE", images: ["Images/AM_02.jpg", "Images/AM_02b.jpg"]},
-  {code: "AM03", name: "ELEANOR", type: "AMERICAN STYLE", images: ["Images/AM_03.jpg", "Images/AM_03b.jpg"]},
-  {code: "AM04", name: "WESTON", type: "AMERICAN STYLE", images: ["Images/AM_04.jpg", "Images/AM_04b.jpg"]},
-  {code: "AM05", name: "PRESIDENT", type: "AMERICAN STYLE", images: ["Images/AM_05.jpg", "Images/AM_05b.jpg"]},
-  {code: "AM06", name: "KENWOOD", type: "AMERICAN STYLE", images: ["Images/AM_06.jpg", "Images/AM_06b.jpg"]},
-  {code: "AM07", name: "EMPEROR", type: "AMERICAN STYLE", images: ["Images/AM_07.jpg", "Images/AM_07b.jpg"]},
-  {code: "AM08", name: "FEMALE ESTHER CERRY", type: "AMERICAN STYLE", images: ["Images/AM_08.jpg", "Images/AM_08b.jpg"]},
-  {code: "AM09", name: "NEW HOPE", type: "AMERICAN STYLE", images: ["Images/AM_09.jpg", "Images/AM_09b.jpg"]},
-  {code: "AM10", name: "REMEMBRENCE", type: "AMERICAN STYLE", images: ["Images/AM_10.jpg", "Images/AM_10b.jpg"]},
-  {code: "AM11", name: "UNITY", type: "AMERICAN STYLE", images: ["Images/AM_11.jpg", "Images/AM_11b.jpg"]},
-  {code: "AM12", name: "TIGER WOOD", type: "AMERICAN STYLE", images: ["Images/AM_12.jpg", "Images/AM_12b.jpg"]},
-  {code: "AM13", name: "SENATOR", type: "AMERICAN STYLE", images: ["Images/AM_13.jpg", "Images/AM_13b.jpg"]},
-  {code: "AM14", name: "TUSCANY", type: "AMERICAN STYLE", images: ["Images/AM_14.jpg", "Images/AM_14b.jpg"]},
-  {code: "AM15", name: "WILLOW BROOK", type: "AMERICAN STYLE", images: ["Images/AM_15.jpg", "Images/AM_15b.jpg"]},
-  {code: "AM16", name: "MAGISTRATE RED", type: "AMERICAN STYLE", images: ["Images/AM_16.jpg", "Images/AM_16b.jpg"]},
-  {code: "AM17", name: "OAK MANOR", type: "AMERICAN STYLE", images: ["Images/AM_17.jpg", "Images/AM_17b.jpg"]},
-  {code: "AM18", name: "GLORIFY", type: "AMERICAN STYLE", images: ["Images/AM_18.png", "Images/AM_18b.jpg"]},
-  {code: "AM19", name: "ROVEN", type: "AMERICAN STYLE", images: ["Images/AM_19.png", "Images/AM_19b.jpg"]},
-  {code: "AM20", name: "GRANDIA", type: "AMERICAN STYLE", images: ["Images/AM_20.jpg", "Images/AM_20b.jpg"]},
-  {code: "AM21", name: "PEACE", type: "AMERICAN STYLE", images: ["Images/AM_21.png", "Images/AM_21b.jpg"]},
-  {code: "AS01", name: "LUMINOR", type: "ASIA STYLE", images: ["Images/AS_01.jpg", "Images/AS_01b.jpg", "Images/AS_01_3.png"]},
-  {code: "AS02", name: "SYLVAN", type: "ASIA STYLE", images: ["Images/AS_02.png", "Images/AS_02b.jpg"]},
-  {code: "AS03", name: "GOLDEN", type: "ASIA STYLE", images: ["Images/AS_03.png", "Images/AS_03b.jpg", "Images/AS_03_3.png"]},
-  {code: "AS04", name: "GILSON", type: "ASIA STYLE", images: ["Images/AS_04.png", "Images/AS_04b.jpg", "Images/AS_04_3.png"]},
-  {code: "AS05", name: "IVORY", type: "ASIA STYLE", images: ["Images/AS_05.jpg", "Images/AS_05b.jpg", "Images/AS_05_3.jpg"]},
-  {code: "AS06", name: "MONTANA", type: "ASIA STYLE", images: ["Images/AS_06.png", "Images/AS_06b.jpg", "Images/AS_06_3.png"]},
-  {code: "AS07", name: "VESTO", type: "ASIA STYLE", images: ["Images/AS_07.jpg", "Images/AS_07b.jpg", "Images/AS_07_3.jpg"]},
-  {code: "AS08", name: "MAVIS", type: "ASIA STYLE", images: ["Images/AS_08.jpg", "Images/AS_08b.jpg", "Images/AS_08_3.jpg"]},
-  {code: "AS09", name: "BRYON", type: "ASIA STYLE", images: ["Images/AS_09.jpg", "Images/AS_09a.png", "Images/AS_09_3.jpg"]},
-  {code: "AS10", name: "THERION", type: "ASIA STYLE", images: ["Images/AS_10.jpg", "Images/AS_10ja.jpg", "Images/AS_10jb.jpg"]},
-  {code: "AS11", name: "VESPER", type: "ASIA STYLE", images: ["Images/AS_11.jpg", "Images/AS_11a.jpg", "Images/AS_11_3.jpg"]},
-  {code: "AS13", name: "AVALON", type: "ASIA STYLE", images: ["Images/AS_13.jpg", "Images/AS_13_2.jpg", "Images/AS_13_3.jpg"]},
-  {code: "AS17", name: "ORION", type: "ASIA STYLE", images: ["Images/AS_17.jpg", "Images/AS_17_2.jpg", "Images/AS_17_3.jpg"]},
-  {code: "AS18", name: "LEGACY", type: "ASIA STYLE", images: ["Images/AS_18.jpg", "Images/AS_18_2.jpg", "Images/AS_18_3.jpg"]},
-  {code: "AS19", name: "UPDATE", type: "ASIA STYLE", images: ["Images/AS_19.jpg", "Images/AS_19_2.jpg", "Images/AS_19_3.jpg"]},
-  {code: "AS20", name: "JEPARA", type: "ASIA STYLE", images: ["Images/AS_20.jpg", "Images/AS_20a.jpg", "Images/AS_20b.jpg"]},
-  {code: "AS21", name: "SURABAYA", type: "ASIA STYLE", images: ["Images/AS_21b.jpg", "Images/AS_21c.jpg", "Images/AS_21.jpg"]},
-  {code: "AS22", name: "KAIXAO KIK", type: "ASIA STYLE", images: ["Images/AS_22a.jpg", "Images/AS_22b.jpg", "Images/AS_22_3.jpg"]},
-  {code: "AS24", name: "TRINITY", type: "ASIA STYLE", images: ["Images/AS_24.jpg", "Images/AS_24_2.jpg", "Images/AS_24_3.jpg"]},
-  {code: "AS25", name: "OKTAV", type: "ASIA STYLE", images: ["Images/AS_25.jpg", "Images/AS_25_2.jpg", "Images/AS_25_3.jpg"]},
-  {code: "JS01", name: "POLARIS ZJERO", type: "JATI STANDARD", images: ["Images/JS_01.jpg", "Images/JS_01a.jpg", "Images/JS_01_3.png"]}
+  {codes: ["AM01"], name: "SUMMERVILLE", type: "AMERICAN STYLE", images: ["Images/AM_01.jpg", "Images/AM_01b.png"]},
+  {codes: ["AM02"], name: "DOMMINION", type: "AMERICAN STYLE", images: ["Images/AM_02.jpg", "Images/AM_02b.jpg"]},
+  {codes: ["AM03"], name: "ELEANOR", type: "AMERICAN STYLE", images: ["Images/AM_03.jpg", "Images/AM_03b.jpg"]},
+  {codes: ["AM04"], name: "WESTON", type: "AMERICAN STYLE", images: ["Images/AM_04.jpg", "Images/AM_04b.jpg"]},
+  {codes: ["AM05"], name: "PRESIDENT", type: "AMERICAN STYLE", images: ["Images/AM_05.jpg", "Images/AM_05b.jpg"]},
+  {codes: ["AM06"], name: "KENWOOD", type: "AMERICAN STYLE", images: ["Images/AM_06.jpg", "Images/AM_06b.jpg"]},
+  {codes: ["AM07"], name: "EMPEROR", type: "AMERICAN STYLE", images: ["Images/AM_07.jpg", "Images/AM_07b.jpg"]},
+  {codes: ["AM08"], name: "FEMALE ESTHER CERRY", type: "AMERICAN STYLE", images: ["Images/AM_08.jpg", "Images/AM_08b.jpg"]},
+  {codes: ["AM09"], name: "NEW HOPE", type: "AMERICAN STYLE", images: ["Images/AM_09.jpg", "Images/AM_09b.jpg"]},
+  {codes: ["AM10"], name: "REMEMBRENCE", type: "AMERICAN STYLE", images: ["Images/AM_10.jpg", "Images/AM_10b.jpg"]},
+  {codes: ["AM11"], name: "UNITY", type: "AMERICAN STYLE", images: ["Images/AM_11.jpg", "Images/AM_11b.jpg"]},
+  {codes: ["AM12"], name: "TIGER WOOD", type: "AMERICAN STYLE", images: ["Images/AM_12.jpg", "Images/AM_12b.jpg"]},
+  {codes: ["AM13"], name: "SENATOR", type: "AMERICAN STYLE", images: ["Images/AM_13.jpg", "Images/AM_13b.jpg"]},
+  {codes: ["AM14"], name: "TUSCANY", type: "AMERICAN STYLE", images: ["Images/AM_14.jpg", "Images/AM_14b.jpg"]},
+  {codes: ["AM15"], name: "WILLOW BROOK", type: "AMERICAN STYLE", images: ["Images/AM_15.jpg", "Images/AM_15b.jpg"]},
+  {codes: ["AM16"], name: "MAGISTRATE RED", type: "AMERICAN STYLE", images: ["Images/AM_16.jpg", "Images/AM_16b.jpg"]},
+  {codes: ["AM17"], name: "OAK MANOR", type: "AMERICAN STYLE", images: ["Images/AM_17.jpg", "Images/AM_17b.jpg"]},
+  {codes: ["AM18"], name: "GLORIFY", type: "AMERICAN STYLE", images: ["Images/AM_18.png", "Images/AM_18b.jpg"]},
+  {codes: ["AM19"], name: "ROVEN", type: "AMERICAN STYLE", images: ["Images/AM_19.png", "Images/AM_19b.jpg"]},
+  {codes: ["AM20"], name: "GRANDIA", type: "AMERICAN STYLE", images: ["Images/AM_20.jpg", "Images/AM_20b.jpg"]},
+  {codes: ["AM21"], name: "PEACE", type: "AMERICAN STYLE", images: ["Images/AM_21.png", "Images/AM_21b.jpg"]},
+  {codes: ["AS01"], name: "LUMINOR", type: "ASIA STYLE", images: ["Images/AS_01.jpg", "Images/AS_01b.jpg", "Images/AS_01_3.png"]},
+  {codes: ["AS02"], name: "SYLVAN", type: "ASIA STYLE", images: ["Images/AS_02.png", "Images/AS_02b.jpg"]},
+  {codes: ["AS03"], name: "GOLDEN", type: "ASIA STYLE", images: ["Images/AS_03.png", "Images/AS_03b.jpg", "Images/AS_03_3.png"]},
+  {codes: ["AS04"], name: "GILSON", type: "ASIA STYLE", images: ["Images/AS_04.png", "Images/AS_04b.jpg", "Images/AS_04_3.png"]},
+  {codes: ["AS05"], name: "IVORY", type: "ASIA STYLE", images: ["Images/AS_05.jpg", "Images/AS_05b.jpg", "Images/AS_05_3.jpg"]},
+  {codes: ["AS06"], name: "MONTANA", type: "ASIA STYLE", images: ["Images/AS_06.png", "Images/AS_06b.jpg", "Images/AS_06_3.png"]},
+  {codes: ["AS07"], name: "VESTO", type: "ASIA STYLE", images: ["Images/AS_07.jpg", "Images/AS_07b.jpg", "Images/AS_07_3.jpg"]},
+  {codes: ["AS08"], name: "MAVIS", type: "ASIA STYLE", images: ["Images/AS_08.jpg", "Images/AS_08b.jpg", "Images/AS_08_3.jpg"]},
+  {codes: ["AS09"], name: "BRYON", type: "ASIA STYLE", images: ["Images/AS_09.jpg", "Images/AS_09a.png", "Images/AS_09_3.jpg"]},
+  // THERION digabung otomatis menjumlahkan kode AS10 dan AS11 dengan slide foto lengkap
+  {codes: ["AS10", "AS11"], name: "THERION", type: "ASIA STYLE", images: ["Images/AS_10.jpg", "Images/AS_10ja.jpg", "Images/AS_10jb.jpg"]},
+  {codes: ["AS12"], name: "VESPER", type: "ASIA STYLE", images: ["Images/AS_11.jpg", "Images/AS_11a.jpg", "Images/AS_11_3.jpg"]},
+  {codes: ["AS13"], name: "AVALON", type: "ASIA STYLE", images: ["Images/AS_13.jpg", "Images/AS_13_2.jpg", "Images/AS_13_3.jpg"]},
+  {codes: ["AS17"], name: "ORION", type: "ASIA STYLE", images: ["Images/AS_17.jpg", "Images/AS_17_2.jpg", "Images/AS_17_3.jpg"]},
+  {codes: ["AS18"], name: "LEGACY", type: "ASIA STYLE", images: ["Images/AS_18.jpg", "Images/AS_18_2.jpg", "Images/AS_18_3.jpg"]},
+  {codes: ["AS19"], name: "UPDATE", type: "ASIA STYLE", images: ["Images/AS_19.jpg", "Images/AS_19_2.jpg", "Images/AS_19_3.jpg"]},
+  {codes: ["AS20"], name: "JEPARA", type: "ASIA STYLE", images: ["Images/AS_20.jpg", "Images/AS_20a.jpg", "Images/AS_20b.jpg"]},
+  {codes: ["AS21"], name: "SURABAYA", type: "ASIA STYLE", images: ["Images/AS_21b.jpg", "Images/AS_21c.jpg", "Images/AS_21.jpg"]},
+  {codes: ["AS22"], name: "KAIXAO KIK", type: "ASIA STYLE", images: ["Images/AS_22a.jpg", "Images/AS_22b.jpg", "Images/AS_22_3.jpg"]},
+  {codes: ["AS24"], name: "TRINITY", type: "ASIA STYLE", images: ["Images/AS_24.jpg", "Images/AS_24_2.jpg", "Images/AS_24_3.jpg"]},
+  {codes: ["AS25"], name: "OKTAV", type: "ASIA STYLE", images: ["Images/AS_25.jpg", "Images/AS_25_2.jpg", "Images/AS_25_3.jpg"]},
+  {codes: ["JS01"], name: "POLARIS ZJERO", type: "JATI STANDARD", images: ["Images/JS_01.jpg", "Images/JS_01a.jpg", "Images/JS_01_3.png"]}
 ];
 
 let products = [];
@@ -207,9 +208,16 @@ async function loadCatalog() {
   }
 
   products = masterProducts.map((item, idx) => {
-    let match = dbRows.find(r => (r.code || "").trim().toUpperCase() === item.code.toUpperCase());
-    let stockVal = match ? Number(match.stock || 0) : 0;
-    let stockDesc = stockVal === 0 ? "⚠️ Stock Hotu Ona (Habis)" : (stockVal <= 3 ? "⚠️ Stock Menus: " + stockVal : "📦 Stock Tersedia: " + stockVal);
+    // Jumlahkan stok dari semua kode yang terdaftar di produk ini (misal AS10 + AS11)
+    let totalStock = 0;
+    item.codes.forEach(c => {
+      let match = dbRows.find(r => (r.code || "").trim().toUpperCase() === c.toUpperCase());
+      if(match) {
+        totalStock += Number(match.stock || 0);
+      }
+    });
+
+    let stockDesc = totalStock === 0 ? "⚠️ Stock Hotu Ona (Habis)" : (totalStock <= 3 ? "⚠️ Stock Menus: " + totalStock : "📦 Stock Tersedia: " + totalStock);
 
     return {
       id: "prod-" + idx,
