@@ -244,7 +244,7 @@ let products = [];
 
 async function loadCatalog() {
   try {
-    const response = await fetch(SUPABASE_URL + "/rest/v1/products?select=code,name,stock", {
+    const response = await fetch(SUPABASE_URL + "/rest/v1/products?select=code,name,variant,stock", {
       headers: HEADERS
     });
     if(response.ok) {
@@ -353,13 +353,12 @@ function updateProductDisplay(productId, baseName) {
 
   let specificStock = 0;
   if (selectedVariant) {
-    // Cari stok berdasarkan nama varian yang sama persis dengan kolom 'name' di database
-    let foundVar = globalDbRows.find(r => (r.name || "").trim().toUpperCase() === selectedVariant.toUpperCase());
+    // Mencocokkan pilihan dropdown dengan kolom 'variant' di Supabase
+    let foundVar = globalDbRows.find(r => (r.variant || "").trim().toUpperCase() === selectedVariant.toUpperCase());
     if (foundVar) {
       specificStock = Number(foundVar.stock || 0);
     }
   } else {
-    // Jika dropdown dikosongkan kembali, hitung ulang total stok master produk
     let masterItem = masterProducts.find(p => p.name === baseName);
     if (masterItem) {
       masterItem.codes.forEach(c => {
