@@ -184,13 +184,14 @@ const HEADERS = {
 
 const wa='67076312111';
 
-// Daftar sub-varian produk beserta nama lengkapnya
+// Daftar sub-varian produk beserta nama lengkapnya untuk Asia Style & Jati Standard
 const productSubOptions = {
   "SURABAYA": ["Surabaya B", "Surabaya C"],
   "JEPARA": ["Jepara VVIP A", "Jepara VVIP B", "Jepara A", "Jepara B", "Jepara C"],
   "KAIXAO KIK": ["Kaixao Kik A", "Kaixao Kik B"],
   "BRYON": ["Bryon Surabaya A", "Bryon Surabaya B"],
-  "THERION": ["Therion Jepara A", "Therion Jepara B"]
+  "THERION": ["Therion Jepara A", "Therion Jepara B"],
+  "POLARIS ZJERO": ["Jati Standard Zjero", "Jati Standard Full Kaca"]
 };
 
 const masterProducts = [
@@ -349,14 +350,10 @@ function updateProductDisplay(productId, baseName) {
   let selectedVariant = selectElem.value;
 
   if (selectedVariant) {
-    // Tampilkan nama varian yang dipilih pada kartu produk (misal: "Jepara A")
     nameElem.textContent = selectedVariant;
-    
-    // Pesan WhatsApp otomatis berisi varian yang dipilih
     let message = `Halo ZJERO, Ha’u interese ho produtu ${selectedVariant}`;
     waLinkElem.href = `https://wa.me/${wa}?text=` + encodeURIComponent(message);
   } else {
-    // Kembali ke nama dasar jika pilihan dikosongkan
     nameElem.textContent = baseName;
     let message = `Halo ZJERO, Ha’u interese ho produtu ${baseName}`;
     waLinkElem.href = `https://wa.me/${wa}?text=` + encodeURIComponent(message);
