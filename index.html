@@ -239,16 +239,16 @@ const masterProducts = [
   {codes: ["JS01"], name: "POLARIS ZJERO", type: "JATI STANDARD", images: ["Images/JS_01.jpg", "Images/JS_01a.jpg", "Images/JS_01_3.png"]}
 ];
 
+let globalDbRows = [];
 let products = [];
 
 async function loadCatalog() {
-  let dbRows = [];
   try {
     const response = await fetch(SUPABASE_URL + "/rest/v1/products?select=code,name,stock", {
       headers: HEADERS
     });
     if(response.ok) {
-      dbRows = await response.json();
+      globalDbRows = await response.json();
     }
   } catch(e) {
     console.error("Gagal konek Supabase:", e);
@@ -258,14 +258,14 @@ async function loadCatalog() {
     let totalStock = 0;
     
     item.codes.forEach(c => {
-      let found = dbRows.find(r => (r.code || "").trim().toUpperCase() === c.toUpperCase());
+      let found = globalDbRows.find(r => (r.code || "").trim().toUpperCase() === c.toUpperCase());
       if(found) {
         totalStock += Number(found.stock || 0);
       }
     });
 
     if(totalStock === 0) {
-      dbRows.forEach(r => {
+      globalDbRows.forEach(r => {
         let dbName = (r.name || "").trim().toUpperCase();
         let dbCode = (r.code || "").trim().toUpperCase();
         if(dbName.includes(item.name.toUpperCase()) || item.codes.includes(dbCode)) {
@@ -331,7 +331,7 @@ function show(cat,btn,save=true){
         <div class="body">
           <div class="type">${esc(p.type)}</div>
           <div class="name" id="name-${p.id}">${esc(p.name)}</div>
-          <div class="desc">${esc(p.desc)}</div>
+          <div class="desc" id="desc-${p.id}">${esc(p.desc)}</div>
           <div class="price">${price}</div>
           ${subOptionsHtml}
           <a class="wa" id="wa-${p.id}" href="https://wa.me/${wa}?text=${initialMsg}" target="_blank">Husu liu husi WhatsApp</a>
@@ -344,18 +344,36 @@ function show(cat,btn,save=true){
 function updateProductDisplay(productId, baseName) {
   let selectElem = document.getElementById(`select-${productId}`);
   let nameElem = document.getElementById(`name-${productId}`);
+  let descElem = document.getElementById(`desc-${productId}`);
   let waLinkElem = document.getElementById(`wa-${productId}`);
   let selectedVariant = selectElem.value;
 
+  let targetName = selectedVariant ? selectedVariant : baseName;
+  nameElem.textContent = targetName;
+
+  let specificStock = 0;
   if (selectedVariant) {
-    nameElem.textContent = selectedVariant;
-    let message = `Halo ZJERO, Ha’u interese ho produtu ${selectedVariant}`;
-    waLinkElem.href = `https://wa.me/${wa}?text=` + encodeURIComponent(message);
+    // Cari stok berdasarkan nama varian yang sama persis dengan kolom 'name' di database
+    let foundVar = globalDbRows.find(r => (r.name || "").trim().toUpperCase() === selectedVariant.toUpperCase());
+    if (foundVar) {
+      specificStock = Number(foundVar.stock || 0);
+    }
   } else {
-    nameElem.textContent = baseName;
-    let message = `Halo ZJERO, Ha’u interese ho produtu ${baseName}`;
-    waLinkElem.href = `https://wa.me/${wa}?text=` + encodeURIComponent(message);
+    // Jika dropdown dikosongkan kembali, hitung ulang total stok master produk
+    let masterItem = masterProducts.find(p => p.name === baseName);
+    if (masterItem) {
+      masterItem.codes.forEach(c => {
+        let found = globalDbRows.find(r => (r.code || "").trim().toUpperCase() === c.toUpperCase());
+        if(found) specificStock += Number(found.stock || 0);
+      });
+    }
   }
+
+  let stockDesc = specificStock === 0 ? "⚠️ Stock Hotu Ona (Habis)" : (specificStock <= 3 ? "⚠️ Stock Menus: " + specificStock : "📦 Stock Tersedia: " + specificStock);
+  descElem.textContent = stockDesc;
+
+  let message = `Halo ZJERO, Ha’u interese ho produtu ${targetName}`;
+  waLinkElem.href = `https://wa.me/${wa}?text=` + encodeURIComponent(message);
 }
 
 function moveSlide(productId, direction){
