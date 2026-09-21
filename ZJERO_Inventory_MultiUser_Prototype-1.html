@@ -1144,7 +1144,6 @@ async function transact(kind){
   }
 
   try{
-    // 1. Simpan riwayat transaksi ke Supabase
     await api("stock_transactions", {
       method: "POST",
       headers: { "Prefer": "return=minimal" },
@@ -1163,12 +1162,10 @@ async function transact(kind){
       })
     });
 
-    // 2. Hitung total stok baru secara akurat berdasarkan data produk valid dari Supabase
     const currentStock = Number(product.stock || 0);
     const newStock = kind === "in" ? (currentStock + qty) : (currentStock - qty);
     let newStatus = newStock === 0 ? "out_of_stock" : (newStock <= 3 ? "low_stock" : "available");
 
-    // 3. Perbarui langsung tabel products di Supabase agar katalog web ikut berubah
     await api("products?id=eq." + product.id, {
       method: "PATCH",
       headers: { "Prefer": "return=minimal" },
@@ -1199,7 +1196,7 @@ async function updatePaymentStatus(txId) {
     await api("stock_transactions?id=eq." + txId, {
       method: "PATCH",
       headers: { "Prefer": "return=minimal" },
-      body: JSON.stringify({ payment_status: "LUNAS" })
+      body: JSON.stringify({ payment_status: "LUNAS", dp_amount: 0 })
     });
 
     await loadData();
@@ -1310,9 +1307,7 @@ function renderHistory(){
       } else {
         const sisa = h.totalPrice - h.dpAmount;
         paymentBadge = `<span class="badge-belum">SEIDAUK LUNAS</span><br><small style="color:#a8483e;font-weight:bold;">DP: $${h.dpAmount} | Sisa: $${sisa > 0 ? sisa : 0}</small>`;
-        if(current && current.role === "Admin") {
-          paymentBadge += `<br><button type="button" class="btn-lunas" onclick="updatePaymentStatus('${h.id}')">Update LUNAS</button>`;
-        }
+        paymentBadge += `<br><button type="button" class="btn-lunas" onclick="updatePaymentStatus('${h.id}')">Update LUNAS</button>`;
       }
     }
 
