@@ -208,20 +208,29 @@ async function loadCatalog() {
   products = masterProducts.map((item, idx) => {
     let totalStock = 0;
     
+    // Perulangan untuk menjumlahkan semua kode yang terdaftar pada item ini
     item.codes.forEach(c => {
-      let match = dbRows.find(r => {
+      let found = dbRows.find(r => {
         let dbCode = (r.code || "").trim().toUpperCase();
-        let dbName = (r.name || "").trim().toUpperCase();
         let targetCode = c.trim().toUpperCase();
-        
-        // Pencocokan fleksibel: mencocokkan kode AS10/AS11 ATAU mencocokkan nama THERION
-        return dbCode === targetCode || (item.name === "THERION" && (dbName.includes("THERION") || dbCode === "AS10" || dbCode === "AS11"));
+        return dbCode === targetCode;
       });
       
-      if(match) {
-        totalStock += Number(match.stock || 0);
+      if(found) {
+        totalStock += Number(found.stock || 0);
       }
     });
+
+    // Perlakuan khusus mutlak untuk THERION (AS10 & AS11) jika pencocokan kode butuh fallback ke nama
+    if(item.name === "THERION" && totalStock === 0) {
+      dbRows.forEach(r => {
+        let dbName = (r.name || "").trim().toUpperCase();
+        let dbCode = (r.code || "").trim().toUpperCase();
+        if(dbName.includes("THERION") || dbCode === "AS10" || dbCode === "AS11") {
+          totalStock += Number(r.stock || 0);
+        }
+      });
+    }
 
     let stockDesc = totalStock === 0 ? "⚠️ Stock Hotu Ona (Habis)" : (totalStock <= 3 ? "⚠️ Stock Menus: " + totalStock : "📦 Stock Tersedia: " + totalStock);
 
@@ -240,7 +249,7 @@ async function loadCatalog() {
   show(savedCat, null, false);
 }
 
-function esc(s){return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+function esc(s){return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'} [m]))}
 
 function show(cat,btn,save=true){
   if(save){localStorage.setItem('selectedCategory',cat);}
