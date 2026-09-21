@@ -145,6 +145,7 @@ const HEADERS = {
 
 const wa='67076312111';
 
+// Master data katalog yang memetakan seluruh varian gabungan (Therion, Jepara, Surabaya, Kikaoxao Kik)
 const masterProducts = [
   {codes: ["AM01"], name: "SUMMERVILLE", type: "AMERICAN STYLE", images: ["Images/AM_01.jpg", "Images/AM_01b.png"]},
   {codes: ["AM02"], name: "DOMMINION", type: "AMERICAN STYLE", images: ["Images/AM_02.jpg", "Images/AM_02b.jpg"]},
@@ -179,12 +180,10 @@ const masterProducts = [
   {codes: ["AS10", "AS11"], name: "THERION", type: "ASIA STYLE", images: ["Images/AS_10.jpg", "Images/AS_10ja.jpg", "Images/AS_10jb.jpg"]},
   {codes: ["AS12"], name: "VESPER", type: "ASIA STYLE", images: ["Images/AS_11.jpg", "Images/AS_11a.jpg", "Images/AS_11_3.jpg"]},
   {codes: ["AS13"], name: "AVALON", type: "ASIA STYLE", images: ["Images/AS_13.jpg", "Images/AS_13_2.jpg", "Images/AS_13_3.jpg"]},
-  {codes: ["AS14", "AS15", "AS16", "AS17"], name: "ORION", type: "ASIA STYLE", images: ["Images/AS_17.jpg", "Images/AS_17_2.jpg", "Images/AS_17_3.jpg"]},
-  {codes: ["AS18"], name: "LEGACY", type: "ASIA STYLE", images: ["Images/AS_18.jpg", "Images/AS_18_2.jpg", "Images/AS_18_3.jpg"]},
-  {codes: ["AS19"], name: "UPDATE", type: "ASIA STYLE", images: ["Images/AS_19.jpg", "Images/AS_19_2.jpg", "Images/AS_19_3.jpg"]},
-  {codes: ["AS20"], name: "JEPARA", type: "ASIA STYLE", images: ["Images/AS_20.jpg", "Images/AS_20a.jpg", "Images/AS_20b.jpg"]},
-  {codes: ["AS21"], name: "SURABAYA", type: "ASIA STYLE", images: ["Images/AS_21b.jpg", "Images/AS_21c.jpg", "Images/AS_21.jpg"]},
-  {codes: ["AS22"], name: "KAIXAO KIK", type: "ASIA STYLE", images: ["Images/AS_22a.jpg", "Images/AS_22b.jpg", "Images/AS_22_3.jpg"]},
+  {codes: ["AS14", "AS15", "AS16"], name: "ORION", type: "ASIA STYLE", images: ["Images/AS_17.jpg", "Images/AS_17_2.jpg", "Images/AS_17_3.jpg"]},
+  {codes: ["AS17", "AS18"], name: "JEPARA", type: "ASIA STYLE", images: ["Images/AS_20.jpg", "Images/AS_20a.jpg", "Images/AS_20b.jpg"]},
+  {codes: ["AS19", "AS20", "AS21"], name: "SURABAYA", type: "ASIA STYLE", images: ["Images/AS_21b.jpg", "Images/AS_21c.jpg", "Images/AS_21.jpg"]},
+  {codes: ["AS22", "AS23"], name: "KAIXAO KIK", type: "ASIA STYLE", images: ["Images/AS_22a.jpg", "Images/AS_22b.jpg", "Images/AS_22_3.jpg"]},
   {codes: ["AS24"], name: "TRINITY", type: "ASIA STYLE", images: ["Images/AS_24.jpg", "Images/AS_24_2.jpg", "Images/AS_24_3.jpg"]},
   {codes: ["AS25"], name: "OKTAV", type: "ASIA STYLE", images: ["Images/AS_25.jpg", "Images/AS_25_2.jpg", "Images/AS_25_3.jpg"]},
   {codes: ["JS01"], name: "POLARIS ZJERO", type: "JATI STANDARD", images: ["Images/JS_01.jpg", "Images/JS_01a.jpg", "Images/JS_01_3.png"]}
@@ -208,25 +207,20 @@ async function loadCatalog() {
   products = masterProducts.map((item, idx) => {
     let totalStock = 0;
     
-    // Perulangan untuk menjumlahkan semua kode yang terdaftar pada item ini
+    // Menjumlahkan stok dari semua kode yang terdaftar di item ini
     item.codes.forEach(c => {
-      let found = dbRows.find(r => {
-        let dbCode = (r.code || "").trim().toUpperCase();
-        let targetCode = c.trim().toUpperCase();
-        return dbCode === targetCode;
-      });
-      
+      let found = dbRows.find(r => (r.code || "").trim().toUpperCase() === c.toUpperCase());
       if(found) {
         totalStock += Number(found.stock || 0);
       }
     });
 
-    // Perlakuan khusus mutlak untuk THERION (AS10 & AS11) jika pencocokan kode butuh fallback ke nama
-    if(item.name === "THERION" && totalStock === 0) {
+    // Fallback pencocokan berdasarkan nama jika total stok masih 0 dan nama produk cocok
+    if(totalStock === 0) {
       dbRows.forEach(r => {
         let dbName = (r.name || "").trim().toUpperCase();
         let dbCode = (r.code || "").trim().toUpperCase();
-        if(dbName.includes("THERION") || dbCode === "AS10" || dbCode === "AS11") {
+        if(dbName.includes(item.name.toUpperCase()) || item.codes.includes(dbCode)) {
           totalStock += Number(r.stock || 0);
         }
       });
@@ -249,7 +243,7 @@ async function loadCatalog() {
   show(savedCat, null, false);
 }
 
-function esc(s){return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'} [m]))}
+function esc(s){return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
 
 function show(cat,btn,save=true){
   if(save){localStorage.setItem('selectedCategory',cat);}
