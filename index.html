@@ -184,7 +184,7 @@ const HEADERS = {
 
 const wa='67076312111';
 
-// Daftar sub-varian khusus untuk produk tertentu dengan opsi lengkap
+// Daftar sub-varian produk beserta nama lengkapnya
 const productSubOptions = {
   "SURABAYA": ["Surabaya B", "Surabaya C"],
   "JEPARA": ["Jepara VVIP A", "Jepara VVIP B", "Jepara A", "Jepara B", "Jepara C"],
@@ -307,12 +307,12 @@ function show(cat,btn,save=true){
     let price = 'Presu, kontaktu ami';
     let imgs = p.images.map((img, i) => `<img src="${esc(img)}" class="${i===0?'active':''}" alt="${esc(p.name)}" onerror="this.onerror=null;this.src='logo.png';">`).join('');
     
-    // Cek apakah produk ini punya daftar sub-pilihan khusus
+    // Cek apakah produk ini memiliki sub-opsi dropdown
     let subOptionsHtml = '';
     if (productSubOptions[p.name]) {
       let options = productSubOptions[p.name].map(opt => `<option value="${esc(opt)}">${esc(opt)}</option>`).join('');
       subOptionsHtml = `
-        <select class="card-select" id="select-${p.id}" onchange="updateWaLink('${p.id}', '${esc(p.name)}')">
+        <select class="card-select" id="select-${p.id}" onchange="updateProductDisplay('${p.id}', '${esc(p.name)}')">
           <option value="">-- Hili Varian / Model --</option>
           ${options}
         </select>
@@ -330,7 +330,7 @@ function show(cat,btn,save=true){
         </div>
         <div class="body">
           <div class="type">${esc(p.type)}</div>
-          <div class="name">${esc(p.name)}</div>
+          <div class="name" id="name-${p.id}">${esc(p.name)}</div>
           <div class="desc">${esc(p.desc)}</div>
           <div class="price">${price}</div>
           ${subOptionsHtml}
@@ -341,17 +341,26 @@ function show(cat,btn,save=true){
   }).join('');
 }
 
-// Fungsi untuk memperbarui pesan WhatsApp secara otomatis saat varian di dropdown dipilih
-function updateWaLink(productId, productName) {
+// Fungsi untuk memperbarui nama produk di kartu dan tautan WhatsApp ketika varian dipilih
+function updateProductDisplay(productId, baseName) {
   let selectElem = document.getElementById(`select-${productId}`);
+  let nameElem = document.getElementById(`name-${productId}`);
   let waLinkElem = document.getElementById(`wa-${productId}`);
   let selectedVariant = selectElem.value;
 
-  let message = selectedVariant 
-    ? `Halo ZJERO, Ha’u interese ho produtu ${productName} - Varian: ${selectedVariant}`
-    : `Halo ZJERO, Ha’u interese ho produtu ${productName}`;
-
-  waLinkElem.href = `https://wa.me/${wa}?text=` + encodeURIComponent(message);
+  if (selectedVariant) {
+    // Tampilkan nama varian yang dipilih pada kartu produk (misal: "Jepara A")
+    nameElem.textContent = selectedVariant;
+    
+    // Pesan WhatsApp otomatis berisi varian yang dipilih
+    let message = `Halo ZJERO, Ha’u interese ho produtu ${selectedVariant}`;
+    waLinkElem.href = `https://wa.me/${wa}?text=` + encodeURIComponent(message);
+  } else {
+    // Kembali ke nama dasar jika pilihan dikosongkan
+    nameElem.textContent = baseName;
+    let message = `Halo ZJERO, Ha’u interese ho produtu ${baseName}`;
+    waLinkElem.href = `https://wa.me/${wa}?text=` + encodeURIComponent(message);
+  }
 }
 
 function moveSlide(productId, direction){
