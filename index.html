@@ -87,54 +87,48 @@ body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#222}
   gap:8px;
   overflow-x:auto;
   white-space:nowrap;
-  padding:20px 16px 5px;
+  padding:20px 16px 10px;
   scroll-behavior:smooth;
   -webkit-overflow-scrolling:touch;
 }
-.filters::-webkit-scrollbar, .sub-filters::-webkit-scrollbar{display:none;}
-.filters, .sub-filters{-ms-overflow-style:none;scrollbar-width:none;}
+.filters::-webkit-scrollbar{display:none;}
+.filters{-ms-overflow-style:none;scrollbar-width:none;}
 
-.filters button, .sub-filters button{
+.filters button{
   flex:0 0 auto;
   border:0;
-  padding:8px 16px;
+  padding:10px 18px;
   border-radius:20px;
   background:#ddd;
   cursor:pointer;
-  font-size:12px;
+  font-size:13px;
   font-weight:600;
   transition:all 0.2s;
 }
-.filters button.active, .sub-filters button.active{background:#111;color:#fff}
+.filters button.active{background:#111;color:#fff}
 
-/* Sub Kategori Slider (Hanya muncul jika Asia/Jati dipilih) */
-.sub-filters-container {
-  display: none; 
+/* Kotak Dropdown Sub Kategori */
+.sub-dropdown-container {
+  display: none;
   padding: 0 16px 15px;
+  max-width: 300px;
+  margin: 0 auto;
 }
-.sub-filters-container.show {
+.sub-dropdown-container.show {
   display: block;
 }
-.sub-filters {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  white-space: nowrap;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  background: #eaeaea;
-  padding: 8px;
-  border-radius: 12px;
-}
-.sub-filters button {
-  background: #fff;
-  color: #333;
+.sub-dropdown {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 20px;
   border: 1px solid #ccc;
-}
-.sub-filters button.active {
-  background: #c59a38;
-  color: #fff;
-  border-color: #c59a38;
+  background-color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  outline: none;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
 .grid{max-width:1200px;margin:auto;padding:10px 16px 40px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
@@ -184,9 +178,11 @@ body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#222}
   <button onclick="filterMain('JATI STANDARD',this)">JATI STANDARD</button>
 </div>
 
-<!-- Sub Kategori Slider Horizontal -->
-<div id="subCategoryContainer" class="sub-filters-container">
-  <div class="sub-filters" id="subFiltersList"></div>
+<!-- Dropdown Sub Kategori (Hanya muncul untuk Asia & Jati Standard) -->
+<div id="subDropdownContainer" class="sub-dropdown-container">
+  <select id="subSelect" class="sub-dropdown" onchange="filterSubDropdown(this.value)">
+    <!-- Opsi akan terisi otomatis lewat JS -->
+  </select>
 </div>
 
 <div id="grid" class="grid"><div class="empty">Halai da'uk hela dadus no stock...</div></div>
@@ -304,7 +300,9 @@ async function loadCatalog() {
 
   filterMain(savedCat, targetBtn, false);
   if(savedCat === 'ASIA STYLE' || savedCat === 'JATI STANDARD') {
-    filterSub(savedSub, false);
+    currentSubCat = savedSub;
+    let selectElem = document.getElementById('subSelect');
+    if(selectElem) selectElem.value = savedSub;
   }
 }
 
@@ -326,23 +324,23 @@ function filterMain(cat, btn, save=true){
   }
   if(btn) btn.classList.add('active');
 
-  let subContainer = document.getElementById('subCategoryContainer');
-  let subListDiv = document.getElementById('subFiltersList');
+  let subContainer = document.getElementById('subDropdownContainer');
+  let selectElem = document.getElementById('subSelect');
 
   if(cat === 'ASIA STYLE' || cat === 'JATI STANDARD') {
     subContainer.classList.add('show');
     
     let subOptions = ['SEMUA'];
     if(cat === 'ASIA STYLE') {
-      // Subkategori disesuaikan dengan contoh produk Anda
       subOptions = ['SEMUA', 'SURABAYA', 'JEPARA', 'KAIXAO KIK', 'BRYON', 'THERION'];
     } else if(cat === 'JATI STANDARD') {
       subOptions = ['SEMUA', 'POLARIS ZJERO'];
     }
 
-    subListDiv.innerHTML = subOptions.map(sub => `
-      <button onclick="filterSub('${sub}', this)" class="${sub === 'SEMUA' ? 'active' : ''}">${sub}</button>
+    selectElem.innerHTML = subOptions.map(sub => `
+      <option value="${sub}">${sub === 'SEMUA' ? '-- Pilih Sub Kategori --' : sub}</option>
     `).join('');
+    selectElem.value = 'SEMUA';
 
   } else {
     subContainer.classList.remove('show');
@@ -351,19 +349,9 @@ function filterMain(cat, btn, save=true){
   renderProducts();
 }
 
-function filterSub(sub, btn, save=true){
+function filterSubDropdown(sub){
   currentSubCat = sub;
-  if(save) localStorage.setItem('selectedSubCategory', sub);
-
-  if(btn){
-    document.querySelectorAll('.sub-filters button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-  } else {
-    document.querySelectorAll('.sub-filters button').forEach(b => {
-      if(b.textContent.trim() === sub) b.classList.add('active');
-    });
-  }
-
+  localStorage.setItem('selectedSubCategory', sub);
   renderProducts();
 }
 
