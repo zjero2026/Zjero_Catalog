@@ -1067,6 +1067,15 @@ function getStoreStock(storeName, productId){
   return storeStock >= 0 ? storeStock : 0;
 }
 
+function getStoreDamagedStock(storeName, productId){
+  const storeTransactions = history.filter(h => h.store === storeName && h.productId === productId && h.type === "Sasan Tama" && h.note.includes("rusak"));
+  let damagedStock = 0;
+  storeTransactions.forEach(h => {
+    damagedStock += h.qty;
+  });
+  return damagedStock;
+}
+
 function updateStoreStock(kind){
   const storeEl = document.getElementById(kind === 'in' ? 'instore' : 'outstore');
   const modelEl = document.getElementById(kind === 'in' ? 'inmodel' : 'outmodel');
@@ -1161,11 +1170,11 @@ async function updateDirectStock(productId) {
     return;
   }
 
-  const passInput = prompt("Hatama lian fatin (password) hodi konfirma update stock:");
+  const passInput = prompt("Hatama password:");
   if (passInput === null) return;
 
   if (passInput !== "adminzjero2026") {
-    alert("Lian fatin sala! Ita la iha autorizasaun atu muda stock.");
+    alert("Password sala!");
     return;
   }
 
@@ -1287,7 +1296,7 @@ async function transact(kind){
     toggleDPField();
     if(noteElement) noteElement.value = "";
 
-    alert(isDamaged ? "Sasan Aat rejistu ona iha istoria ho formatu kurung!" : "Transaksaun rai ona ho susesu!");
+    alert("Transaksaun rai ona ho susesu!");
   }catch(error){
     console.error(error);
     alert("La konsege rai transaksaun.\n\n" + error.message);
@@ -1315,11 +1324,11 @@ async function updatePaymentStatus(txId) {
 }
 
 async function deleteTransaction(txId) {
-  const passInput = prompt("Hatama password zjeroadmin2026 hodi hamos (delete) transaksaun ne'e:");
+  const passInput = prompt("Hatama password:");
   if (passInput === null) return;
 
   if (passInput !== "zjeroadmin2026") {
-    alert("Password sala! Ita la iha autorizasaun atu hamos transaksaun ne'e.");
+    alert("Password sala!");
     return;
   }
 
@@ -1341,11 +1350,11 @@ async function deleteTransaction(txId) {
 }
 
 async function editTransaction(txId) {
-  const passInput = prompt("Hatama password zjeroadmin2026 hodi edit transaksaun ne'e:");
+  const passInput = prompt("Hatama password:");
   if (passInput === null) return;
 
   if (passInput !== "zjeroadmin2026") {
-    alert("Password sala! Ita la iha autorizasaun atu edit transaksaun ne'e.");
+    alert("Password sala!");
     return;
   }
 
@@ -1581,10 +1590,12 @@ updateDash = function(){
     let hasItems = false;
     data.forEach(p => {
       const qty = getStoreStock(store, p.id);
-      if(qty > 0){
+      const damagedQty = getStoreDamagedStock(store, p.id);
+      if(qty > 0 || damagedQty > 0){
         hasItems = true;
         const label = p.variant ? `${p.name} (${p.variant})` : p.name;
-        breakdownHTML += `<li>${label}: <b>${qty}</b></li>`;
+        let damagedText = damagedQty > 0 ? ` <span style="color:#a8483e;">(rusak: ${damagedQty})</span>` : "";
+        breakdownHTML += `<li>${label}: <b>${qty}</b>${damagedText}</li>`;
       }
     });
     if(!hasItems) breakdownHTML += `<li style="color:#888;">Seidauk iha stock</li>`;
