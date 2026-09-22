@@ -307,12 +307,29 @@ th{
   margin-bottom: 12px;
 }
 
-.store-card h3 {
-  margin: 0 0 8px 0;
-  font-size: 14px;
-  color: #a77c1e;
+.store-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   border-bottom: 1px solid #eee;
   padding-bottom: 5px;
+  margin-bottom: 8px;
+}
+
+.store-card h3 {
+  margin: 0;
+  font-size: 14px;
+  color: #a77c1e;
+}
+
+.store-print-btn {
+  background: #39734e;
+  color: #fff;
+  border: 0;
+  padding: 3px 8px;
+  font-size: 10px;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .badge-lunas {
@@ -450,7 +467,15 @@ th{
   margin-top: 6px;
 }
 
-/* CSS MEDIA PRINT KHUSUS INVOICE BERSIH */
+/* KERTAS CETAK LAPORAN STOK PER TOKO */
+#store-print-section {
+  background: #fff;
+  border: 1px solid #e5e0d8;
+  border-radius: 12px;
+  padding: 30px !important;
+}
+
+/* CSS MEDIA PRINT KHUSUS */
 @media print{
   body { background: #fff !important; color: #000 !important; }
   .side, .top, button, .print-btn, .invoice-btn, .btn-lunas, .form { display: none !important; }
@@ -458,7 +483,8 @@ th{
   .main { padding: 0 !important; overflow: visible !important; width: 100% !important; }
   section { display: none !important; }
   section#invoice-section { display: block !important; }
-  #invoice-section { border: 0 !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; width: 100% !important; }
+  section#store-print-section { display: block !important; }
+  #invoice-section, #store-print-section { border: 0 !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; width: 100% !important; }
 }
 </style>
 </head>
@@ -774,6 +800,44 @@ th{
         <div>
           <button type="button" onclick="window.print()" class="print-btn" style="margin:0;">🖨️ Cetak / Download Invoice</button>
           <button type="button" class="secondary" onclick="page('history', document.querySelectorAll('.nav')[4])" style="margin-left:8px;">Fali ba Istoria</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- HALAMAN CETAK KHUSUS LAPORAN STOK PER TOKO -->
+    <section id="store-print-section" class="panel hidden" style="max-width:700px; margin:auto;">
+      <div class="invoice-header">
+        <div class="invoice-brand">
+          <img src="logo.png" alt="ZJERO Logo" onerror="this.style.display='none'">
+          <div>
+            <h2>ZJERO</h2>
+            <small>LAPORAN STOCK PER TOKO / FATIN</small>
+          </div>
+        </div>
+        <div class="invoice-meta">
+          <strong id="print-store-name" style="font-size:15px; color:#a77c1e;">—</strong><br>
+          <span id="print-store-date">Data: —</span>
+        </div>
+      </div>
+
+      <table class="invoice-table">
+        <thead>
+          <tr>
+            <th>Kode</th>
+            <th>Modelu Kaixao / Varian</th>
+            <th style="text-align:center;">Kuantidade Stock</th>
+          </tr>
+        </thead>
+        <tbody id="print-store-items">
+          <!-- Dinamis diisi JS -->
+        </tbody>
+      </table>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #eee; padding-top:15px; margin-top:20px;">
+        <small style="color:#888;">Sistem Jestaun Stock ZJERO.</small>
+        <div>
+          <button type="button" onclick="window.print()" class="print-btn" style="margin:0;">🖨️ Cetak / Download PDF</button>
+          <button type="button" class="secondary" onclick="page('dashboard', document.querySelectorAll('.nav')[0])" style="margin-left:8px;">Fali ba Painel</button>
         </div>
       </div>
     </section>
@@ -1210,6 +1274,39 @@ async function updatePaymentStatus(txId) {
   }
 }
 
+function showStorePrint(storeName) {
+  document.getElementById("print-store-name").textContent = storeName;
+  document.getElementById("print-store-date").textContent = "Data: " + new Date().toLocaleString("id-ID");
+
+  let html = "";
+  let hasItems = false;
+  data.forEach(p => {
+    const qty = getStoreStock(storeName, p.id);
+    if(qty > 0){
+      hasItems = true;
+      const label = p.variant ? `${p.name} (${p.variant})` : p.name;
+      html += `
+        <tr>
+          <td>${p.code || "—"}</td>
+          <td><b>${label}</b></td>
+          <td style="text-align:center;"><b>${qty}</b></td>
+        </tr>
+      `;
+    }
+  });
+
+  if(!hasItems){
+    html = `<tr><td colspan="3" style="text-align:center; color:#888;">Seidauk iha stock iha fatin ne'e.</td></tr>`;
+  }
+
+  document.getElementById("print-store-items").innerHTML = html;
+
+  document.querySelectorAll("main section").forEach(s => s.classList.add("hidden"));
+  document.getElementById("store-print-section").classList.remove("hidden");
+  document.getElementById("title").textContent = "Laporan Stock " + storeName;
+  window.scrollTo(0, 0);
+}
+
 function showInvoice(txId) {
   const h = history.find(x => String(x.id) === String(txId));
   if(!h) {
@@ -1351,7 +1448,14 @@ updateDash = function(){
   const breakdownEl = document.getElementById("storestockbreakdown");
   let breakdownHTML = "";
   stores.forEach(store => {
-    breakdownHTML += `<div class="store-card"><h3>🏢 ${store}</h3><ul style="margin:0;padding-left:18px;font-size:12px;">`;
+    breakdownHTML += `
+      <div class="store-card">
+        <div class="store-card-header">
+          <h3>🏢 ${store}</h3>
+          <button type="button" class="store-print-btn" onclick="showStorePrint('${store}')">🖨️ Cetak Stock</button>
+        </div>
+        <ul style="margin:0;padding-left:18px;font-size:12px;">
+    `;
     let hasItems = false;
     data.forEach(p => {
       const qty = getStoreStock(store, p.id);
