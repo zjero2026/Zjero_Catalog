@@ -3,169 +3,175 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ZJERO Inventory System</title>
+<title>ZJERO Catalogue</title>
 <style>
 body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#222}
 
 .top{
   background:#111;
   color:#fff;
-  padding:20px 16px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+  padding:30px 16px 24px;
+  text-align:center;
   box-shadow:0 4px 12px rgba(0,0,0,0.15);
+}
+
+.top-container{
+  max-width:600px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
 }
 
 .top-brand{
   display:flex;
   align-items:center;
-  gap:12px;
+  justify-content:center;
+  gap:14px;
 }
 
 .top-logo{
-  width:40px;
-  height:40px;
+  width:60px;
+  height:60px;
   object-fit:contain;
-  border-radius:8px;
+  border-radius:10px;
   background:#222;
   padding:2px;
   border:1px solid #333;
 }
 
-.top-title h1{
+.top-title-area h1{
   margin:0;
-  font-size:20px;
-  letter-spacing:1px;
+  font-size:26px;
+  letter-spacing:2px;
+  font-weight:800;
   color:#fff;
+  text-align:left;
 }
 
-.top-title p{
-  margin:2px 0 0;
-  font-size:11px;
+.top-title-area p{
+  margin:4px 0 0;
+  font-size:13px;
   color:#c59a38;
+  letter-spacing:1px;
+  text-align:left;
   font-weight:600;
 }
 
-.container{
-  max-width:1000px;
-  margin:20px auto;
-  padding:0 16px;
+.address-box{
+  margin-top:12px;
+  background:rgba(255, 255, 255, 0.06);
+  border:1px solid rgba(255, 255, 255, 0.1);
+  border-radius:8px;
+  padding:10px 16px;
+  font-size:13px;
+  color:#ddd;
+  line-height:1.6;
+  width:100%;
+  max-width:450px;
 }
 
-.header-actions{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:15px;
-}
-
-.update-time{
-  font-size:12px;
-  color:#666;
-  font-weight:600;
-}
-
-.print-btn{
-  background:#c59a38;
+.address-box strong{
   color:#fff;
-  border:0;
-  padding:8px 16px;
-  border-radius:6px;
-  font-size:13px;
-  font-weight:bold;
-  cursor:pointer;
-  transition:background 0.2s;
-}
-.print-btn:hover{background:#a9822e;}
-
-.loja-card{
-  background:#fff;
-  border-radius:10px;
-  padding:16px;
-  margin-bottom:15px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.08);
-  border-left:5px solid #c59a38;
-}
-
-.loja-title{
-  font-size:16px;
-  font-weight:bold;
-  color:#111;
-  margin-bottom:10px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.loja-total{
   font-size:12px;
-  background:#eee;
-  padding:3px 8px;
-  border-radius:12px;
-  color:#444;
+  letter-spacing:0.5px;
+  text-transform:uppercase;
+  display:block;
+  margin-bottom:2px;
 }
 
-.item-list{
-  list-style:none;
-  padding:0;
-  margin:0;
-}
-
-.item-list li{
+/* Filter Utama dengan Slide Horizontal */
+.filters{
   display:flex;
-  justify-content:space-between;
-  padding:6px 0;
-  border-bottom:1px solid #eee;
+  gap:8px;
+  overflow-x:auto;
+  white-space:nowrap;
+  padding:20px 16px 15px;
+  scroll-behavior:smooth;
+  -webkit-overflow-scrolling:touch;
+}
+.filters::-webkit-scrollbar{display:none;}
+.filters{-ms-overflow-style:none;scrollbar-width:none;}
+
+.filters button{
+  flex:0 0 auto;
+  border:0;
+  padding:10px 18px;
+  border-radius:20px;
+  background:#ddd;
+  cursor:pointer;
   font-size:13px;
+  font-weight:600;
+  transition:all 0.2s;
+}
+.filters button.active{background:#111;color:#fff}
+
+.grid{max-width:1200px;margin:auto;padding:10px 16px 40px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px #0001;display:flex;flex-direction:column;}
+.slider{position:relative;width:100%;aspect-ratio:4/3;background:#eee;overflow:hidden}
+.slider img{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;display:none}
+.slider img.active{display:block}
+.slider-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.5);color:#fff;border:0;padding:8px 12px;cursor:pointer;font-size:16px;border-radius:4px;z-index:10}
+.slider-btn.prev{left:8px}
+.slider-btn.next{right:8px}
+
+.body{padding:14px;display:flex;flex-direction:column;flex:1;}
+.type{font-size:11px;color:#777;font-weight:bold;letter-spacing:0.5px}
+.name{font-size:18px;font-weight:700;margin:5px 0;color:#111}
+.desc{font-size:12px;color:#39704c;font-weight:bold;margin-top:4px;}
+.price{font-size:16px;font-weight:700;margin:10px 0;color:#c59a38}
+
+/* Styling Dropdown di dalam Kartu */
+.card-select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background-color: #fafafa;
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10px;
+  outline: none;
+  cursor: pointer;
 }
 
-.item-list li:last-child{
-  border-bottom:none;
-}
+.wa{display:block;text-align:center;text-decoration:none;background:#111;color:#fff;padding:10px;border-radius:9px;font-size:13px;font-weight:bold;margin-top:auto;transition:background 0.2s}
+.wa:hover{background:#333}
 
-.footer{text-align:center;color:#777;padding:30px;font-size:12px}
-
-/* Pengaturan khusus saat dicetak (Print) */
-@media print {
-  .top, .print-btn, .footer {
-    display: none;
-  }
-  body {
-    background: #fff;
-  }
-  .loja-card {
-    box-shadow: none;
-    border: 1px solid #ddd;
-    break-inside: avoid;
-  }
-}
+.empty{text-align:center;padding:50px;grid-column:1/-1;color:#777;}
+.footer{text-align:center;color:#777;padding:30px;font-size:13px} 
 </style>
 </head>
 <body>
 
 <div class="top">
-  <div class="top-brand">
-    <img src="logo.png" alt="Logo" class="top-logo" onerror="this.style.display='none'">
-    <div class="top-title">
-      <h1>ZJERO INVENTORY</h1>
-      <p>Sistema Jestaun Stock Loja</p>
+  <div class="top-container">
+    <div class="top-brand">
+      <img src="logo.png" alt="Logo ZJERO" class="top-logo" onerror="this.style.display='none'">
+      <div class="top-title-area">
+        <h1>ZJERO CATALOGU</h1>
+        <p>KATALOGU KAIXAO / COFFIN</p>
+      </div>
+    </div>
+    <div class="address-box">
+      <strong>Endereçu Loja Ami:</strong>
+      Rebal no Bairopite &bull; Atende 24 oras durante loron tomak.
     </div>
   </div>
 </div>
 
-<div class="container">
-  <div class="header-actions">
-    <div class="update-time" id="updateTime">🕒 Aktualiza dadus...</div>
-    <button class="print-btn" onclick="window.print()">🖨️ Print Laporan</button>
-  </div>
-
-  <div id="lojaContainer">
-    <div style="text-align:center;padding:40px;color:#777;">Hela da'uk dada dadus stock husi Supabase...</div>
-  </div>
+<!-- Filter Utama Bisa Digeser (Slide) -->
+<div class="filters">
+  <button onclick="show('SEMUA',this)">ALL DATA</button>
+  <button onclick="show('AMERICAN STYLE',this)">AMERICAN STYLE</button>
+  <button onclick="show('ASIA STYLE',this)">ASIA STYLE</button>
+  <button onclick="show('JATI STANDARD',this)">JATI STANDARD</button>
 </div>
 
-<div class="footer">ZJERO Inventory System &copy; 2026</div>
+<div id="grid" class="grid"><div class="empty">Halai da'uk hela dadus no stock...</div></div>
+<div class="footer">ZJERO Catalogue &copy; 2026</div>
 
 <script>
 const SUPABASE_URL = "https://nlyofmbqfmvhxssourwc.supabase.co";
@@ -176,84 +182,196 @@ const HEADERS = {
   "Content-Type": "application/json"
 };
 
-async function loadInventory() {
+const wa='67076312111';
+
+// Daftar sub-varian produk beserta nama lengkapnya untuk Asia Style & Jati Standard
+const productSubOptions = {
+  "SURABAYA": ["Surabaya B", "Surabaya C"],
+  "JEPARA": ["Jepara VVIP A", "Jepara VVIP B", "Jepara A", "Jepara B", "Jepara C"],
+  "KAIXAO KIK": ["Kaixao Kik A", "Kaixao Kik B"],
+  "BRYON": ["Bryon Surabaya A", "Bryon Surabaya B"],
+  "THERION": ["Therion Jepara A", "Therion Jepara B"],
+  "POLARIS ZJERO": ["Jati Standard Zjero", "Jati Standard Full Kaca"]
+};
+
+const masterProducts = [
+  {codes: ["AM01"], name: "SUMMERVILLE", type: "AMERICAN STYLE", images: ["Images/AM_01.jpg", "Images/AM_01b.png"]},
+  {codes: ["AM02"], name: "DOMMINION", type: "AMERICAN STYLE", images: ["Images/AM_02.jpg", "Images/AM_02b.jpg"]},
+  {codes: ["AM03"], name: "ELEANOR", type: "AMERICAN STYLE", images: ["Images/AM_03.jpg", "Images/AM_03b.jpg"]},
+  {codes: ["AM04"], name: "WESTON", type: "AMERICAN STYLE", images: ["Images/AM_04.jpg", "Images/AM_04b.jpg"]},
+  {codes: ["AM05"], name: "PRESIDENT", type: "AMERICAN STYLE", images: ["Images/AM_05.jpg", "Images/AM_05b.jpg"]},
+  {codes: ["AM06"], name: "KENWOOD", type: "AMERICAN STYLE", images: ["Images/AM_06.jpg", "Images/AM_06b.jpg"]},
+  {codes: ["AM07"], name: "EMPEROR", type: "AMERICAN STYLE", images: ["Images/AM_07.jpg", "Images/AM_07b.jpg"]},
+  {codes: ["AM08"], name: "FEMALE ESTHER CERRY", type: "AMERICAN STYLE", images: ["Images/AM_08.jpg", "Images/AM_08b.jpg"]},
+  {codes: ["AM09"], name: "NEW HOPE", type: "AMERICAN STYLE", images: ["Images/AM_09.jpg", "Images/AM_09b.jpg"]},
+  {codes: ["AM10"], name: "REMEMBRENCE", type: "AMERICAN STYLE", images: ["Images/AM_10.jpg", "Images/AM_10b.jpg"]},
+  {codes: ["AM11"], name: "UNITY", type: "AMERICAN STYLE", images: ["Images/AM_11.jpg", "Images/AM_11b.jpg"]},
+  {codes: ["AM12"], name: "TIGER WOOD", type: "AMERICAN STYLE", images: ["Images/AM_12.jpg", "Images/AM_12b.jpg"]},
+  {codes: ["AM13"], name: "SENATOR", type: "AMERICAN STYLE", images: ["Images/AM_13.jpg", "Images/AM_13b.jpg"]},
+  {codes: ["AM14"], name: "TUSCANY", type: "AMERICAN STYLE", images: ["Images/AM_14.jpg", "Images/AM_14b.jpg"]},
+  {codes: ["AM15"], name: "WILLOW BROOK", type: "AMERICAN STYLE", images: ["Images/AM_15.jpg", "Images/AM_15b.jpg"]},
+  {codes: ["AM16"], name: "MAGISTRATE RED", type: "AMERICAN STYLE", images: ["Images/AM_16.jpg", "Images/AM_16b.jpg"]},
+  {codes: ["AM17"], name: "OAK MANOR", type: "AMERICAN STYLE", images: ["Images/AM_17.jpg", "Images/AM_17b.jpg"]},
+  {codes: ["AM18"], name: "GLORIFY", type: "AMERICAN STYLE", images: ["Images/AM_18.png", "Images/AM_18b.jpg"]},
+  {codes: ["AM19"], name: "ROVEN", type: "AMERICAN STYLE", images: ["Images/AM_19.png", "Images/AM_19b.jpg"]},
+  {codes: ["AM20"], name: "GRANDIA", type: "AMERICAN STYLE", images: ["Images/AM_20.jpg", "Images/AM_20b.jpg"]},
+  {codes: ["AM21"], name: "PEACE", type: "AMERICAN STYLE", images: ["Images/AM_21.png", "Images/AM_21b.jpg"]},
+  {codes: ["AS01"], name: "LUMINOR", type: "ASIA STYLE", images: ["Images/AS_01.jpg", "Images/AS_01b.jpg", "Images/AS_01_3.png"]},
+  {codes: ["AS02"], name: "SYLVAN", type: "ASIA STYLE", images: ["Images/AS_02.png", "Images/AS_02b.jpg"]},
+  {codes: ["AS03"], name: "GOLDEN", type: "ASIA STYLE", images: ["Images/AS_03.png", "Images/AS_03b.jpg", "Images/AS_03_3.png"]},
+  {codes: ["AS04"], name: "GILSON", type: "ASIA STYLE", images: ["Images/AS_04.png", "Images/AS_04b.jpg", "Images/AS_04_3.png"]},
+  {codes: ["AS05"], name: "IVORY", type: "ASIA STYLE", images: ["Images/AS_05.jpg", "Images/AS_05b.jpg", "Images/AS_05_3.jpg"]},
+  {codes: ["AS06"], name: "MONTANA", type: "ASIA STYLE", images: ["Images/AS_06.png", "Images/AS_06b.jpg", "Images/AS_06_3.png"]},
+  {codes: ["AS07"], name: "VESTO", type: "ASIA STYLE", images: ["Images/AS_07.jpg", "Images/AS_07b.jpg", "Images/AS_07_3.jpg"]},
+  {codes: ["AS08"], name: "MAVIS", type: "ASIA STYLE", images: ["Images/AS_08.jpg", "Images/AS_08b.jpg", "Images/AS_08_3.jpg"]},
+  {codes: ["AS09"], name: "BRYON", type: "ASIA STYLE", images: ["Images/AS_09.jpg", "Images/AS_09a.png", "Images/AS_09_3.jpg"]},
+  {codes: ["AS10", "AS11"], name: "THERION", type: "ASIA STYLE", images: ["Images/AS_10.jpg", "Images/AS_10ja.jpg", "Images/AS_10jb.jpg"]},
+  {codes: ["AS12"], name: "VESPER", type: "ASIA STYLE", images: ["Images/AS_11.jpg", "Images/AS_11a.jpg", "Images/AS_11_3.jpg"]},
+  {codes: ["AS13"], name: "AVALON", type: "ASIA STYLE", images: ["Images/AS_13.jpg", "Images/AS_13_2.jpg", "Images/AS_13_3.jpg"]},
+  {codes: ["AS14"], name: "ORION", type: "ASIA STYLE", images: ["Images/AS_17.jpg", "Images/AS_17_2.jpg", "Images/AS_17_3.jpg"]},
+  {codes: ["AS16"], name: "UPER", type: "ASIA STYLE", images: ["Images/AS_19.jpg", "Images/AS_17_2.jpg", "Images/AS_17_3.jpg"]},
+  {codes: ["AS17", "AS18"], name: "JEPARA", type: "ASIA STYLE", images: ["Images/AS_20.jpg", "Images/AS_20a.jpg", "Images/AS_20b.jpg"]},
+  {codes: ["AS19", "AS20", "AS21"], name: "SURABAYA", type: "ASIA STYLE", images: ["Images/AS_21b.jpg", "Images/AS_21c.jpg", "Images/AS_21.jpg"]},
+  {codes: ["AS22", "AS23"], name: "KAIXAO KIK", type: "ASIA STYLE", images: ["Images/AS_22a.jpg", "Images/AS_22b.jpg", "Images/AS_22_3.jpg"]},
+  {codes: ["AS24"], name: "TRINITY", type: "ASIA STYLE", images: ["Images/AS_24.jpg", "Images/AS_24_2.jpg", "Images/AS_24_3.jpg"]},
+  {codes: ["AS25"], name: "OKTAV", type: "ASIA STYLE", images: ["Images/AS_25.jpg", "Images/AS_25_2.jpg", "Images/AS_25_3.jpg"]},
+  {codes: ["AS26"], name: "LEGACY", type: "ASIA STYLE", images: ["Images/AS_18.jpg", "Images/AS_26_2.jpg", "Images/AS_26_3.jpg"]},
+  {codes: ["JS01"], name: "POLARIS ZJERO", type: "JATI STANDARD", images: ["Images/JS_01.jpg", "Images/JS_01a.jpg", "Images/JS_01_3.png"]}
+];
+
+let products = [];
+
+async function loadCatalog() {
+  let dbRows = [];
   try {
-    const response = await fetch(SUPABASE_URL + "/rest/v1/products?select=code,name,variant,stock,loja", {
+    const response = await fetch(SUPABASE_URL + "/rest/v1/products?select=code,name,stock", {
       headers: HEADERS
     });
-    
     if(response.ok) {
-      let rows = await response.json();
-      renderInventory(rows);
-      updateTimestamp();
-    } else {
-      document.getElementById('lojaContainer').innerHTML = '<p style="text-align:center;color:red;">Gagal memuat data dari database.</p>';
+      dbRows = await response.json();
     }
   } catch(e) {
-    console.error("Error:", e);
-    document.getElementById('lojaContainer').innerHTML = '<p style="text-align:center;color:red;">Terjadi kesalahan koneksi.</p>';
-  }
-}
-
-function renderInventory(rows) {
-  let container = document.getElementById('lojaContainer');
-  
-  if(!rows || rows.length === 0) {
-    container.innerHTML = '<p style="text-align:center;">Dadus stock mamuk.</p>';
-    return;
+    console.error("Gagal konek Supabase:", e);
   }
 
-  // Kelompokkan data berdasarkan Loja / Toko
-  let groupedByLoja = {};
-  rows.forEach(r => {
-    let lojaName = r.loja ? r.loja.trim() : "Gudang Utama / Loe Fatin La Indikadu";
-    if(!groupedByLoja[lojaName]) {
-      groupedByLoja[lojaName] = [];
+  products = masterProducts.map((item, idx) => {
+    let totalStock = 0;
+    
+    item.codes.forEach(c => {
+      let found = dbRows.find(r => (r.code || "").trim().toUpperCase() === c.toUpperCase());
+      if(found) {
+        totalStock += Number(found.stock || 0);
+      }
+    });
+
+    if(totalStock === 0) {
+      dbRows.forEach(r => {
+        let dbName = (r.name || "").trim().toUpperCase();
+        let dbCode = (r.code || "").trim().toUpperCase();
+        if(dbName.includes(item.name.toUpperCase()) || item.codes.includes(dbCode)) {
+          totalStock += Number(r.stock || 0);
+        }
+      });
     }
-    groupedByLoja[lojaName].push(r);
+
+    let stockDesc = totalStock === 0 ? "⚠️ Stock Hotu Ona (Habis)" : (totalStock <= 3 ? "⚠️ Stock Menus: " + totalStock : "📦 Stock Tersedia: " + totalStock);
+
+    return {
+      id: "prod-" + idx,
+      type: item.type,
+      name: item.name,
+      desc: stockDesc,
+      images: item.images
+    };
   });
 
-  let html = '';
-  for(let loja in groupedByLoja) {
-    let items = groupedByLoja[loja];
-    let totalStockLoja = items.reduce((sum, item) => sum + Number(item.stock || 0), 0);
-
-    let itemsHtml = items.map(item => {
-      let displayName = item.variant ? `${item.name} (${item.variant})` : item.name;
-      return `
-        <li>
-          <span>📦 ${esc(displayName)}</span>
-          <strong>${item.stock || 0}</strong>
-        </li>
-      `;
-    }).join('');
-
-    html += `
-      <div class="loja-card">
-        <div class="loja-title">
-          <span>🏪 ${esc(loja)}</span>
-          <span class="loja-total">Total Stock: ${totalStockLoja}</span>
-        </div>
-        <ul class="item-list">
-          ${itemsHtml}
-        </ul>
-      </div>
-    `;
-  }
-
-  container.innerHTML = html;
-}
-
-function updateTimestamp() {
-  let now = new Date();
-  let options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-  let timeString = now.toLocaleDateString('id-ID', options);
-  document.getElementById('updateTime').textContent = `🕒 Update Terakhir: ${timeString}`;
+  let savedCat = localStorage.getItem('selectedCategory') || 'SEMUA';
+  show(savedCat, null, false);
 }
 
 function esc(s){return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
 
-loadInventory();
+function show(cat,btn,save=true){
+  if(save){localStorage.setItem('selectedCategory',cat);}
+  document.querySelectorAll('.filters button').forEach(b=>b.classList.remove('active'));
+  if(!btn){
+    let buttons=document.querySelectorAll('.filters button');
+    buttons.forEach(b=>{if(b.textContent.trim()===(cat==='SEMUA'?'ALL DATA':cat)){btn=b;}});
+    if(btn)btn.classList.add('active');
+  }else{
+    btn.classList.add('active');
+  }
+
+  let list = cat==='SEMUA' ? products : products.filter(p => p.type === cat);
+
+  document.getElementById('grid').innerHTML = list.map(p => {
+    let price = 'Presu, kontaktu ami';
+    let imgs = p.images.map((img, i) => `<img src="${esc(img)}" class="${i===0?'active':''}" alt="${esc(p.name)}" onerror="this.onerror=null;this.src='logo.png';">`).join('');
+    
+    // Cek apakah produk ini memiliki sub-opsi dropdown
+    let subOptionsHtml = '';
+    if (productSubOptions[p.name]) {
+      let options = productSubOptions[p.name].map(opt => `<option value="${esc(opt)}">${esc(opt)}</option>`).join('');
+      subOptionsHtml = `
+        <select class="card-select" id="select-${p.id}" onchange="updateProductDisplay('${p.id}', '${esc(p.name)}')">
+          <option value="">-- Hili Varian / Model --</option>
+          ${options}
+        </select>
+      `;
+    }
+
+    let initialMsg = encodeURIComponent('Halo ZJERO, Ha’u interese ho produtu ' + p.name);
+
+    return `
+      <div class="card">
+        <div class="slider" id="slider-${p.id}">
+          ${imgs}
+          <button class="slider-btn prev" onclick="moveSlide('${p.id}', -1)">‹</button>
+          <button class="slider-btn next" onclick="moveSlide('${p.id}', 1)">›</button>
+        </div>
+        <div class="body">
+          <div class="type">${esc(p.type)}</div>
+          <div class="name" id="name-${p.id}">${esc(p.name)}</div>
+          <div class="desc">${esc(p.desc)}</div>
+          <div class="price">${price}</div>
+          ${subOptionsHtml}
+          <a class="wa" id="wa-${p.id}" href="https://wa.me/${wa}?text=${initialMsg}" target="_blank">Husu liu husi WhatsApp</a>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Fungsi untuk memperbarui nama produk di kartu dan tautan WhatsApp ketika varian dipilih
+function updateProductDisplay(productId, baseName) {
+  let selectElem = document.getElementById(`select-${productId}`);
+  let nameElem = document.getElementById(`name-${productId}`);
+  let waLinkElem = document.getElementById(`wa-${productId}`);
+  let selectedVariant = selectElem.value;
+
+  if (selectedVariant) {
+    nameElem.textContent = selectedVariant;
+    let message = `Halo ZJERO, Ha’u interese ho produtu ${selectedVariant}`;
+    waLinkElem.href = `https://wa.me/${wa}?text=` + encodeURIComponent(message);
+  } else {
+    nameElem.textContent = baseName;
+    let message = `Halo ZJERO, Ha’u interese ho produtu ${baseName}`;
+    waLinkElem.href = `https://wa.me/${wa}?text=` + encodeURIComponent(message);
+  }
+}
+
+function moveSlide(productId, direction){
+  let slider = document.getElementById(`slider-${productId}`);
+  if(!slider) return;
+  let imgs = slider.querySelectorAll('img');
+  let activeIndex = Array.from(imgs).findIndex(img => img.classList.contains('active'));
+  if(activeIndex === -1) return;
+  imgs[activeIndex].classList.remove('active');
+  let newIndex = (activeIndex + direction + imgs.length) % imgs.length;
+  imgs[newIndex].classList.add('active');
+}
+
+loadCatalog();
 </script>
 </body>
 </html>
