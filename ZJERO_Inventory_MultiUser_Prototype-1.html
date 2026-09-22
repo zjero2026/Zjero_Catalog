@@ -1159,7 +1159,6 @@ async function updateDirectStock(productId) {
     return;
   }
 
-  // Pengaman Password baru: adminzjero2026
   const passInput = prompt("Hatama lian fatin (password) hodi konfirma update stock:");
   if (passInput === null) return;
 
@@ -1224,7 +1223,7 @@ async function transact(kind){
 
   let note = noteElement ? noteElement.value.trim() : "";
   if(isDamaged){
-    note = "[KONDISAUN: AAT / RUSAK] " + note;
+    note = "[KONDISAUN: AAT / RUSAK] " + (note ? note : "");
   }
 
   const product = data[idx];
@@ -1445,8 +1444,7 @@ function renderHistory(){
       btnInvoice = `<button type="button" class="invoice-btn" onclick="showInvoice('${h.id}')">📄 Cetak Invoice</button>`;
     }
 
-    let noteDisplay = h.note ? `<br><small style="color:#666;">${h.note}</small>` : "";
-    let isDamagedBadge = h.note && h.note.includes("AAT / RUSAK") ? `<br><span class="badge-dam">⚠️ Sasan Aat / Rusak</span>` : "";
+    let noteDisplay = h.note ? `<br><small style="color:#444; background:#fdf8ed; padding:2px 6px; border-radius:4px; display:inline-block; margin-top:3px;">💬 ${h.note}</small>` : "";
 
     let paymentBadge = "—";
     if(h.type === "Sasan Sai") {
@@ -1458,7 +1456,8 @@ function renderHistory(){
         paymentBadge += `<br><button type="button" class="btn-lunas" onclick="updatePaymentStatus('${h.id}')">Update LUNAS</button>`;
       }
     } else {
-      paymentBadge = `<span style="color:#39734e; font-weight:bold;">Sasan Tama</span>${isDamagedBadge}`;
+      let isDamaged = h.note && h.note.includes("AAT / RUSAK");
+      paymentBadge = isDamaged ? `<span class="badge-dam">⚠️ Sasan Aat / Rusak</span>` : `<span style="color:#39734e; font-weight:bold;">Sasan Tama (Di'ak)</span>`;
     }
 
     return `
