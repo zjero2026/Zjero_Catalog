@@ -1,179 +1,826 @@
 <!doctype html>
-<html lang="id">
+<html lang="tet">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ZJERO Catalogue</title>
-<style>
-body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#222}
+<title>ZJERO Inventory Multi-User</title>
+<link rel="manifest" href="manifest.json">
 
-.top{
-  background:#111;
-  color:#fff;
-  padding:30px 16px 24px;
-  text-align:center;
-  box-shadow:0 4px 12px rgba(0,0,0,0.15);
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f5f3ef;
+  color:#29251f
 }
 
-.top-container{
-  max-width:600px;
-  margin:0 auto;
+.app{
+  display:flex;
+  min-height:100vh
+}
+
+.side{
+  width:225px;
+  background:#211e1a;
+  color:#fff;
+  padding:22px 14px;
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+}
+
+.logo{
+  padding:0 0 20px;
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:12px;
+  gap:6px;
 }
 
-.top-brand{
+.logo img{
+  width:50px;
+  height:50px;
+  object-fit:contain;
+  border-radius:8px;
+}
+
+.logo-text{
+  font-size:18px;
+  font-weight:800;
+  letter-spacing:2px;
+}
+
+.logo small{
+  display:block;
+  font-size:9px;
+  color:#d5ac45;
+  letter-spacing:1px;
+}
+
+.nav{
+  padding:11px 13px;
+  margin:5px 0;
+  border-radius:9px;
+  color:#ddd;
+  font-size:14px;
+  cursor:pointer;
+  text-align:left;
+}
+
+.nav.active{
+  background:#c59a38;
+  color:#fff;
+  font-weight:bold
+}
+
+/* Tombol Install PWA di Sidebar */
+.install-btn{
+  margin-top:auto;
+  background:#39734e;
+  color:#fff;
+  padding:11px 13px;
+  border-radius:9px;
+  font-size:13px;
+  font-weight:bold;
+  cursor:pointer;
+  text-align:left;
+  border:0;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  width:100%;
+}
+
+.main{
+  flex:1;
+  padding:25px;
+  overflow:auto
+}
+
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px
+}
+
+h1{
+  margin:0;
+  font-size:25px
+}
+
+.sub{
+  color:#777;
+  font-size:13px;
+  margin-top:5px
+}
+
+.user{
+  background:#fff;
+  padding:9px 14px;
+  border-radius:20px;
+  font-size:12px
+}
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:13px;
+  margin-bottom:15px;
+}
+
+.card,.panel{
+  background:#fff;
+  border-radius:12px;
+  padding:17px;
+  box-shadow:0 2px 12px #0001
+}
+
+.label{
+  font-size:12px;
+  color:#777
+}
+
+.num{
+  font-size:27px;
+  font-weight:bold;
+  margin-top:7px
+}
+
+.gold{color:#a77c1e}
+.green{color:#39734e}
+.red{color:#a8483e}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+  margin-top:15px
+}
+
+.panel h2{
+  font-size:16px;
+  margin:0 0 14px
+}
+
+.form{
+  display:grid;
+  gap:10px
+}
+
+label{
+  font-size:12px;
+  color:#666
+}
+
+input,select,textarea{
+  width:100%;
+  padding:10px;
+  border:1px solid #ddd;
+  border-radius:8px;
+  font-size:13px;
+  background:white
+}
+
+button{
+  padding:10px 14px;
+  border:0;
+  border-radius:8px;
+  background:#c59a38;
+  color:white;
+  font-weight:bold;
+  cursor:pointer
+}
+
+.secondary{background:#555}
+.danger{background:#a8483e}
+.print-btn{background:#39734e;margin-bottom:14px;}
+.invoice-btn{background:#211e1a;padding:6px 10px;font-size:11px;margin-left:5px;cursor:pointer;}
+.update-stock-btn{background:#39734e;padding:4px 8px;font-size:11px;margin-left:5px;}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px
+}
+
+th,td{
+  padding:10px 7px;
+  text-align:left;
+  border-bottom:1px solid #eee
+}
+
+th{
+  color:#777
+}
+
+.pill{
+  padding:5px 8px;
+  border-radius:12px;
+  background:#e7f3ea;
+  color:#39704c;
+  font-size:10px
+}
+
+.warn{
+  background:#fff0d7;
+  color:#986b1a
+}
+
+.out{
+  background:#f6dfdd;
+  color:#963f37
+}
+
+.hidden{
+  display:none!important
+}
+
+.login{
+  min-height:100vh;
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:14px;
+  background:#211e1a
 }
 
-.top-logo{
-  width:60px;
-  height:60px;
+.loginbox{
+  width:350px;
+  max-width:90%;
+  background:white;
+  border-radius:15px;
+  padding:30px;
+  box-shadow:0 10px 35px #0005;
+  text-align:center;
+}
+
+.loginlogo img{
+  width:75px;
+  height:75px;
   object-fit:contain;
-  border-radius:10px;
-  background:#222;
-  padding:2px;
-  border:1px solid #333;
+  margin-bottom:10px;
 }
 
-.top-title-area h1{
-  margin:0;
+.loginlogo h2{
   font-size:26px;
-  letter-spacing:2px;
-  font-weight:800;
-  color:#fff;
-  text-align:left;
+  font-weight:bold;
+  letter-spacing:4px;
+  margin:0;
 }
 
-.top-title-area p{
-  margin:4px 0 0;
-  font-size:13px;
-  color:#c59a38;
-  letter-spacing:1px;
-  text-align:left;
-  font-weight:600;
-}
-
-.address-box{
-  margin-top:12px;
-  background:rgba(255, 255, 255, 0.06);
-  border:1px solid rgba(255, 255, 255, 0.1);
-  border-radius:8px;
-  padding:10px 16px;
-  font-size:13px;
-  color:#ddd;
-  line-height:1.6;
-  width:100%;
-  max-width:450px;
-}
-
-.address-box strong{
-  color:#fff;
+.loginbox p{
+  text-align:center;
+  color:#777;
   font-size:12px;
-  letter-spacing:0.5px;
-  text-transform:uppercase;
-  display:block;
-  margin-bottom:2px;
+  margin-bottom:25px;
+  margin-top:5px;
 }
 
-/* Filter Utama dengan Slide Horizontal */
-.filters{
-  display:flex;
-  gap:8px;
-  overflow-x:auto;
-  white-space:nowrap;
-  padding:20px 16px 15px;
-  scroll-behavior:smooth;
-  -webkit-overflow-scrolling:touch;
+.loginbox .form{
+  margin-top:15px;
+  text-align:left;
 }
-.filters::-webkit-scrollbar{display:none;}
-.filters{-ms-overflow-style:none;scrollbar-width:none;}
 
-.filters button{
-  flex:0 0 auto;
-  border:0;
-  padding:10px 18px;
-  border-radius:20px;
-  background:#ddd;
-  cursor:pointer;
-  font-size:13px;
-  font-weight:600;
-  transition:all 0.2s;
+.error{
+  color:#a8483e;
+  font-size:12px;
+  min-height:15px
 }
-.filters button.active{background:#111;color:#fff}
 
-.grid{max-width:1200px;margin:auto;padding:10px 16px 40px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
-.card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px #0001;display:flex;flex-direction:column;}
-.slider{position:relative;width:100%;aspect-ratio:4/3;background:#eee;overflow:hidden}
-.slider img{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;display:none}
-.slider img.active{display:block}
-.slider-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.5);color:#fff;border:0;padding:8px 12px;cursor:pointer;font-size:16px;border-radius:4px;z-index:10}
-.slider-btn.prev{left:8px}
-.slider-btn.next{right:8px}
+.stock-info{
+  background:#fdf8ed;
+  border:1px solid #e5d3a1;
+  padding:8px 12px;
+  border-radius:6px;
+  font-size:12px;
+  color:#7a5a14;
+  font-weight:bold;
+}
 
-.body{padding:14px;display:flex;flex-direction:column;flex:1;}
-.type{font-size:11px;color:#777;font-weight:bold;letter-spacing:0.5px}
-.name{font-size:18px;font-weight:700;margin:5px 0;color:#111}
-.desc{font-size:12px;color:#39704c;font-weight:bold;margin-top:4px;}
-.price{font-size:16px;font-weight:700;margin:10px 0;color:#c59a38}
+.store-card {
+  background: #fdfbf7;
+  border: 1px solid #e6dec5;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
 
-/* Styling Dropdown di dalam Kartu */
-.card-select {
-  width: 100%;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  background-color: #fafafa;
-  font-size: 12px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 10px;
-  outline: none;
+.store-card h3 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #a77c1e;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 5px;
+}
+
+.badge-lunas {
+  background: #e7f3ea;
+  color: #39704c;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 11px;
+}
+
+.badge-belum {
+  background: #f6dfdd;
+  color: #963f37;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 11px;
+  display: inline-block;
+  margin-bottom: 4px;
+}
+
+.btn-lunas {
+  background: #39734e;
+  padding: 5px 10px;
+  font-size: 11px;
+  margin-left: 5px;
   cursor: pointer;
 }
 
-.wa{display:block;text-align:center;text-decoration:none;background:#111;color:#fff;padding:10px;border-radius:9px;font-size:13px;font-weight:bold;margin-top:auto;transition:background 0.2s}
-.wa:hover{background:#333}
+/* KHUSUS DESAIN PROFESIONAL CETAK INVOICE */
+#invoice-section {
+  background: #fff;
+  border: 1px solid #e5e0d8;
+  border-radius: 12px;
+  padding: 30px !important;
+}
 
-.empty{text-align:center;padding:50px;grid-column:1/-1;color:#777;}
-.footer{text-align:center;color:#777;padding:30px;font-size:13px} 
+.invoice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #211e1a;
+  padding-bottom: 15px;
+  margin-bottom: 20px;
+}
+
+.invoice-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.invoice-brand img {
+  width: 55px;
+  height: 55px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.invoice-brand h2 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: 2px;
+  color: #211e1a;
+}
+
+.invoice-brand small {
+  display: block;
+  font-size: 10px;
+  color: #a77c1e;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.invoice-meta {
+  text-align: right;
+  font-size: 12px;
+  color: #555;
+  line-height: 1.5;
+}
+
+.invoice-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  background: #fdfbf7;
+  padding: 12px 15px;
+  border-radius: 8px;
+  border: 1px solid #f0eae1;
+  margin-bottom: 20px;
+  font-size: 12px;
+}
+
+.invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  font-size: 12px;
+}
+
+.invoice-table th {
+  background: #211e1a;
+  color: #fff;
+  padding: 10px;
+  text-align: left;
+}
+
+.invoice-table td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.invoice-summary-box {
+  background: #fcf9f2;
+  border: 1px solid #e6dec5;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.invoice-summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.invoice-summary-row.total {
+  font-size: 16px;
+  font-weight: bold;
+  color: #211e1a;
+  border-top: 1px dashed #ccc;
+  padding-top: 8px;
+  margin-top: 6px;
+}
+
+/* CSS MEDIA PRINT KHUSUS INVOICE BERSIH */
+@media print{
+  body { background: #fff !important; color: #000 !important; }
+  .side, .top, button, .print-btn, .invoice-btn, .btn-lunas, .form { display: none !important; }
+  .app { display: block !important; }
+  .main { padding: 0 !important; overflow: visible !important; width: 100% !important; }
+  section { display: none !important; }
+  section#invoice-section { display: block !important; }
+  #invoice-section { border: 0 !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; width: 100% !important; }
+}
 </style>
 </head>
+
 <body>
 
-<div class="top">
-  <div class="top-container">
-    <div class="top-brand">
-      <img src="logo.png" alt="Logo ZJERO" class="top-logo" onerror="this.style.display='none'">
-      <div class="top-title-area">
-        <h1>ZJERO CATALOGU</h1>
-        <p>KATALOGU KAIXAO / COFFIN</p>
-      </div>
+<!-- LOGIN -->
+<div id="login" class="login">
+  <div class="loginbox">
+    <div class="loginlogo">
+      <img src="logo.png" alt="Logo ZJERO" onerror="this.style.display='none'">
+      <h2>ZJERO</h2>
     </div>
-    <div class="address-box">
-      <strong>Endereçu Loja Ami:</strong>
-      Rebal no Bairopite &bull; Atende 24 oras durante loron tomak.
+    <p>INVENTORY MANAGEMENT SYSTEM</p>
+    <p style="font-size:10px;color:#a77c1e;margin-top:-15px;margin-bottom:25px;font-weight:bold;">Tri Software (Beta version)</p>
+    <div class="form">
+      <label>Naran User (Username)</label>
+      <input id="username" type="text" placeholder="Hatama username" autocomplete="username">
+      <label>Lian Fatin (Password)</label>
+      <input id="password" type="password" placeholder="Hatama lian fatin" autocomplete="current-password">
+      <div id="err" class="error"></div>
+      <button type="button" onclick="login()">LOGIN</button>
     </div>
   </div>
 </div>
 
-<!-- Filter Utama Bisa Digeser (Slide) -->
-<div class="filters">
-  <button onclick="show('SEMUA',this)">ALL DATA</button>
-  <button onclick="show('AMERICAN STYLE',this)">AMERICAN STYLE</button>
-  <button onclick="show('ASIA STYLE',this)">ASIA STYLE</button>
-  <button onclick="show('JATI STANDARD',this)">JATI STANDARD</button>
+<!-- APPLICATION -->
+<div id="app" class="app hidden">
+  <aside class="side">
+    <div class="logo">
+      <img src="logo.png" alt="Logo ZJERO" onerror="this.style.display='none'">
+      <div class="logo-text">ZJERO</div>
+      <small>SYSTEM</small>
+    </div>
+    <div class="nav active" onclick="page('dashboard',this)">⌂ <span>Painel</span></div>
+    <div class="nav" onclick="page('data',this)">▣ <span>Dadus Kaixao</span></div>
+    <div class="nav" onclick="page('in',this)">↓ <span>Sasan Tama</span></div>
+    <div class="nav" onclick="page('out',this)">↑ <span>Sasan Sai</span></div>
+    <div class="nav" onclick="page('history',this)">▤ <span>Istoria Transaksaun</span></div>
+    <div class="nav" onclick="page('users',this)">♙ <span>Uzuáriu</span></div>
+    <div class="nav" onclick="logout()">↪ <span>Sai</span></div>
+    <button id="installAppBtn" class="install-btn hidden" onclick="installPWA()">📥 <span>Install App</span></button>
+  </aside>
+
+  <main class="main">
+    <div class="top">
+      <div>
+        <h1 id="title">Painel</h1>
+        <div class="sub">Sistema Jestaun Stock Loja</div>
+      </div>
+      <div class="user">● <span id="who"></span></div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <section id="dashboard">
+      <div class="cards">
+        <div class="card">
+          <div class="label">Total Varian Kaixao</div>
+          <div class="num" id="cmodels">0</div>
+        </div>
+        <div class="card">
+          <div class="label">Stock Haree Total</div>
+          <div class="num gold" id="cstock">0</div>
+        </div>
+        <div class="card">
+          <div class="label">Sasan Tama</div>
+          <div class="num green" id="cin">0</div>
+        </div>
+        <div class="card">
+          <div class="label">Sasan Sai</div>
+          <div class="num red" id="cout">0</div>
+        </div>
+      </div>
+      <div class="grid">
+        <div class="panel">
+          <h2>Transaksaun Foun</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Loja</th>
+                <th>Modelu Kaixao</th>
+                <th>Kuantidade</th>
+                <th>Total ($)</th>
+              </tr>
+            </thead>
+            <tbody id="dashhist"></tbody>
+          </table>
+        </div>
+        <div class="panel">
+          <h2>Rinaum Stock tuir Loja / Fatin</h2>
+          <div id="storestockbreakdown"></div>
+          <h2 style="margin-top:20px">Rezumu</h2>
+          <div id="summary"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DATA KAIXAO -->
+    <section id="data" class="hidden">
+      <div class="panel">
+        <button type="button" class="print-btn" onclick="window.print()">🖨️ Imprime / Download PDF Dadus Kaixao</button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+          <input id="search" placeholder="🔎 Aluka modelu kaixao..." oninput="renderData()" style="flex:1">
+          <select id="filter" onchange="renderData()" style="max-width:210px">
+            <option value="">Type Hotu-hotu</option>
+            <option>AMERICAN STYLE</option>
+            <option>JATI STANDARD</option>
+            <option>ASIA STYLE</option>
+          </select>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Kode</th>
+              <th>Type</th>
+              <th>Modelu Kaixao / Varian</th>
+              <th>Stock Aktual</th>
+              <th>Aksi / Update Stock</th>
+            </tr>
+          </thead>
+          <tbody id="datatable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SASAN TAMA -->
+    <section id="in" class="hidden">
+      <div class="panel" style="max-width:650px">
+        <h2>Sasan Tama</h2>
+        <div class="form">
+          <label>Hili Loja / Fatin</label>
+          <select id="instore" onchange="updateStoreStock('in')">
+            <option value="Loja Rebal">Loja Rebal</option>
+            <option value="Loja Bairopite">Loja Bairopite</option>
+            <option value="Gudang Lahane">Gudang Lahane</option>
+            <option value="Loja Same">Loja Same</option>
+            <option value="Loja Oe-cusse">Loja Oe-cusse</option>
+            <option value="Loja Ainaro">Loja Ainaro</option>
+            <option value="Loja Baucau">Loja Baucau</option>
+          </select>
+          <label>Modelu Kaixao</label>
+          <select id="inmodel" onchange="updateStoreStock('in')"></select>
+          <div id="instockinfo" class="stock-info">📦 Stock iha loja ne'e: 0</div>
+          <label>Kuantidade Tama</label>
+          <input id="inqty" type="number" min="1" placeholder="Egzemplu: 5">
+          <label>Komentáriu / Notas</label>
+          <textarea id="innote" rows="3" placeholder="Opcional"></textarea>
+          <button type="button" onclick="transact('in')">Rejistu Sasan Tama</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SASAN SAI -->
+    <section id="out" class="hidden">
+      <div class="panel" style="max-width:650px">
+        <h2>Sasan Sai</h2>
+        <div class="form">
+          <label>Hili Loja Asal Sasan</label>
+          <select id="outstore" onchange="updateStoreStock('out')">
+            <option value="Loja Rebal">Loja Rebal</option>
+            <option value="Loja Bairopite">Loja Bairopite</option>
+            <option value="Gudang Lahane">Gudang Lahane</option>
+            <option value="Loja Same">Loja Same</option>
+            <option value="Loja Oe-cusse">Loja Oe-cusse</option>
+            <option value="Loja Ainaro">Loja Ainaro</option>
+            <option value="Loja Baucau">Loja Baucau</option>
+          </select>
+          <label>Modelu Kaixao</label>
+          <select id="outmodel" onchange="updateStoreStock('out')"></select>
+          <div id="outstockinfo" class="stock-info">📦 Stock iha loja ne'e: 0</div>
+          <label>Kuantidade Sai</label>
+          <input id="outqty" type="number" min="1" placeholder="Egzemplu: 2">
+          
+          <label>Presu Kaixao ($)</label>
+          <input id="outboxprice" type="number" min="0" step="0.01" placeholder="Egzemplu: 500">
+          
+          <label>Presu Ambulansia</label>
+          <select id="outambulance">
+            <option value="0">Gratuita (Pakote) - $0</option>
+            <option value="50">1 loron - $50 (Dili laran)</option>
+            <option value="190">1 loron - $190 (Municipiu)</option>
+          </select>
+          
+          <label>Presu Freezer</label>
+          <select id="outfreezer">
+            <option value="0">Gratuita (Pakote) - $0</option>
+            <option value="100">1 loron - $100 (Dili laran)</option>
+            <option value="200">2 loron - $200 (Dili laran)</option>
+            <option value="300">3 loron - $300 (Dili laran)</option>
+            <option value="150">1 loron - $150 (Municipiu)</option>
+            <option value="300">2 loron - $300 (Municipiu)</option>
+            <option value="450">3 loron - $450 (Municipiu)</option>
+          </select>
+          
+          <label>Opsaun ba Pagamentu</label>
+          <select id="outpaytype" onchange="toggleDPField()">
+            <option value="lunas">Cash Lunas</option>
+            <option value="dp">Down Payment (DP)</option>
+          </select>
+          
+          <div id="dpcontainer" class="hidden">
+            <label>Down Payment / DP ($)</label>
+            <input id="outdp" type="number" min="0" step="0.01" placeholder="Egzemplu: 200">
+          </div>
+          
+          <label>Objetivu Sai / Hatama ba Fatin Ne'ebé</label>
+          <input id="outdest" type="text" placeholder="Egzemplu: RSUD / Filial / Uma Duka">
+          
+          <label>Komentáriu / Notas</label>
+          <textarea id="outnote" rows="3" placeholder="Egzemplu: Staff : Aldo"></textarea>
+          
+          <button type="button" class="danger" onclick="transact('out')">Rejistu Sasan Sai</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- HISTORY / RIWAYAT -->
+    <section id="history" class="hidden">
+      <div class="panel">
+        <button type="button" class="print-btn" onclick="window.print()">🖨️ Imprime / Download PDF Istoria</button>
+        <h2>Istoria Transaksaun</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Tempu</th>
+              <th>Loja</th>
+              <th>Modelu Kaixao</th>
+              <th>Kuantidade</th>
+              <th>Biaya Rincian ($)</th>
+              <th>Total & DP</th>
+              <th>Status / Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="historytable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- INVOICE PROFESIONAL DENGAN LOGO -->
+    <section id="invoice-section" class="panel hidden" style="max-width:700px; margin:auto;">
+      <div class="invoice-header">
+        <div class="invoice-brand">
+          <img src="logo.png" alt="ZJERO Logo" onerror="this.style.display='none'">
+          <div>
+            <h2>ZJERO</h2>
+            <small>INVENTORY & FUNERAL SERVICES</small>
+          </div>
+        </div>
+        <div class="invoice-meta">
+          <strong>OFFICIAL INVOICE</strong><br>
+          <span id="inv-id">No: #ZJ-000</span><br>
+          <span id="inv-date">Data: —</span>
+        </div>
+      </div>
+
+      <div class="invoice-details-grid">
+        <div>
+          <p style="margin:0 0 4px 0; color:#777;">Fatin / Loja Asal:</p>
+          <strong id="inv-store" style="font-size:13px;">—</strong>
+        </div>
+        <div>
+          <p style="margin:0 0 4px 0; color:#777;">Objetivu / Fatin Hatama:</p>
+          <strong id="inv-dest" style="font-size:13px;">—</strong>
+        </div>
+      </div>
+
+      <table class="invoice-table">
+        <thead>
+          <tr>
+            <th>Deskrisaun Sasan & Servisu</th>
+            <th style="text-align:center;">Kuantidade</th>
+            <th style="text-align:right;">Presu ($)</th>
+          </tr>
+        </thead>
+        <tbody id="inv-items-body">
+          <!-- Dinamis diisi JS -->
+        </tbody>
+      </table>
+
+      <div class="invoice-summary-box">
+        <div class="invoice-summary-row">
+          <span>Subtotal Kaixao:</span>
+          <span id="inv-subbox">$0.00</span>
+        </div>
+        <div class="invoice-summary-row">
+          <span>Presu Ambulansia:</span>
+          <span id="inv-subamb">$0.00</span>
+        </div>
+        <div class="invoice-summary-row">
+          <span>Presu Freezer:</span>
+          <span id="inv-subfrz">$0.00</span>
+        </div>
+        <div class="invoice-summary-row total">
+          <span>Total Tomak:</span>
+          <span id="inv-total" style="color:#a77c1e;">$0.00</span>
+        </div>
+        <div class="invoice-summary-row" style="margin-top:10px; font-size:12px;">
+          <span>Opsaun Pagamentu:</span>
+          <strong id="inv-paystatus">—</strong>
+        </div>
+        <div id="inv-dp-row" class="invoice-summary-row" style="font-size:12px; margin-top:4px;">
+          <span>DP & Sisa Kekurangan:</span>
+          <span id="inv-dp-detail">—</span>
+        </div>
+      </div>
+
+      <div id="inv-note-box" style="font-size:12px; color:#555; background:#faf8f5; padding:10px; border-radius:6px; margin-bottom:20px;">
+        <strong>Komentáriu / Notas:</strong> <span id="inv-note-text">—</span>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #eee; padding-top:15px;">
+        <small style="color:#888;">Tratamentu di'ak no kmanek husi ZJERO.</small>
+        <div>
+          <button type="button" onclick="window.print()" class="print-btn" style="margin:0;">🖨️ Cetak / Download Invoice</button>
+          <button type="button" class="secondary" onclick="page('history', document.querySelectorAll('.nav')[4])" style="margin-left:8px;">Fali ba Istoria</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- USERS -->
+    <section id="users" class="hidden">
+      <div class="panel">
+        <h2>Uzuáriu & Direitu Acessu</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Papel (Role)</th>
+              <th>Acessu Menu</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>admin</td><td>Admin</td><td>Menu hotu-hotu</td></tr>
+            <tr><td>gudang</td><td>Gudang</td><td>Dadus Kaixao, Sasan Tama, Sasan Sai, Istoria</td></tr>
+            <tr><td>viewer</td><td>Viewer</td><td>Painel & Dadus Kaixao</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
 </div>
 
-<div id="grid" class="grid"><div class="empty">Halai da'uk hela dadus no stock...</div></div>
-<div class="footer">ZJERO Catalogue &copy; 2026</div>
-
 <script>
+let deferredPrompt;
+const installBtn = document.getElementById("installAppBtn");
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if(installBtn) installBtn.classList.remove("hidden");
+});
+
+function installPWA() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      deferredPrompt = null;
+      if(installBtn) installBtn.classList.add("hidden");
+    });
+  }
+}
+
 const SUPABASE_URL = "https://nlyofmbqfmvhxssourwc.supabase.co";
 const SUPABASE_KEY = "sb_publishable_0FYPfH2F2AggNG_Zp7FKBA_NkK_KKnh";
 const HEADERS = {
@@ -182,211 +829,583 @@ const HEADERS = {
   "Content-Type": "application/json"
 };
 
-const wa='67076312111';
+let data = [];
+let history = [];
+let current = null;
 
-// Daftar sub-varian produk beserta nama lengkapnya
-const productSubOptions = {
-  "SURABAYA": ["Surabaya A Segi 4", "Surabaya B Segi 8"],
-  "JEPARA": ["Jepara VIP", "Jepara A", "Jepara B", "Jepara C"],
-  "KAIXAO KIK": ["Kaixao Kik 80cm", "Kaixao Kik 120cm"],
-  "BRYON": ["Bryon Surabaya A", "Bryon Surabaya B"],
-  "LUMINOR": ["Luminor putih Non Kaca", "Luminor Cokelat Non Kaca"],
-  "THERION": ["Therion Jepara A", "Therion Jepara B"],
-  "POLARIS ZJERO": ["Jati Standard Zjero", "Jati Standard Full Kaca"]
+const users = {
+  admin: { pass: "admin123", role: "Admin" },
+  gudang: { pass: "gudang123", role: "Gudang" },
+  viewer: { pass: "viewer123", role: "Viewer" }
 };
 
-const masterProducts = [
-  {codes: ["AM01"], name: "SUMMERVILLE", type: "AMERICAN STYLE", images: ["Images/AM_01.jpg", "Images/AM_01b.png"]},
-  {codes: ["AM02"], name: "DOMMINION", type: "AMERICAN STYLE", images: ["Images/AM_02.jpg", "Images/AM_02b.jpg"]},
-  {codes: ["AM03"], name: "ELEANOR", type: "AMERICAN STYLE", images: ["Images/AM_03.jpg", "Images/AM_03b.jpg"]},
-  {codes: ["AM04"], name: "WESTON", type: "AMERICAN STYLE", images: ["Images/AM_04.jpg", "Images/AM_04b.jpg"]},
-  {codes: ["AM05"], name: "PRESIDENT", type: "AMERICAN STYLE", images: ["Images/AM_05.jpg", "Images/AM_05b.jpg"]},
-  {codes: ["AM06"], name: "KENWOOD", type: "AMERICAN STYLE", images: ["Images/AM_06.jpg", "Images/AM_06b.jpg"]},
-  {codes: ["AM07"], name: "EMPEROR", type: "AMERICAN STYLE", images: ["Images/AM_07.jpg", "Images/AM_07b.jpg"]},
-  {codes: ["AM08"], name: "FEMALE ESTHER CERRY", type: "AMERICAN STYLE", images: ["Images/AM_08.jpg", "Images/AM_08b.jpg"]},
-  {codes: ["AM09"], name: "NEW HOPE", type: "AMERICAN STYLE", images: ["Images/AM_09.jpg", "Images/AM_09b.jpg"]},
-  {codes: ["AM10"], name: "REMEMBRENCE", type: "AMERICAN STYLE", images: ["Images/AM_10.jpg", "Images/AM_10b.jpg"]},
-  {codes: ["AM11"], name: "UNITY", type: "AMERICAN STYLE", images: ["Images/AM_11.jpg", "Images/AM_11b.jpg"]},
-  {codes: ["AM12"], name: "TIGER WOOD", type: "AMERICAN STYLE", images: ["Images/AM_12.jpg", "Images/AM_12b.jpg"]},
-  {codes: ["AM13"], name: "SENATOR", type: "AMERICAN STYLE", images: ["Images/AM_13.jpg", "Images/AM_13b.jpg"]},
-  {codes: ["AM14"], name: "TUSCANY", type: "AMERICAN STYLE", images: ["Images/AM_14.jpg", "Images/AM_14b.jpg"]},
-  {codes: ["AM15"], name: "WILLOW BROOK", type: "AMERICAN STYLE", images: ["Images/AM_15.jpg", "Images/AM_15b.jpg"]},
-  {codes: ["AM16"], name: "MAGISTRATE RED", type: "AMERICAN STYLE", images: ["Images/AM_16.jpg", "Images/AM_16b.jpg"]},
-  {codes: ["AM17"], name: "OAK MANOR", type: "AMERICAN STYLE", images: ["Images/AM_17.jpg", "Images/AM_17b.jpg"]},
-  {codes: ["AM18"], name: "GLORIFY", type: "AMERICAN STYLE", images: ["Images/AM_18.png", "Images/AM_18b.jpg"]},
-  {codes: ["AM19"], name: "ROVEN", type: "AMERICAN STYLE", images: ["Images/AM_19.png", "Images/AM_19b.jpg"]},
-  {codes: ["AM20"], name: "GRANDIA", type: "AMERICAN STYLE", images: ["Images/AM_20.jpg", "Images/AM_20b.jpg"]},
-  {codes: ["AM21"], name: "PEACE", type: "AMERICAN STYLE", images: ["Images/AM_21.png", "Images/AM_21b.jpg"]},
-  {codes: ["AS01", "AS02"], name: "LUMINOR", type: "ASIA STYLE", images: ["Images/AS_01.jpg", "Images/AS_01b.jpg", "Images/AS_01_3.png"]},
-  {codes: ["AS03"], name: "GOLDEN", type: "ASIA STYLE", images: ["Images/AS_03.png", "Images/AS_03b.jpg", "Images/AS_03_3.png"]},
-  {codes: ["AS04"], name: "GILSON", type: "ASIA STYLE", images: ["Images/AS_04.png", "Images/AS_04b.jpg", "Images/AS_04_3.png"]},
-  {codes: ["AS05"], name: "IVORY", type: "ASIA STYLE", images: ["Images/AS_05.jpg", "Images/AS_05b.jpg", "Images/AS_05_3.jpg"]},
-  {codes: ["AS06"], name: "MONTANA", type: "ASIA STYLE", images: ["Images/AS_06.png", "Images/AS_06b.jpg", "Images/AS_06_3.png"]},
-  {codes: ["AS07"], name: "BRYON", type: "ASIA STYLE", images: ["Images/AS_09.jpg", "Images/AS_09a.png", "Images/AS_09_3.jpg"]},
-  {codes: ["AS08", "AS09"], name: "THERION", type: "ASIA STYLE", images: ["Images/AS_10.jpg", "Images/AS_10ja.jpg", "Images/AS_10jb.jpg"]},
-  {codes: ["AS10"], name: "VESPER", type: "ASIA STYLE", images: ["Images/AS_11.jpg", "Images/AS_11a.jpg", "Images/AS_11_3.jpg"]},
-  {codes: ["AS11"], name: "AVALON", type: "ASIA STYLE", images: ["Images/AS_13.jpg", "Images/AS_13_2.jpg", "Images/AS_13_3.jpg"]},
-  {codes: ["AS12"], name: "ORION", type: "ASIA STYLE", images: ["Images/AS_17.jpg", "Images/AS_17_2.jpg", "Images/AS_17_3.jpg"]},
-  {codes: ["AS13", "AS14", "AS15", "AS16", "AS17", "AS18"], name: "JEPARA", type: "ASIA STYLE", images: ["Images/AS_19.jpg", "Images/AS_17_2.jpg", "Images/AS_17_3.jpg"]},
-  {codes: ["AS19", "AS20", "AS21"], name: "SURABAYA", type: "ASIA STYLE", images: ["Images/AS_21b.jpg", "Images/AS_21c.jpg", "Images/AS_21.jpg"]},
-  {codes: ["AS22", "AS23"], name: "KAIXAO KIK", type: "ASIA STYLE", images: ["Images/AS_22a.jpg", "Images/AS_22b.jpg", "Images/AS_22_3.jpg"]},
-  {codes: ["AS24"], name: "TRINITY", type: "ASIA STYLE", images: ["Images/AS_24.jpg", "Images/AS_24_2.jpg", "Images/AS_24_3.jpg"]},
-  {codes: ["AS25"], name: "OKTAV", type: "ASIA STYLE", images: ["Images/AS_25.jpg", "Images/AS_25_2.jpg", "Images/AS_25_3.jpg"]},
-  {codes: ["AS26"], name: "LEGACY", type: "ASIA STYLE", images: ["Images/AS_18.jpg", "Images/AS_26_2.jpg", "Images/AS_26_3.jpg"]},
-  {codes: ["AS27"], name: "YARIS COKLAT", type: "ASIA STYLE", images: ["Images/AS_18.jpg", "Images/AS_26_2.jpg", "Images/AS_26_3.jpg"]},
-  {codes: ["AS28"], name: "JERSEY", type: "ASIA STYLE", images: ["Images/AS_02.png", "Images/AS_02b.jpg"]},
-  {codes: ["AS29"], name: "SYLVAN", type: "ASIA STYLE", images: ["Images/AS_02.png", "Images/AS_02b.jpg"]},
-  {codes: ["JS01"], name: "POLARIS ZJERO", type: "JATI STANDARD", images: ["Images/JS_01.jpg", "Images/JS_01a.jpg", "Images/JS_01_3.png"]}
-];
-
-let globalDbRows = [];
-let products = [];
-
-async function loadCatalog() {
-  try {
-    const response = await fetch(SUPABASE_URL + "/rest/v1/products?select=code,name,variant,stock", {
-      headers: HEADERS
-    });
-    if(response.ok) {
-      globalDbRows = await response.json();
-    }
-  } catch(e) {
-    console.error("Gagal konek Supabase:", e);
+async function api(path, options = {}) {
+  const response = await fetch(SUPABASE_URL + "/rest/v1/" + path, {
+    ...options,
+    headers: { ...HEADERS, ...(options.headers || {}) }
+  });
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || "Supabase request la la'o di'ak");
   }
+  if (response.status === 204) return null;
+  const text = await response.text();
+  if (!text) return null;
+  try { return JSON.parse(text); } catch (e) { return null; }
+}
 
-  products = masterProducts.map((item, idx) => {
-    let totalStock = 0;
-    
-    item.codes.forEach(c => {
-      let found = globalDbRows.find(r => (r.code || "").trim().toUpperCase() === c.toUpperCase());
-      if(found) {
-        totalStock += Number(found.stock || 0);
-      }
-    });
+async function loadData(){
+  const rows = await api("products?select=id,code,name,style,variant,stock,status&order=id");
+  data = rows.map(x => ({
+    id: x.id,
+    code: x.code,
+    type: x.style,
+    name: x.name,
+    variant: x.variant,
+    stock: Number(x.stock || 0),
+    status: x.status
+  }));
 
-    if(totalStock === 0) {
-      globalDbRows.forEach(r => {
-        let dbName = (r.name || "").trim().toUpperCase();
-        let dbCode = (r.code || "").trim().toUpperCase();
-        if(dbName.includes(item.name.toUpperCase()) || item.codes.includes(dbCode)) {
-          totalStock += Number(r.stock || 0);
-        }
-      });
-    }
+  const tx = await api("stock_transactions?select=id,product_id,transaction_type,quantity,naran_loja,objetivu_sai,notes,payment_status,total_price,dp_amount,ambulance_price,freezer_price,created_at&order=created_at.desc");
 
-    let stockDesc = totalStock === 0 ? "⚠️ Stock Hotu Ona (Habis)" : (totalStock <= 3 ? "⚠️ Stock Menus: " + totalStock : "📦 Stock Tersedia: " + totalStock);
+  history = tx.map(h => {
+    const product = data.find(p => p.id === h.product_id);
+    let storeName = h.naran_loja || "Loja Rebal";
+    if(storeName === "Toko Rebal") storeName = "Loja Rebal";
+    if(storeName === "Toko Bairopite") storeName = "Loja Bairopite";
+
+    const tot = Number(h.total_price || 0);
+    const amb = Number(h.ambulance_price || 0);
+    const frz = Number(h.freezer_price || 0);
+    const boxP = tot - amb - frz;
 
     return {
-      id: "prod-" + idx,
-      type: item.type,
-      name: item.name,
-      desc: stockDesc,
-      images: item.images
+      id: h.id,
+      productId: h.product_id,
+      store: storeName,
+      name: product ? (product.variant ? product.name + " — " + product.variant : product.name) : "—",
+      type: h.transaction_type === "in" ? "Sasan Tama" : "Sasan Sai",
+      qty: Number(h.quantity || 0),
+      dest: h.transaction_type === "in" ? "(Sasan Tama)" : (h.objetivu_sai || "—"),
+      totalPrice: tot,
+      dpAmount: Number(h.dp_amount || 0),
+      ambulancePrice: amb,
+      freezerPrice: frz,
+      boxPrice: boxP > 0 ? boxP : tot,
+      paymentStatus: h.transaction_type === "out" ? (h.payment_status || "LUNAS") : "—",
+      note: h.notes || "",
+      time: new Date(h.created_at).toLocaleString("id-ID")
     };
   });
-
-  let savedCat = localStorage.getItem('selectedCategory') || 'SEMUA';
-  show(savedCat, null, false);
 }
 
-function esc(s){return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+async function login(){
+  const usernameInput = document.getElementById("username");
+  const passwordInput = document.getElementById("password");
+  const error = document.getElementById("err");
 
-function show(cat,btn,save=true){
-  if(save){localStorage.setItem('selectedCategory',cat);}
-  document.querySelectorAll('.filters button').forEach(b=>b.classList.remove('active'));
-  if(!btn){
-    let buttons=document.querySelectorAll('.filters button');
-    buttons.forEach(b=>{if(b.textContent.trim()===(cat==='SEMUA'?'ALL DATA':cat)){btn=b;}});
-    if(btn)btn.classList.add('active');
-  }else{
-    btn.classList.add('active');
+  const username = usernameInput.value.trim();
+  const password = passwordInput.value;
+  error.textContent = "";
+
+  if(!username || !password){
+    error.textContent = "Favor hatama username ho lian fatin.";
+    return;
   }
 
-  let list = cat==='SEMUA' ? products : products.filter(p => p.type === cat);
+  const user = users[username];
+  if(!user || user.pass !== password){
+    error.textContent = "Username ka lian fatin sala.";
+    return;
+  }
 
-  document.getElementById('grid').innerHTML = list.map(p => {
-    let price = 'Presu, kontaktu ami';
-    let imgs = p.images.map((img, i) => `<img src="${esc(img)}" class="${i===0?'active':''}" alt="${esc(p.name)}" onerror="this.onerror=null;this.src='logo.png';">`).join('');
-    
-    let subOptionsHtml = '';
-    if (productSubOptions[p.name]) {
-      let options = productSubOptions[p.name].map(opt => `<option value="${esc(opt)}">${esc(opt)}</option>`).join('');
-      subOptionsHtml = `
-        <select class="card-select" id="select-${p.id}" onchange="updateProductDisplay('${p.id}', '${esc(p.name)}')">
-          <option value="">-- Hili Varian / Model --</option>
-          ${options}
-        </select>
-      `;
+  current = { name: username, role: user.role };
+  localStorage.setItem("zjero_user", JSON.stringify(current));
+  
+  await executeAppStartup();
+}
+
+async function executeAppStartup(){
+  const loginBox = document.getElementById("login");
+  const app = document.getElementById("app");
+  const who = document.getElementById("who");
+
+  loginBox.classList.add("hidden");
+  app.classList.remove("hidden");
+  who.textContent = current.name + " — " + current.role;
+
+  try {
+    await loadData();
+    setup();
+    page("dashboard", document.querySelector(".nav.active"));
+  } catch(error) {
+    console.error(error);
+    alert("Dada dadus husi Supabase la konsege.\n\n" + error.message);
+  }
+}
+
+function setup(){
+  const inmodel = document.getElementById("inmodel");
+  const outmodel = document.getElementById("outmodel");
+  const options = data.map((x,i) => {
+    const label = x.variant ? x.name + " — " + x.variant : x.name;
+    return `<option value="${i}">${label}</option>`;
+  }).join("");
+
+  if(inmodel) inmodel.innerHTML = options;
+  if(outmodel) outmodel.innerHTML = options;
+  updateStoreStock('in');
+  updateStoreStock('out');
+  renderData();
+  updateDash();
+  applyRole();
+}
+
+function toggleDPField(){
+  const payType = document.getElementById("outpaytype").value;
+  const dpContainer = document.getElementById("dpcontainer");
+  if(payType === "dp"){
+    dpContainer.classList.remove("hidden");
+  } else {
+    dpContainer.classList.add("hidden");
+    document.getElementById("outdp").value = "";
+  }
+}
+
+function getStoreStock(storeName, productId){
+  const storeTransactions = history.filter(h => h.store === storeName && h.productId === productId);
+  let storeStock = 0;
+  storeTransactions.forEach(h => {
+    if(h.type === "Sasan Tama") storeStock += h.qty;
+    else if(h.type === "Sasan Sai") storeStock -= h.qty;
+  });
+  return storeStock >= 0 ? storeStock : 0;
+}
+
+function updateStoreStock(kind){
+  const storeEl = document.getElementById(kind === 'in' ? 'instore' : 'outstore');
+  const modelEl = document.getElementById(kind === 'in' ? 'inmodel' : 'outmodel');
+  const infoEl = document.getElementById(kind === 'in' ? 'instockinfo' : 'outstockinfo');
+
+  if(!storeEl || !modelEl || !infoEl) return;
+  const storeName = storeEl.value;
+  const productIdx = Number(modelEl.value);
+  const product = data[productIdx];
+
+  if(!product){
+    infoEl.textContent = `📦 Stock iha ${storeName}: 0`;
+    return;
+  }
+  const storeStock = getStoreStock(storeName, product.id);
+  infoEl.textContent = `📦 Stock ${product.name} (${storeName}): ${storeStock}`;
+}
+
+function applyRole(){
+  const nav = document.querySelectorAll(".nav");
+  if(!nav.length) return;
+  nav.forEach(n => n.style.display = "block");
+  if(current.role === "Viewer"){
+    nav[2].style.display = "none";
+    nav[3].style.display = "none";
+    nav[4].style.display = "none";
+    nav[5].style.display = "none";
+  }
+  if(current.role === "Gudang"){
+    nav[5].style.display = "none";
+  }
+}
+
+function page(id,el){
+  document.querySelectorAll("main section").forEach(section => section.classList.add("hidden"));
+  const selected = document.getElementById(id);
+  if(selected) selected.classList.remove("hidden");
+
+  document.querySelectorAll(".nav").forEach(nav => nav.classList.remove("active"));
+  if(el) el.classList.add("active");
+
+  const titles = {
+    dashboard: "Painel",
+    data: "Dadus Kaixao",
+    in: "Sasan Tama",
+    out: "Sasan Sai",
+    history: "Istoria Transaksaun",
+    users: "Uzuáriu"
+  };
+  document.getElementById("title").textContent = titles[id] || "Painel";
+  if(id === "history") renderHistory();
+}
+
+function renderData(){
+  const search = document.getElementById("search");
+  const filter = document.getElementById("filter");
+  const table = document.getElementById("datatable");
+  if(!table) return;
+
+  const q = (search.value || "").toLowerCase();
+  const f = filter.value || "";
+
+  const filtered = data.filter(x => {
+    const label = x.name + " " + (x.variant || "");
+    return (!f || x.type === f) && (!q || label.toLowerCase().includes(q));
+  });
+
+  table.innerHTML = filtered.map(x => {
+    const stock = Number(x.stock || 0);
+    const label = x.variant ? x.name + " — " + x.variant : x.name;
+    return `
+      <tr>
+        <td>${x.code || "—"}</td>
+        <td>${x.type || "—"}</td>
+        <td><b>${label}</b></td>
+        <td><input id="stock-input-${x.id}" type="number" value="${stock}" style="width:70px; padding:5px; text-align:center;"></td>
+        <td>
+          <button type="button" class="update-stock-btn" onclick="updateDirectStock('${x.id}')">💾 Update Stock</button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
+async function updateDirectStock(productId) {
+  const inputEl = document.getElementById("stock-input-" + productId);
+  if(!inputEl) return;
+  const newStock = Number(inputEl.value);
+
+  if(isNaN(newStock) || newStock < 0) {
+    alert("Favor hatama numeru stock ne'ebé loloos.");
+    return;
+  }
+
+  if(!confirm("Muda stock ba " + newStock + "?")) return;
+
+  let newStatus = newStock === 0 ? "out_of_stock" : (newStock <= 3 ? "low_stock" : "available");
+
+  try {
+    await api("products?id=eq." + productId, {
+      method: "PATCH",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({ stock: newStock, status: newStatus })
+    });
+
+    await loadData();
+    renderData();
+    updateDash();
+    alert("Stock atualiza ona ho susesu!");
+  } catch(error) {
+    console.error(error);
+    alert("La konsege atualiza stock.\n\n" + error.message);
+  }
+}
+
+async function transact(kind){
+  const storeElement = document.getElementById(kind === "in" ? "instore" : "outstore");
+  const modelElement = document.getElementById(kind === "in" ? "inmodel" : "outmodel");
+  const qtyElement = document.getElementById(kind === "in" ? "inqty" : "outqty");
+  const store = storeElement.value;
+  const destElement = document.getElementById("outdest");
+  const boxPriceEl = document.getElementById("outboxprice");
+  const ambulanceEl = document.getElementById("outambulance");
+  const freezerEl = document.getElementById("outfreezer");
+  const payTypeEl = document.getElementById("outpaytype");
+  const dpEl = document.getElementById("outdp");
+  const noteElement = document.getElementById(kind === "in" ? "innote" : "outnote");
+
+  const idx = Number(modelElement.value);
+  const qty = Number(qtyElement.value);
+  const dest = kind === "out" ? (destElement.value.trim() || "—") : "—";
+
+  const boxPrice = kind === "out" ? Number(boxPriceEl.value || 0) : 0;
+  const ambulancePrice = kind === "out" ? Number(ambulanceEl.value || 0) : 0;
+  const freezerPrice = kind === "out" ? Number(freezerEl.value || 0) : 0;
+
+  const totalPrice = boxPrice + ambulancePrice + freezerPrice;
+  let dpAmount = 0;
+  let paymentStatus = "LUNAS";
+
+  if (kind === "out" && payTypeEl.value === "dp") {
+    dpAmount = Number(dpEl.value || 0);
+    paymentStatus = (dpAmount < totalPrice) ? "SEIDAUK LUNAS" : "LUNAS";
+  }
+
+  const note = noteElement ? noteElement.value.trim() : "";
+  const product = data[idx];
+
+  if(!product){
+    alert("Modelu kaixao la hetan.");
+    return;
+  }
+  if(!qty || qty < 1){
+    alert("Favor hatama kuantidade ne'ebé loloos.");
+    return;
+  }
+  if(kind === "out" && qty > Number(product.stock || 0)){
+    alert("Stock la iha Sufisiente.");
+    return;
+  }
+
+  try{
+    await api("stock_transactions", {
+      method: "POST",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({
+        product_id: product.id,
+        transaction_type: kind,
+        quantity: qty,
+        naran_loja: store,
+        objetivu_sai: dest,
+        total_price: totalPrice,
+        dp_amount: dpAmount,
+        ambulance_price: ambulancePrice,
+        freezer_price: freezerPrice,
+        payment_status: paymentStatus,
+        notes: note
+      })
+    });
+
+    const currentStock = Number(product.stock || 0);
+    const newStock = kind === "in" ? (currentStock + qty) : (currentStock - qty);
+    let newStatus = newStock === 0 ? "out_of_stock" : (newStock <= 3 ? "low_stock" : "available");
+
+    await api("products?id=eq." + product.id, {
+      method: "PATCH",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({ stock: newStock, status: newStatus })
+    });
+
+    await loadData();
+    setup();
+
+    qtyElement.value = "";
+    if(destElement) destElement.value = "";
+    if(boxPriceEl) boxPriceEl.value = "";
+    if(dpEl) dpEl.value = "";
+    if(payTypeEl) payTypeEl.value = "lunas";
+    toggleDPField();
+    if(noteElement) noteElement.value = "";
+
+    alert("Transaksaun Rai ona ba Supabase ho susesu! Stock iha katalog web mós agora foin atualiza ona.");
+  }catch(error){
+    console.error(error);
+    alert("Transaksaun la konsege rai ba Supabase.\n\n" + error.message);
+  }
+}
+
+async function updatePaymentStatus(txId) {
+  if(!confirm("Muda estadu pagamentu ba LUNAS?")) return;
+  try {
+    await api("stock_transactions?id=eq." + txId, {
+      method: "PATCH",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({ payment_status: "LUNAS", dp_amount: 0 })
+    });
+
+    await loadData();
+    renderHistory();
+    updateDash();
+
+    alert("Estadu pagamentu muda ona ba LUNAS ho susesu!");
+  } catch(error) {
+    console.error(error);
+    alert("La konsege atualiza estadu pagamentu.\n\n" + error.message);
+  }
+}
+
+function showInvoice(txId) {
+  const h = history.find(x => String(x.id) === String(txId));
+  if(!h) {
+    alert("Dados transaksaun la hetan.");
+    return;
+  }
+
+  document.getElementById("inv-id").textContent = "No: #" + String(h.id).slice(-5);
+  document.getElementById("inv-date").textContent = "Data: " + h.time;
+  document.getElementById("inv-store").textContent = h.store;
+  document.getElementById("inv-dest").textContent = h.dest;
+
+  let itemsHtml = `
+    <tr>
+      <td><b>Kaixao:</b> ${h.name}</td>
+      <td style="text-align:center;">${h.qty}</td>
+      <td style="text-align:right;">$${h.boxPrice.toFixed(2)}</td>
+    </tr>
+  `;
+  if(h.ambulancePrice > 0){
+    itemsHtml += `
+      <tr>
+        <td><b>Servisu Ambulansia</b></td>
+        <td style="text-align:center;">1</td>
+        <td style="text-align:right;">$${h.ambulancePrice.toFixed(2)}</td>
+      </tr>
+    `;
+  }
+  if(h.freezerPrice > 0){
+    itemsHtml += `
+      <tr>
+        <td><b>Sewa Freezer</b></td>
+        <td style="text-align:center;">1</td>
+        <td style="text-align:right;">$${h.freezerPrice.toFixed(2)}</td>
+      </tr>
+    `;
+  }
+  document.getElementById("inv-items-body").innerHTML = itemsHtml;
+
+  document.getElementById("inv-subbox").textContent = "$" + h.boxPrice.toFixed(2);
+  document.getElementById("inv-subamb").textContent = "$" + h.ambulancePrice.toFixed(2);
+  document.getElementById("inv-subfrz").textContent = "$" + h.freezerPrice.toFixed(2);
+  document.getElementById("inv-total").textContent = "$" + h.totalPrice.toFixed(2);
+
+  const payStatusEl = document.getElementById("inv-paystatus");
+  const dpRow = document.getElementById("inv-dp-row");
+  const dpDetail = document.getElementById("inv-dp-detail");
+
+  if(h.paymentStatus === "LUNAS"){
+    payStatusEl.innerHTML = `<span style="color:#39704c; font-weight:bold;">LUNAS (Cash)</span>`;
+    dpRow.style.display = "none";
+  } else {
+    const sisa = h.totalPrice - h.dpAmount;
+    payStatusEl.innerHTML = `<span style="color:#a8483e; font-weight:bold;">SEIDAUK LUNAS (DP)</span>`;
+    dpRow.style.display = "flex";
+    dpDetail.innerHTML = `DP: <b>$${h.dpAmount.toFixed(2)}</b> | Sisa Kekurangan: <b style="color:#a8483e;">$${sisa > 0 ? sisa.toFixed(2) : '0.00'}</b>`;
+  }
+
+  const noteBox = document.getElementById("inv-note-box");
+  const noteText = document.getElementById("inv-note-text");
+  if(h.note){
+    noteBox.style.display = "block";
+    noteText.textContent = h.note;
+  } else {
+    noteBox.style.display = "none";
+  }
+
+  document.querySelectorAll("main section").forEach(s => s.classList.add("hidden"));
+  document.getElementById("invoice-section").classList.remove("hidden");
+  document.getElementById("title").textContent = "Invoice / Nota";
+  window.scrollTo(0, 0);
+}
+
+function renderHistory(){
+  const table = document.getElementById("historytable");
+  if(!table) return;
+  
+  if(!history.length){
+    table.innerHTML = `<tr><td colspan="7">Seidauk iha transaksaun.</td></tr>`;
+    return;
+  }
+
+  table.innerHTML = history.map(h => {
+    let rincianText = "—";
+    let btnInvoice = "";
+    if(h.type === "Sasan Sai") {
+      rincianText = `Kaixao: $${h.boxPrice}<br>Ambulansia: $${h.ambulancePrice}<br>Freezer: $${h.freezerPrice}`;
+      btnInvoice = `<button type="button" class="invoice-btn" onclick="showInvoice('${h.id}')">📄 Cetak Invoice</button>`;
     }
 
-    let initialMsg = encodeURIComponent('Halo ZJERO, Ha’u interese ho produtu ' + p.name);
+    let paymentBadge = "—";
+    if(h.type === "Sasan Sai") {
+      if(h.paymentStatus === "LUNAS") {
+        paymentBadge = `<span class="badge-lunas">LUNAS (Cash)</span>`;
+      } else {
+        const sisa = h.totalPrice - h.dpAmount;
+        paymentBadge = `<span class="badge-belum">SEIDAUK LUNAS</span><br><small style="color:#a8483e;font-weight:bold;">DP: $${h.dpAmount} | Sisa: $${sisa > 0 ? sisa : 0}</small>`;
+        paymentBadge += `<br><button type="button" class="btn-lunas" onclick="updatePaymentStatus('${h.id}')">Update LUNAS</button>`;
+      }
+    }
 
     return `
-      <div class="card">
-        <div class="slider" id="slider-${p.id}">
-          ${imgs}
-          <button class="slider-btn prev" onclick="moveSlide('${p.id}', -1)">‹</button>
-          <button class="slider-btn next" onclick="moveSlide('${p.id}', 1)">›</button>
-        </div>
-        <div class="body">
-          <div class="type">${esc(p.type)}</div>
-          <div class="name" id="name-${p.id}">${esc(p.name)}</div>
-          <div class="desc" id="desc-${p.id}">${esc(p.desc)}</div>
-          <div class="price">${price}</div>
-          ${subOptionsHtml}
-          <a class="wa" id="wa-${p.id}" href="https://wa.me/${wa}?text=${initialMsg}" target="_blank">Husu liu husi WhatsApp</a>
-        </div>
-      </div>
+      <tr>
+        <td>${h.time}</td>
+        <td><b>${h.store}</b></td>
+        <td>${h.name}</td>
+        <td>${h.qty}</td>
+        <td>${rincianText}</td>
+        <td><b>Total: $${h.totalPrice}</b></td>
+        <td>${paymentBadge} ${btnInvoice}</td>
+      </tr>
     `;
-  }).join('');
+  }).join("");
 }
 
-function updateProductDisplay(productId, baseName) {
-  let selectElem = document.getElementById(`select-${productId}`);
-  let nameElem = document.getElementById(`name-${productId}`);
-  let descElem = document.getElementById(`desc-${productId}`);
-  let waLinkElem = document.getElementById(`wa-${productId}`);
-  let selectedVariant = selectElem.value;
+updateDash = function(){
+  const totalStock = data.reduce((total,x) => total + Number(x.stock || 0), 0);
+  const totalIn = history.filter(h => h.type === "Sasan Tama").reduce((total,h) => total + Number(h.qty || 0), 0);
+  const totalOut = history.filter(h => h.type === "Sasan Sai").reduce((total,h) => total + Number(h.qty || 0), 0);
 
-  let targetName = selectedVariant ? selectedVariant : baseName;
-  nameElem.textContent = targetName;
+  document.getElementById("cmodels").textContent = data.length;
+  document.getElementById("cstock").textContent = totalStock;
+  document.getElementById("cin").textContent = totalIn;
+  document.getElementById("cout").textContent = totalOut;
 
-  let specificStock = 0;
-  if (selectedVariant) {
-    // Mencocokkan pilihan dropdown dengan kolom 'variant' di Supabase
-    let foundVar = globalDbRows.find(r => (r.variant || "").trim().toUpperCase() === selectedVariant.toUpperCase());
-    if (foundVar) {
-      specificStock = Number(foundVar.stock || 0);
-    }
-  } else {
-    let masterItem = masterProducts.find(p => p.name === baseName);
-    if (masterItem) {
-      masterItem.codes.forEach(c => {
-        let found = globalDbRows.find(r => (r.code || "").trim().toUpperCase() === c.toUpperCase());
-        if(found) specificStock += Number(found.stock || 0);
-      });
+  const dashhist = document.getElementById("dashhist");
+  dashhist.innerHTML = history.slice(0,5).map(h => {
+    return `
+      <tr>
+        <td><b>${h.store}</b></td>
+        <td>${h.name}</td>
+        <td>${h.qty}</td>
+        <td>$${h.totalPrice}</td>
+      </tr>
+    `;
+  }).join("") || `<tr><td colspan="4">Seidauk iha transaksaun.</td></tr>`;
+
+  const stores = ["Loja Rebal", "Loja Bairopite", "Gudang Lahane", "Loja Same", "Loja Oe-cusse", "Loja Ainaro", "Loja Baucau"];
+  const breakdownEl = document.getElementById("storestockbreakdown");
+  let breakdownHTML = "";
+  stores.forEach(store => {
+    breakdownHTML += `<div class="store-card"><h3>🏢 ${store}</h3><ul style="margin:0;padding-left:18px;font-size:12px;">`;
+    let hasItems = false;
+    data.forEach(p => {
+      const qty = getStoreStock(store, p.id);
+      if(qty > 0){
+        hasItems = true;
+        const label = p.variant ? `${p.name} (${p.variant})` : p.name;
+        breakdownHTML += `<li>${label}: <b>${qty}</b></li>`;
+      }
+    });
+    if(!hasItems) breakdownHTML += `<li style="color:#888;">Seidauk iha stock</li>`;
+    breakdownHTML += `</ul></div>`;
+  });
+  breakdownEl.innerHTML = breakdownHTML;
+
+  const available = data.filter(x => Number(x.stock || 0) > 3).length;
+  const low = data.filter(x => Number(x.stock || 0) > 0 && Number(x.stock || 0) <= 3).length;
+  const empty = data.filter(x => Number(x.stock || 0) === 0).length;
+
+  document.getElementById("summary").innerHTML = `
+    <p style="font-size:12px">Disponível: <b>${available}</b> model</p>
+    <p style="font-size:12px">Menus (Menipis): <b>${low}</b> model</p>
+    <p style="font-size:12px">Hotu ona (Habis): <b>${empty}</b> model</p>
+  `;
+};
+
+function logout(){
+  current = null;
+  localStorage.removeItem("zjero_user");
+  document.getElementById("app").classList.add("hidden");
+  document.getElementById("login").classList.remove("hidden");
+  document.getElementById("username").value = "";
+  document.getElementById("password").value = "";
+  document.getElementById("err").textContent = "";
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+  const savedUser = localStorage.getItem("zjero_user");
+  if(savedUser){
+    try{
+      current = JSON.parse(savedUser);
+      executeAppStartup();
+    }catch(e){
+      localStorage.removeItem("zjero_user");
     }
   }
 
-  let stockDesc = specificStock === 0 ? "⚠️ Stock Hotu Ona (Habis)" : (specificStock <= 3 ? "⚠️ Stock Menus: " + specificStock : "📦 Stock Tersedia: " + specificStock);
-  descElem.textContent = stockDesc;
-
-  let message = `Halo ZJERO, Ha’u interese ho produtu ${targetName}`;
-  waLinkElem.href = `https://wa.me/${wa}?text=` + encodeURIComponent(message);
-}
-
-function moveSlide(productId, direction){
-  let slider = document.getElementById(`slider-${productId}`);
-  if(!slider) return;
-  let imgs = slider.querySelectorAll('img');
-  let activeIndex = Array.from(imgs).findIndex(img => img.classList.contains('active'));
-  if(activeIndex === -1) return;
-  imgs[activeIndex].classList.remove('active');
-  let newIndex = (activeIndex + direction + imgs.length) % imgs.length;
-  imgs[newIndex].classList.add('active');
-}
-
-loadCatalog();
+  const pwdInput = document.getElementById("password");
+  if(pwdInput){
+    pwdInput.addEventListener("keydown", function(event){
+      if(event.key === "Enter") login();
+    });
+  }
+});
 </script>
+
 </body>
 </html>
