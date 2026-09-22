@@ -1159,6 +1159,15 @@ async function updateDirectStock(productId) {
     return;
   }
 
+  // Pengaman Password baru: adminzjero2026
+  const passInput = prompt("Hatama lian fatin (password) hodi konfirma update stock:");
+  if (passInput === null) return;
+
+  if (passInput !== "adminzjero2026") {
+    alert("Lian fatin sala! Ita la iha autorizasaun atu muda stock.");
+    return;
+  }
+
   if(!confirm("Muda stock ba " + newStock + "?")) return;
 
   let newStatus = newStock === 0 ? "out_of_stock" : (newStock <= 3 ? "low_stock" : "available");
@@ -1252,7 +1261,6 @@ async function transact(kind){
       })
     });
 
-    // Jika barang rusak (damaged), tidak menambah total stock siap jual di web, tapi tercatat di history
     let newStock = Number(product.stock || 0);
     if(!isDamaged) {
       newStock = kind === "in" ? (newStock + qty) : (newStock - qty);
