@@ -352,6 +352,15 @@ th{
   margin-bottom: 4px;
 }
 
+.badge-dam {
+  background: #fdf0ed;
+  color: #a8483e;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: bold;
+}
+
 .btn-lunas {
   background: #39734e;
   padding: 5px 10px;
@@ -625,13 +634,23 @@ th{
             <option value="Loja Ainaro">Loja Ainaro</option>
             <option value="Loja Baucau">Loja Baucau</option>
           </select>
+
+          <label>Kondisaun Sasan</label>
+          <select id="incondition">
+            <option value="good">Di'ak (Siap Jual)</option>
+            <option value="damaged">Aat / Rusak</option>
+          </select>
+
           <label>Modelu Kaixao</label>
           <select id="inmodel" onchange="updateStoreStock('in')"></select>
           <div id="instockinfo" class="stock-info">📦 Stock iha loja ne'e: 0</div>
+          
           <label>Kuantidade Tama</label>
           <input id="inqty" type="number" min="1" placeholder="Egzemplu: 5">
+          
           <label>Komentáriu / Notas</label>
           <textarea id="innote" rows="3" placeholder="Opcional"></textarea>
+          
           <button type="button" onclick="transact('in')">Rejistu Sasan Tama</button>
         </div>
       </div>
@@ -1173,10 +1192,13 @@ async function transact(kind){
   const payTypeEl = document.getElementById("outpaytype");
   const dpEl = document.getElementById("outdp");
   const noteElement = document.getElementById(kind === "in" ? "innote" : "outnote");
+  const conditionEl = document.getElementById("incondition");
 
   const idx = Number(modelElement.value);
   const qty = Number(qtyElement.value);
   const dest = kind === "out" ? (destElement.value.trim() || "—") : "—";
+  
+  const isDamaged = kind === "in" && conditionEl && conditionEl.value === "damaged";
 
   const boxPrice = kind === "out" ? Number(boxPriceEl.value || 0) : 0;
   const ambulancePrice = kind === "out" ? Number(ambulanceEl.value || 0) : 0;
@@ -1191,7 +1213,11 @@ async function transact(kind){
     paymentStatus = (dpAmount < totalPrice) ? "SEIDAUK LUNAS" : "LUNAS";
   }
 
-  const note = noteElement ? noteElement.value.trim() : "";
+  let note = noteElement ? noteElement.value.trim() : "";
+  if(isDamaged){
+    note = "[KONDISAUN: AAT / RUSAK] " + note;
+  }
+
   const product = data[idx];
 
   if(!product){
@@ -1226,8 +1252,12 @@ async function transact(kind){
       })
     });
 
-    const currentStock = Number(product.stock || 0);
-    const newStock = kind === "in" ? (currentStock + qty) : (currentStock - qty);
+    // Jika barang rusak (damaged), tidak menambah total stock siap jual di web, tapi tercatat di history
+    let newStock = Number(product.stock || 0);
+    if(!isDamaged) {
+      newStock = kind === "in" ? (newStock + qty) : (newStock - qty);
+    }
+    
     let newStatus = newStock === 0 ? "out_of_stock" : (newStock <= 3 ? "low_stock" : "available");
 
     await api("products?id=eq." + product.id, {
@@ -1247,10 +1277,10 @@ async function transact(kind){
     toggleDPField();
     if(noteElement) noteElement.value = "";
 
-    alert("Transaksaun Rai ona ba Supabase ho susesu! Stock iha katalog web mós agora foin atualiza ona.");
+    alert(isDamaged ? "Sasan Aat rejistu ona iha istoria (Stock publik la book)." : "Transaksaun rai ona ho susesu!");
   }catch(error){
     console.error(error);
-    alert("Transaksaun la konsege rai ba Supabase.\n\n" + error.message);
+    alert("Transaksaun la konsege rai.\n\n" + error.message);
   }
 }
 
@@ -1280,10 +1310,13 @@ function showStorePrint(storeName) {
 
   let html = "";
   let hasItems = false;
+  let storeTotal = 0;
+
   data.forEach(p => {
     const qty = getStoreStock(storeName, p.id);
     if(qty > 0){
       hasItems = true;
+      storeTotal += qty;
       const label = p.variant ? `${p.name} (${p.variant})` : p.name;
       html += `
         <tr>
@@ -1297,6 +1330,13 @@ function showStorePrint(storeName) {
 
   if(!hasItems){
     html = `<tr><td colspan="3" style="text-align:center; color:#888;">Seidauk iha stock iha fatin ne'e.</td></tr>`;
+  } else {
+    html += `
+      <tr style="background:#fdfbf7; font-weight:bold;">
+        <td colspan="2" style="text-align:right;">Total Stock di Fatin Ne'e:</td>
+        <td style="text-align:center; color:#a77c1e; font-size:14px;">${storeTotal}</td>
+      </tr>
+    `;
   }
 
   document.getElementById("print-store-items").innerHTML = html;
@@ -1397,6 +1437,9 @@ function renderHistory(){
       btnInvoice = `<button type="button" class="invoice-btn" onclick="showInvoice('${h.id}')">📄 Cetak Invoice</button>`;
     }
 
+    let noteDisplay = h.note ? `<br><small style="color:#666;">${h.note}</small>` : "";
+    let isDamagedBadge = h.note && h.note.includes("AAT / RUSAK") ? `<br><span class="badge-dam">⚠️ Sasan Aat / Rusak</span>` : "";
+
     let paymentBadge = "—";
     if(h.type === "Sasan Sai") {
       if(h.paymentStatus === "LUNAS") {
@@ -1406,13 +1449,15 @@ function renderHistory(){
         paymentBadge = `<span class="badge-belum">SEIDAUK LUNAS</span><br><small style="color:#a8483e;font-weight:bold;">DP: $${h.dpAmount} | Sisa: $${sisa > 0 ? sisa : 0}</small>`;
         paymentBadge += `<br><button type="button" class="btn-lunas" onclick="updatePaymentStatus('${h.id}')">Update LUNAS</button>`;
       }
+    } else {
+      paymentBadge = `<span style="color:#39734e; font-weight:bold;">Sasan Tama</span>${isDamagedBadge}`;
     }
 
     return `
       <tr>
         <td>${h.time}</td>
         <td><b>${h.store}</b></td>
-        <td>${h.name}</td>
+        <td>${h.name} ${noteDisplay}</td>
         <td>${h.qty}</td>
         <td>${rincianText}</td>
         <td><b>Total: $${h.totalPrice}</b></td>
@@ -1447,11 +1492,17 @@ updateDash = function(){
   const stores = ["Loja Rebal", "Loja Bairopite", "Gudang Lahane", "Loja Same", "Loja Oe-cusse", "Loja Ainaro", "Loja Baucau"];
   const breakdownEl = document.getElementById("storestockbreakdown");
   let breakdownHTML = "";
+  
   stores.forEach(store => {
+    let storeTotalCount = 0;
+    data.forEach(p => {
+      storeTotalCount += getStoreStock(store, p.id);
+    });
+
     breakdownHTML += `
       <div class="store-card">
         <div class="store-card-header">
-          <h3>🏢 ${store}</h3>
+          <h3>🏢 ${store} <span style="font-size:12px; color:#a77c1e; font-weight:bold;">(Total: ${storeTotalCount})</span></h3>
           <button type="button" class="store-print-btn" onclick="showStorePrint('${store}')">🖨️ Cetak Stock</button>
         </div>
         <ul style="margin:0;padding-left:18px;font-size:12px;">
