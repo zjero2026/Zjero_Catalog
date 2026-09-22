@@ -197,7 +197,9 @@ button{
 .secondary{background:#555}
 .danger{background:#a8483e}
 .print-btn{background:#39734e;margin-bottom:14px;}
-.invoice-btn{background:#211e1a;padding:6px 10px;font-size:11px;margin-left:5px;cursor:pointer;}
+.invoice-btn{background:#211e1a;padding:5px 8px;font-size:10px;margin-left:3px;cursor:pointer;}
+.edit-btn{background:#a77c1e;padding:5px 8px;font-size:10px;margin-left:3px;cursor:pointer;}
+.delete-btn{background:#a8483e;padding:5px 8px;font-size:10px;margin-left:3px;cursor:pointer;}
 .update-stock-btn{background:#39734e;padding:4px 8px;font-size:11px;margin-left:5px;}
 
 table{
@@ -357,7 +359,7 @@ th{
   color: #a8483e;
   padding: 3px 6px;
   border-radius: 4px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: bold;
 }
 
@@ -487,7 +489,7 @@ th{
 /* CSS MEDIA PRINT KHUSUS */
 @media print{
   body { background: #fff !important; color: #000 !important; }
-  .side, .top, button, .print-btn, .invoice-btn, .btn-lunas, .form { display: none !important; }
+  .side, .top, button, .print-btn, .invoice-btn, .edit-btn, .delete-btn, .btn-lunas, .form { display: none !important; }
   .app { display: block !important; }
   .main { padding: 0 !important; overflow: visible !important; width: 100% !important; }
   section { display: none !important; }
@@ -1221,12 +1223,13 @@ async function transact(kind){
     paymentStatus = (dpAmount < totalPrice) ? "SEIDAUK LUNAS" : "LUNAS";
   }
 
-  let note = noteElement ? noteElement.value.trim() : "";
-  if(isDamaged){
-    note = "[KONDISAUN: AAT / RUSAK] " + (note ? note : "");
-  }
-
   const product = data[idx];
+  let note = noteElement ? noteElement.value.trim() : "";
+  
+  if(isDamaged){
+    const labelName = product ? (product.variant ? `${product.name} — ${product.variant}` : product.name) : "Kaixao";
+    note = `(${labelName} rusak : ${qty})${note ? ' - ' + note : ''}`;
+  }
 
   if(!product){
     alert("Modelu kaixao la hetan.");
@@ -1284,10 +1287,10 @@ async function transact(kind){
     toggleDPField();
     if(noteElement) noteElement.value = "";
 
-    alert(isDamaged ? "Sasan Aat rejistu ona iha istoria (Stock publik la book)." : "Transaksaun rai ona ho susesu!");
+    alert(isDamaged ? "Sasan Aat rejistu ona iha istoria ho formatu kurung!" : "Transaksaun rai ona ho susesu!");
   }catch(error){
     console.error(error);
-    alert("Transaksaun la konsege rai.\n\n" + error.message);
+    alert("La konsege rai transaksaun.\n\n" + error.message);
   }
 }
 
@@ -1308,6 +1311,66 @@ async function updatePaymentStatus(txId) {
   } catch(error) {
     console.error(error);
     alert("La konsege atualiza estadu pagamentu.\n\n" + error.message);
+  }
+}
+
+async function deleteTransaction(txId) {
+  const passInput = prompt("Hatama password zjeroadmin2026 hodi hamos (delete) transaksaun ne'e:");
+  if (passInput === null) return;
+
+  if (passInput !== "zjeroadmin2026") {
+    alert("Password sala! Ita la iha autorizasaun atu hamos transaksaun ne'e.");
+    return;
+  }
+
+  if(!confirm("Ita sure hakarak hamos transaksaun ne'e?")) return;
+
+  try {
+    await api("stock_transactions?id=eq." + txId, {
+      method: "DELETE"
+    });
+
+    await loadData();
+    renderHistory();
+    updateDash();
+    alert("Transaksaun hamos ona ho susesu!");
+  } catch(error) {
+    console.error(error);
+    alert("La konsege hamos transaksaun.\n\n" + error.message);
+  }
+}
+
+async function editTransaction(txId) {
+  const passInput = prompt("Hatama password zjeroadmin2026 hodi edit transaksaun ne'e:");
+  if (passInput === null) return;
+
+  if (passInput !== "zjeroadmin2026") {
+    alert("Password sala! Ita la iha autorizasaun atu edit transaksaun ne'e.");
+    return;
+  }
+
+  const newQty = prompt("Hatama kuantidade foun:");
+  if(newQty === null) return;
+  const qtyNum = Number(newQty);
+  if(isNaN(qtyNum) || qtyNum < 1){
+    alert("Kuantidade sala.");
+    return;
+  }
+
+  try {
+    await api("stock_transactions?id=eq." + txId, {
+      method: "PATCH",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({ quantity: qtyNum })
+    });
+
+    await loadData();
+    renderHistory();
+    updateDash();
+    alert("Kuantidade transaksaun troka ona ho susesu!");
+  } catch(error) {
+    console.error(error);
+    alert("La konsege edit transaksaun.\n\n" + error.message);
   }
 }
 
@@ -1438,10 +1501,11 @@ function renderHistory(){
 
   table.innerHTML = history.map(h => {
     let rincianText = "—";
-    let btnInvoice = "";
+    let actionButtons = `<button type="button" class="edit-btn" onclick="editTransaction('${h.id}')">✏️ Edit</button><button type="button" class="delete-btn" onclick="deleteTransaction('${h.id}')">🗑️ Delete</button>`;
+    
     if(h.type === "Sasan Sai") {
       rincianText = `Kaixao: $${h.boxPrice}<br>Ambulansia: $${h.ambulancePrice}<br>Freezer: $${h.freezerPrice}`;
-      btnInvoice = `<button type="button" class="invoice-btn" onclick="showInvoice('${h.id}')">📄 Cetak Invoice</button>`;
+      actionButtons += `<br><button type="button" class="invoice-btn" onclick="showInvoice('${h.id}')" style="margin-top:4px;">📄 Cetak Invoice</button>`;
     }
 
     let noteDisplay = h.note ? `<br><small style="color:#444; background:#fdf8ed; padding:2px 6px; border-radius:4px; display:inline-block; margin-top:3px;">💬 ${h.note}</small>` : "";
@@ -1453,10 +1517,10 @@ function renderHistory(){
       } else {
         const sisa = h.totalPrice - h.dpAmount;
         paymentBadge = `<span class="badge-belum">SEIDAUK LUNAS</span><br><small style="color:#a8483e;font-weight:bold;">DP: $${h.dpAmount} | Sisa: $${sisa > 0 ? sisa : 0}</small>`;
-        paymentBadge += `<br><button type="button" class="btn-lunas" onclick="updatePaymentStatus('${h.id}')">Update LUNAS</button>`;
+        paymentBadge += `<br><button type="button" class="btn-lunas" onclick="updatePaymentStatus('${h.id}')" style="margin-top:3px;">Update LUNAS</button>`;
       }
     } else {
-      let isDamaged = h.note && h.note.includes("AAT / RUSAK");
+      let isDamaged = h.note && h.note.includes("rusak");
       paymentBadge = isDamaged ? `<span class="badge-dam">⚠️ Sasan Aat / Rusak</span>` : `<span style="color:#39734e; font-weight:bold;">Sasan Tama (Di'ak)</span>`;
     }
 
@@ -1468,7 +1532,7 @@ function renderHistory(){
         <td>${h.qty}</td>
         <td>${rincianText}</td>
         <td><b>Total: $${h.totalPrice}</b></td>
-        <td>${paymentBadge} ${btnInvoice}</td>
+        <td>${paymentBadge}<div style="margin-top:4px;">${actionButtons}</div></td>
       </tr>
     `;
   }).join("");
