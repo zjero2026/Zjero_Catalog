@@ -534,6 +534,7 @@ th{
     <div class="nav" onclick="page('data',this)">▣ <span>Dadus Kaixao</span></div>
     <div class="nav" onclick="page('in',this)">↓ <span>Sasan Tama</span></div>
     <div class="nav" onclick="page('out',this)">↑ <span>Sasan Sai</span></div>
+    <div class="nav" onclick="page('transfer',this)">⇄ <span>Transfer Sasan</span></div>
     <div class="nav" onclick="page('history',this)">▤ <span>Istoria Transaksaun</span></div>
     <div class="nav" onclick="page('users',this)">♙ <span>Uzuáriu</span></div>
     <div class="nav" onclick="logout()">↪ <span>Sai</span></div>
@@ -722,6 +723,48 @@ th{
       </div>
     </section>
 
+    <!-- TRANSFER SASAN ANTAR LOJA / GUDANG -->
+    <section id="transfer" class="hidden">
+      <div class="panel" style="max-width:650px">
+        <h2>Transfer Sasan (Husi Fatin Ida ba Fatin Seluk)</h2>
+        <div class="form">
+          <label>Hili Fatin Asal (Husi Fatin Ne'ebé)</label>
+          <select id="fromstore" onchange="updateTransferStockInfo()">
+            <option value="Gudang Lahane">Gudang Lahane</option>
+            <option value="Loja Rebal">Loja Rebal</option>
+            <option value="Loja Bairopite">Loja Bairopite</option>
+            <option value="Loja Same">Loja Same</option>
+            <option value="Loja Oe-cusse">Loja Oe-cusse</option>
+            <option value="Loja Ainaro">Loja Ainaro</option>
+            <option value="Loja Baucau">Loja Baucau</option>
+          </select>
+
+          <label>Hili Fatin Tujuan (Ba Loja Ne'ebé)</label>
+          <select id="tostore">
+            <option value="Loja Rebal">Loja Rebal</option>
+            <option value="Loja Bairopite">Loja Bairopite</option>
+            <option value="Gudang Lahane">Gudang Lahane</option>
+            <option value="Loja Same">Loja Same</option>
+            <option value="Loja Oe-cusse">Loja Oe-cusse</option>
+            <option value="Loja Ainaro">Loja Ainaro</option>
+            <option value="Loja Baucau">Loja Baucau</option>
+          </select>
+
+          <label>Modelu Kaixao</label>
+          <select id="transfermodel" onchange="updateTransferStockInfo()"></select>
+          <div id="transferstockinfo" class="stock-info">📦 Stock iha fatin asal: 0</div>
+
+          <label>Kuantidade Transfer</label>
+          <input id="transferqty" type="number" min="1" placeholder="Egzemplu: 3">
+
+          <label>Komentáriu / Notas</label>
+          <textarea id="transfernote" rows="3" placeholder="Egzemplu: Transportadora / Soper / Placa No..."></textarea>
+
+          <button type="button" style="background:#39734e;" onclick="executeTransfer()">Prosesu Transfer Sasan</button>
+        </div>
+      </div>
+    </section>
+
     <!-- HISTORY / RIWAYAT -->
     <section id="history" class="hidden">
       <div class="panel">
@@ -820,7 +863,7 @@ th{
         <small style="color:#888;">Tratamentu di'ak no kmanek husi ZJERO.</small>
         <div>
           <button type="button" onclick="window.print()" class="print-btn" style="margin:0;">🖨️ Cetak / Download Invoice</button>
-          <button type="button" class="secondary" onclick="page('history', document.querySelectorAll('.nav')[4])" style="margin-left:8px;">Fali ba Istoria</button>
+          <button type="button" class="secondary" onclick="page('history', document.querySelectorAll('.nav')[5])" style="margin-left:8px;">Fali ba Istoria</button>
         </div>
       </div>
     </section>
@@ -969,7 +1012,7 @@ async function loadData(){
       productId: h.product_id,
       store: storeName,
       name: product ? (product.variant ? product.name + " — " + product.variant : product.name) : "—",
-      type: h.transaction_type === "in" ? "Sasan Tama" : "Sasan Sai",
+      type: h.transaction_type === "in" ? "Sasan Tama" : (h.transaction_type === "transfer" ? "Transfer Sasan" : "Sasan Sai"),
       qty: Number(h.quantity || 0),
       dest: h.transaction_type === "in" ? "(Sasan Tama)" : (h.objetivu_sai || "—"),
       totalPrice: tot,
@@ -1032,6 +1075,8 @@ async function executeAppStartup(){
 function setup(){
   const inmodel = document.getElementById("inmodel");
   const outmodel = document.getElementById("outmodel");
+  const transfermodel = document.getElementById("transfermodel");
+  
   const options = data.map((x,i) => {
     const label = x.variant ? x.name + " — " + x.variant : x.name;
     return `<option value="${i}">${label}</option>`;
@@ -1039,8 +1084,11 @@ function setup(){
 
   if(inmodel) inmodel.innerHTML = options;
   if(outmodel) outmodel.innerHTML = options;
+  if(transfermodel) transfermodel.innerHTML = options;
+  
   updateStoreStock('in');
   updateStoreStock('out');
+  updateTransferStockInfo();
   renderData();
   updateDash();
   applyRole();
@@ -1061,8 +1109,8 @@ function getStoreStock(storeName, productId){
   const storeTransactions = history.filter(h => h.store === storeName && h.productId === productId);
   let storeStock = 0;
   storeTransactions.forEach(h => {
-    if(h.type === "Sasan Tama") storeStock += h.qty;
-    else if(h.type === "Sasan Sai") storeStock -= h.qty;
+    if(h.type === "Sasan Tama" || (h.type === "Transfer Sasan" && h.dest === storeName)) storeStock += h.qty;
+    else if(h.type === "Sasan Sai" || (h.type === "Transfer Sasan" && h.store === storeName)) storeStock -= h.qty;
   });
   return storeStock >= 0 ? storeStock : 0;
 }
@@ -1094,6 +1142,83 @@ function updateStoreStock(kind){
   infoEl.textContent = `📦 Stock ${product.name} (${storeName}): ${storeStock}`;
 }
 
+function updateTransferStockInfo(){
+  const fromStoreEl = document.getElementById("fromstore");
+  const modelEl = document.getElementById("transfermodel");
+  const infoEl = document.getElementById("transferstockinfo");
+
+  if(!fromStoreEl || !modelEl || !infoEl) return;
+  const storeName = fromStoreEl.value;
+  const productIdx = Number(modelEl.value);
+  const product = data[productIdx];
+
+  if(!product){
+    infoEl.textContent = `📦 Stock iha fatin asal: 0`;
+    return;
+  }
+  const storeStock = getStoreStock(storeName, product.id);
+  infoEl.textContent = `📦 Stock ${product.name} (${storeName}): ${storeStock}`;
+}
+
+async function executeTransfer(){
+  const fromStore = document.getElementById("fromstore").value;
+  const toStore = document.getElementById("tostore").value;
+  const modelIdx = Number(document.getElementById("transfermodel").value);
+  const qty = Number(document.getElementById("transferqty").value);
+  const note = document.getElementById("transfernote").value.trim();
+
+  if(fromStore === toStore){
+    alert("Fatin asal no fatin tujuan labele hanesan!");
+    return;
+  }
+
+  const product = data[modelIdx];
+  if(!product){
+    alert("Modelu kaixao la hetan.");
+    return;
+  }
+  if(!qty || qty < 1){
+    alert("Favor hatama kuantidade ne'ebé loloos.");
+    return;
+  }
+
+  const stockAsal = getStoreStock(fromStore, product.id);
+  if(qty > stockAsal){
+    alert("Stock iha fatin asal la sufisiente! (Stock disponivel: " + stockAsal + ")");
+    return;
+  }
+
+  try {
+    await api("stock_transactions", {
+      method: "POST",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({
+        product_id: product.id,
+        transaction_type: "transfer",
+        quantity: qty,
+        naran_loja: fromStore,
+        objetivu_sai: toStore,
+        total_price: 0,
+        dp_amount: 0,
+        ambulance_price: 0,
+        freezer_price: 0,
+        payment_status: "LUNAS",
+        notes: `Transfer husi ${fromStore} ba ${toStore}` + (note ? ` - ${note}` : "")
+      })
+    });
+
+    await loadData();
+    setup();
+
+    document.getElementById("transferqty").value = "";
+    document.getElementById("transfernote").value = "";
+    alert("Transfer sasan ba loja seluk la'o ona ho susesu!");
+  } catch(error) {
+    console.error(error);
+    alert("La konsege transfer sasan.\n\n" + error.message);
+  }
+}
+
 function applyRole(){
   const nav = document.querySelectorAll(".nav");
   if(!nav.length) return;
@@ -1103,9 +1228,10 @@ function applyRole(){
     nav[3].style.display = "none";
     nav[4].style.display = "none";
     nav[5].style.display = "none";
+    nav[6].style.display = "none";
   }
   if(current.role === "Gudang"){
-    nav[5].style.display = "none";
+    nav[6].style.display = "none";
   }
 }
 
@@ -1122,6 +1248,7 @@ function page(id,el){
     data: "Dadus Kaixao",
     in: "Sasan Tama",
     out: "Sasan Sai",
+    transfer: "Transfer Sasan",
     history: "Istoria Transaksaun",
     users: "Uzuáriu"
   };
@@ -1393,15 +1520,17 @@ function showStorePrint(storeName) {
 
   data.forEach(p => {
     const qty = getStoreStock(storeName, p.id);
-    if(qty > 0){
+    const damagedQty = getStoreDamagedStock(storeName, p.id);
+    if(qty > 0 || damagedQty > 0){
       hasItems = true;
       storeTotal += qty;
       const label = p.variant ? `${p.name} (${p.variant})` : p.name;
+      let damagedText = damagedQty > 0 ? ` (rusak: ${damagedQty})` : "";
       html += `
         <tr>
           <td>${p.code || "—"}</td>
           <td><b>${label}</b></td>
-          <td style="text-align:center;"><b>${qty}</b></td>
+          <td style="text-align:center;"><b>${qty}</b>${damagedText}</td>
         </tr>
       `;
     }
@@ -1528,6 +1657,8 @@ function renderHistory(){
         paymentBadge = `<span class="badge-belum">SEIDAUK LUNAS</span><br><small style="color:#a8483e;font-weight:bold;">DP: $${h.dpAmount} | Sisa: $${sisa > 0 ? sisa : 0}</small>`;
         paymentBadge += `<br><button type="button" class="btn-lunas" onclick="updatePaymentStatus('${h.id}')" style="margin-top:3px;">Update LUNAS</button>`;
       }
+    } else if(h.type === "Transfer Sasan") {
+      paymentBadge = `<span style="color:#a77c1e; font-weight:bold;">Transfer ba ${h.dest}</span>`;
     } else {
       let isDamaged = h.note && h.note.includes("rusak");
       paymentBadge = isDamaged ? `<span class="badge-dam">⚠️ Sasan Aat / Rusak</span>` : `<span style="color:#39734e; font-weight:bold;">Sasan Tama (Di'ak)</span>`;
