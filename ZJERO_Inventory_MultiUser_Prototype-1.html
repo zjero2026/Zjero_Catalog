@@ -363,6 +363,15 @@ th{
   font-weight: bold;
 }
 
+.badge-transfer {
+  background: #f4ecdf;
+  color: #8c671a;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 11px;
+}
+
 .btn-lunas {
   background: #39734e;
   padding: 5px 10px;
@@ -536,6 +545,7 @@ th{
     <div class="nav" onclick="page('out',this)">↑ <span>Sasan Sai</span></div>
     <div class="nav" onclick="page('transfer',this)">⇄ <span>Transfer Sasan</span></div>
     <div class="nav" onclick="page('history',this)">▤ <span>Istoria Transaksaun</span></div>
+    <div class="nav" onclick="page('transferhistory',this)">📋 <span>Istoria Transfer</span></div>
     <div class="nav" onclick="page('users',this)">♙ <span>Uzuáriu</span></div>
     <div class="nav" onclick="logout()">↪ <span>Sai</span></div>
     <button id="installAppBtn" class="install-btn hidden" onclick="installPWA()">📥 <span>Install App</span></button>
@@ -726,9 +736,9 @@ th{
     <!-- TRANSFER SASAN ANTAR LOJA / GUDANG -->
     <section id="transfer" class="hidden">
       <div class="panel" style="max-width:650px">
-        <h2>Transfer Sasan (Husi Fatin Ida ba Fatin Seluk)</h2>
+        <h2>Transfer Sasan (Husi Fatin Asal ba Fatin Tujuan)</h2>
         <div class="form">
-          <label>Hili Fatin Asal (Husi Fatin Ne'ebé)</label>
+          <label>Hili Fatin Asal (Husi Fatin Ne'ebé - Gudang / Loja)</label>
           <select id="fromstore" onchange="updateTransferStockInfo()">
             <option value="Gudang Lahane">Gudang Lahane</option>
             <option value="Loja Rebal">Loja Rebal</option>
@@ -758,7 +768,7 @@ th{
           <input id="transferqty" type="number" min="1" placeholder="Egzemplu: 3">
 
           <label>Komentáriu / Notas</label>
-          <textarea id="transfernote" rows="3" placeholder="Egzemplu: Transportadora / Soper / Placa No..."></textarea>
+          <textarea id="transfernote" rows="3" placeholder="Egzemplu: Transportadora / Motor / Placa No..."></textarea>
 
           <button type="button" style="background:#39734e;" onclick="executeTransfer()">Prosesu Transfer Sasan</button>
         </div>
@@ -783,6 +793,27 @@ th{
             </tr>
           </thead>
           <tbody id="historytable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ISTORIA TRANSFER SASAN -->
+    <section id="transferhistory" class="hidden">
+      <div class="panel">
+        <button type="button" class="print-btn" onclick="window.print()">🖨️ Imprime / Download PDF Istoria Transfer</button>
+        <h2>Laporan / Istoria Transfer Sasan Antar Fatin</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Tempu</th>
+              <th>Husi Fatin (Asal)</th>
+              <th>Ba Fatin (Tujuan)</th>
+              <th>Modelu Kaixao</th>
+              <th>Kuantidade</th>
+              <th>Notas / Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="transferhistorytable"></tbody>
         </table>
       </div>
     </section>
@@ -1203,7 +1234,7 @@ async function executeTransfer(){
         ambulance_price: 0,
         freezer_price: 0,
         payment_status: "LUNAS",
-        notes: `Transfer husi ${fromStore} ba ${toStore}` + (note ? ` - ${note}` : "")
+        notes: note ? note : "Transfer sasan"
       })
     });
 
@@ -1229,9 +1260,10 @@ function applyRole(){
     nav[4].style.display = "none";
     nav[5].style.display = "none";
     nav[6].style.display = "none";
+    nav[7].style.display = "none";
   }
   if(current.role === "Gudang"){
-    nav[6].style.display = "none";
+    nav[7].style.display = "none";
   }
 }
 
@@ -1250,10 +1282,12 @@ function page(id,el){
     out: "Sasan Sai",
     transfer: "Transfer Sasan",
     history: "Istoria Transaksaun",
+    transferhistory: "Istoria Transfer",
     users: "Uzuáriu"
   };
   document.getElementById("title").textContent = titles[id] || "Painel";
   if(id === "history") renderHistory();
+  if(id === "transferhistory") renderTransferHistory();
 }
 
 function renderData(){
@@ -1632,12 +1666,14 @@ function renderHistory(){
   const table = document.getElementById("historytable");
   if(!table) return;
   
-  if(!history.length){
+  const filteredHistory = history.filter(h => h.type !== "Transfer Sasan");
+
+  if(!filteredHistory.length){
     table.innerHTML = `<tr><td colspan="7">Seidauk iha transaksaun.</td></tr>`;
     return;
   }
 
-  table.innerHTML = history.map(h => {
+  table.innerHTML = filteredHistory.map(h => {
     let rincianText = "—";
     let actionButtons = `<button type="button" class="edit-btn" onclick="editTransaction('${h.id}')">✏️ Edit</button><button type="button" class="delete-btn" onclick="deleteTransaction('${h.id}')">🗑️ Delete</button>`;
     
@@ -1657,8 +1693,6 @@ function renderHistory(){
         paymentBadge = `<span class="badge-belum">SEIDAUK LUNAS</span><br><small style="color:#a8483e;font-weight:bold;">DP: $${h.dpAmount} | Sisa: $${sisa > 0 ? sisa : 0}</small>`;
         paymentBadge += `<br><button type="button" class="btn-lunas" onclick="updatePaymentStatus('${h.id}')" style="margin-top:3px;">Update LUNAS</button>`;
       }
-    } else if(h.type === "Transfer Sasan") {
-      paymentBadge = `<span style="color:#a77c1e; font-weight:bold;">Transfer ba ${h.dest}</span>`;
     } else {
       let isDamaged = h.note && h.note.includes("rusak");
       paymentBadge = isDamaged ? `<span class="badge-dam">⚠️ Sasan Aat / Rusak</span>` : `<span style="color:#39734e; font-weight:bold;">Sasan Tama (Di'ak)</span>`;
@@ -1678,6 +1712,34 @@ function renderHistory(){
   }).join("");
 }
 
+function renderTransferHistory(){
+  const table = document.getElementById("transferhistorytable");
+  if(!table) return;
+
+  const transferList = history.filter(h => h.type === "Transfer Sasan");
+
+  if(!transferList.length){
+    table.innerHTML = `<tr><td colspan="6">Seidauk iha istoria transfer.</td></tr>`;
+    return;
+  }
+
+  table.innerHTML = transferList.map(h => {
+    let noteDisplay = h.note ? `<br><small style="color:#666;">💬 ${h.note}</small>` : "";
+    let actionButtons = `<button type="button" class="delete-btn" onclick="deleteTransaction('${h.id}')">🗑️ Delete</button>`;
+
+    return `
+      <tr>
+        <td>${h.time}</td>
+        <td><b>${h.store}</b></td>
+        <td><b style="color:#a77c1e;">${h.dest}</b></td>
+        <td>${h.name}</td>
+        <td><b>${h.qty}</b></td>
+        <td>${noteDisplay}<div style="margin-top:4px;">${actionButtons}</div></td>
+      </tr>
+    `;
+  }).join("");
+}
+
 updateDash = function(){
   const totalStock = data.reduce((total,x) => total + Number(x.stock || 0), 0);
   const totalIn = history.filter(h => h.type === "Sasan Tama").reduce((total,h) => total + Number(h.qty || 0), 0);
@@ -1689,7 +1751,7 @@ updateDash = function(){
   document.getElementById("cout").textContent = totalOut;
 
   const dashhist = document.getElementById("dashhist");
-  dashhist.innerHTML = history.slice(0,5).map(h => {
+  dashhist.innerHTML = history.filter(h => h.type !== "Transfer Sasan").slice(0,5).map(h => {
     return `
       <tr>
         <td><b>${h.store}</b></td>
