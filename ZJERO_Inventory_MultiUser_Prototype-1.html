@@ -363,15 +363,6 @@ th{
   font-weight: bold;
 }
 
-.badge-transfer {
-  background: #f4ecdf;
-  color: #8c671a;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-weight: bold;
-  font-size: 11px;
-}
-
 .btn-lunas {
   background: #39734e;
   padding: 5px 10px;
@@ -504,7 +495,8 @@ th{
   section { display: none !important; }
   section#invoice-section { display: block !important; }
   section#store-print-section { display: block !important; }
-  #invoice-section, #store-print-section { border: 0 !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; width: 100% !important; }
+  section#transferhistory { display: block !important; }
+  #invoice-section, #store-print-section, #transferhistory { border: 0 !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; width: 100% !important; }
 }
 </style>
 </head>
@@ -738,7 +730,7 @@ th{
       <div class="panel" style="max-width:650px">
         <h2>Transfer Sasan (Husi Fatin Asal ba Fatin Tujuan)</h2>
         <div class="form">
-          <label>Hili Fatin Asal (Husi Fatin Ne'ebé - Gudang / Loja)</label>
+          <label>Hili Fatin Asal (Husi Gudang ka Loja Ne'ebé)</label>
           <select id="fromstore" onchange="updateTransferStockInfo()">
             <option value="Gudang Lahane">Gudang Lahane</option>
             <option value="Loja Rebal">Loja Rebal</option>
@@ -768,7 +760,7 @@ th{
           <input id="transferqty" type="number" min="1" placeholder="Egzemplu: 3">
 
           <label>Komentáriu / Notas</label>
-          <textarea id="transfernote" rows="3" placeholder="Egzemplu: Transportadora / Motor / Placa No..."></textarea>
+          <textarea id="transfernote" rows="3" placeholder="Egzemplu: Transportadora / Soper / Placa No..."></textarea>
 
           <button type="button" style="background:#39734e;" onclick="executeTransfer()">Prosesu Transfer Sasan</button>
         </div>
@@ -797,11 +789,11 @@ th{
       </div>
     </section>
 
-    <!-- ISTORIA TRANSFER SASAN -->
+    <!-- MENU KHUSUS: LAPORAN / ISTORIA TRANSFER -->
     <section id="transferhistory" class="hidden">
       <div class="panel">
-        <button type="button" class="print-btn" onclick="window.print()">🖨️ Imprime / Download PDF Istoria Transfer</button>
-        <h2>Laporan / Istoria Transfer Sasan Antar Fatin</h2>
+        <button type="button" class="print-btn" onclick="window.print()">🖨️ Imprime / Download PDF Laporan Transfer</button>
+        <h2>Laporan Transfer Sasan (Gudang / Loja)</h2>
         <table>
           <thead>
             <tr>
@@ -1719,7 +1711,7 @@ function renderTransferHistory(){
   const transferList = history.filter(h => h.type === "Transfer Sasan");
 
   if(!transferList.length){
-    table.innerHTML = `<tr><td colspan="6">Seidauk iha istoria transfer.</td></tr>`;
+    table.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#888;">Seidauk iha istoria transfer.</td></tr>`;
     return;
   }
 
