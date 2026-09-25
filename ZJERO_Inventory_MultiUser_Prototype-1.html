@@ -486,13 +486,14 @@ th{
   padding: 30px !important;
 }
 
-/* CSS MEDIA PRINT AGAR TAMPIL PERSIS SEPERTI GAMBAR (DENGAN KOTAK DAN TOMBOL) */
+/* CSS MEDIA PRINT AGAR TAMPIL PERSIS SEPERTI GAMBAR (DENGAN WARNA, KOTAK, DAN TOMBOL) */
 @media print {
   @page {
     size: A4 portrait;
-    margin: 10mm;
+    margin: 5mm;
   }
 
+  /* Paksa browser mencetak warna latar belakang dan elemen persis seperti di layar */
   html, body {
     width: 100% !important;
     height: 100% !important;
@@ -500,9 +501,11 @@ th{
     color: #29251f !important;
     margin: 0 !important;
     padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
-  /* Hanya sembunyikan sidebar navigasi, login, dan header dashboard */
+  /* Sembunyikan elemen navigasi, login, dan panel luar */
   .side, .top, #login, aside, .app > aside {
     display: none !important;
   }
@@ -512,6 +515,7 @@ th{
     margin: 0 !important;
     padding: 0 !important;
     width: 100% !important;
+    background: #f5f3ef !important;
   }
 
   .main {
@@ -519,31 +523,37 @@ th{
     margin: 0 !important;
     width: 100% !important;
     overflow: visible !important;
+    background: #f5f3ef !important;
   }
 
   .main > section {
     display: none !important;
   }
 
-  /* Tampilkan section invoice dengan mempertahankan kotak, padding, border, dan tombol bawahnya */
+  /* Tampilkan kartu invoice persis seperti tampilan web */
   .main > section:not(.hidden) {
     display: block !important;
     position: relative !important;
     width: 100% !important;
+    max-width: 100% !important;
     margin: 0 auto !important;
-    max-width: 700px !important;
+    padding: 15px !important;
+    background: #fff !important;
+    border: 1px solid #e5e0d8 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 12px #0001 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   .invoice-header,
   .invoice-details-grid,
+  .invoice-summary-box,
+  .invoice-summary-row,
   .store-card-header {
     display: flex !important;
-  }
-
-  .invoice-summary-box,
-  .invoice-summary-row {
-    display: flex !important;
-    justify-content: space-between !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   table, tr {
