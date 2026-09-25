@@ -486,7 +486,7 @@ th{
   padding: 30px !important;
 }
 
-/* CSS MEDIA PRINT EKSKLUSIF A4 BERSIH TANPA POTONG */
+/* CSS MEDIA PRINT BERSIH TANPA TOMBOL DAN TANPA POTONG */
 @media print {
   @page {
     size: A4 portrait;
@@ -502,10 +502,9 @@ th{
     padding: 0 !important;
   }
 
-  /* Sembunyikan seluruh elemen utama aplikasi */
-  body > *:not(#app),
+  /* Sembunyikan elemen navigasi dan tombol aksi secara total */
   .side, .top, button, .print-btn, .invoice-btn, .edit-btn, .delete-btn, .btn-lunas, .form,
-  #login, aside, .app > aside {
+  #login, aside, .app > aside, div[style*="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #eee; padding-top:15px;"] {
     display: none !important;
   }
 
@@ -523,12 +522,11 @@ th{
     overflow: visible !important;
   }
 
-  /* Sembunyikan semua section di dalam aplikasi secara mutlak */
   .main > section {
     display: none !important;
   }
 
-  /* HANYA TAMPILKAN SECTION YANG SEDANG DIBUKA DAN TIDAK ADA CLASS .hidden */
+  /* Tampilkan hanya section invoice yang sedang aktif secara bersih */
   .main > section:not(.hidden) {
     display: block !important;
     position: absolute !important;
@@ -536,13 +534,12 @@ th{
     top: 0 !important;
     width: 100% !important;
     margin: 0 !important;
-    padding: 10px !important;
+    padding: 0 !important;
     border: none !important;
     box-shadow: none !important;
     background: #fff !important;
   }
 
-  /* Perbaiki struktur Flex/Grid di dalam lembar cetak agar tidak berantakan */
   .invoice-header,
   .invoice-details-grid,
   .invoice-summary-box,
