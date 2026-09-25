@@ -486,17 +486,58 @@ th{
   padding: 30px !important;
 }
 
-/* CSS MEDIA PRINT KHUSUS */
+/* CSS MEDIA PRINT KHUSUS UKURAN A4 RAPI */
 @media print{
-  body { background: #fff !important; color: #000 !important; }
-  .side, .top, button, .print-btn, .invoice-btn, .edit-btn, .delete-btn, .btn-lunas, .form { display: none !important; }
+  body { 
+    background: #fff !important; 
+    color: #000 !important; 
+  }
+
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+
+  .side, .top, button, .print-btn, .invoice-btn, .edit-btn, .delete-btn, .btn-lunas, .form { 
+    display: none !important; 
+  }
+  
   .app { display: block !important; }
   .main { padding: 0 !important; overflow: visible !important; width: 100% !important; }
+  
   section { display: none !important; }
-  section#invoice-section { display: block !important; }
-  section#store-print-section { display: block !important; }
-  section#transferhistory { display: block !important; }
-  #invoice-section, #store-print-section, #transferhistory { border: 0 !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; width: 100% !important; }
+  
+  section#invoice-section:not(.hidden) { 
+    display: block !important; 
+    border: 0 !important; 
+    box-shadow: none !important; 
+    padding: 0 !important; 
+    margin: 0 !important; 
+    width: 100% !important; 
+    break-after: page;
+  }
+  
+  section#store-print-section:not(.hidden) { 
+    display: block !important; 
+    border: 0 !important; 
+    box-shadow: none !important; 
+    padding: 0 !important; 
+    margin: 0 !important; 
+    width: 100% !important; 
+    break-after: page;
+  }
+  
+  section#transferhistory:not(.hidden),
+  section#history:not(.hidden),
+  section#data:not(.hidden) { 
+    display: block !important; 
+    border: 0 !important; 
+    box-shadow: none !important; 
+    padding: 0 !important; 
+    margin: 0 !important; 
+    width: 100% !important; 
+    break-after: page;
+  }
 }
 </style>
 </head>
@@ -1128,7 +1169,6 @@ function toggleDPField(){
   }
 }
 
-// DIPERBAIKI: Fungsi getStoreStock agar menangkap transaksi toko asal maupun toko tujuan transfer
 function getStoreStock(storeName, productId){
   const storeTransactions = history.filter(h => 
     (h.store === storeName && h.productId === productId) || 
@@ -1140,10 +1180,10 @@ function getStoreStock(storeName, productId){
       storeStock += h.qty;
     } else if(h.type === "Transfer Sasan"){
       if(h.store === storeName){
-        storeStock -= h.qty; // Berkurang di tempat asal
+        storeStock -= h.qty; 
       }
       if(h.dest === storeName){
-        storeStock += h.qty; // Bertambah di tempat tujuan
+        storeStock += h.qty; 
       }
     } else if(h.type === "Sasan Sai"){
       storeStock -= h.qty;
