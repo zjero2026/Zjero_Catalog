@@ -486,57 +486,67 @@ th{
   padding: 30px !important;
 }
 
-/* CSS MEDIA PRINT KHUSUS UKURAN A4 RAPI */
-@media print{
-  body { 
-    background: #fff !important; 
-    color: #000 !important; 
-  }
-
+/* CSS MEDIA PRINT KHUSUS A4 TUNTAS */
+@media print {
   @page {
     size: A4;
     margin: 15mm;
   }
 
-  .side, .top, button, .print-btn, .invoice-btn, .edit-btn, .delete-btn, .btn-lunas, .form { 
-    display: none !important; 
+  body {
+    background: #fff !important;
+    color: #000 !important;
   }
-  
-  .app { display: block !important; }
-  .main { padding: 0 !important; overflow: visible !important; width: 100% !important; }
-  
-  section { display: none !important; }
-  
-  section#invoice-section:not(.hidden) { 
-    display: block !important; 
-    border: 0 !important; 
-    box-shadow: none !important; 
-    padding: 0 !important; 
-    margin: 0 !important; 
-    width: 100% !important; 
-    break-after: page;
+
+  body * {
+    display: none !important;
   }
-  
-  section#store-print-section:not(.hidden) { 
-    display: block !important; 
-    border: 0 !important; 
-    box-shadow: none !important; 
-    padding: 0 !important; 
-    margin: 0 !important; 
-    width: 100% !important; 
-    break-after: page;
+
+  section:not(.hidden), 
+  section:not(.hidden) * {
+    display: block !important;
   }
-  
-  section#transferhistory:not(.hidden),
-  section#history:not(.hidden),
-  section#data:not(.hidden) { 
-    display: block !important; 
-    border: 0 !important; 
-    box-shadow: none !important; 
-    padding: 0 !important; 
-    margin: 0 !important; 
-    width: 100% !important; 
-    break-after: page;
+
+  section:not(.hidden) .invoice-header,
+  section:not(.hidden) .invoice-details-grid,
+  section:not(.hidden) .invoice-summary-box,
+  section:not(.hidden) .invoice-summary-row,
+  section:not(.hidden) .store-card-header {
+    display: flex !important;
+  }
+
+  section:not(.hidden) table,
+  section:not(.hidden) tr {
+    display: table !important;
+    width: 100% !important;
+  }
+
+  section:not(.hidden) th,
+  section:not(.hidden) td {
+    display: table-cell !important;
+  }
+
+  section:not(.hidden) tbody {
+    display: table-row-group !important;
+  }
+
+  section:not(.hidden) thead {
+    display: table-header-group !important;
+  }
+
+  section:not(.hidden) {
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+  }
+
+  button, .print-btn, .invoice-btn, .edit-btn, .delete-btn, .btn-lunas, .form, .side, .top {
+    display: none !important;
   }
 }
 </style>
