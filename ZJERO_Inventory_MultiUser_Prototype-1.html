@@ -1128,12 +1128,26 @@ function toggleDPField(){
   }
 }
 
+// DIPERBAIKI: Fungsi getStoreStock agar menangkap transaksi toko asal maupun toko tujuan transfer
 function getStoreStock(storeName, productId){
-  const storeTransactions = history.filter(h => h.store === storeName && h.productId === productId);
+  const storeTransactions = history.filter(h => 
+    (h.store === storeName && h.productId === productId) || 
+    (h.type === "Transfer Sasan" && h.dest === storeName && h.productId === productId)
+  );
   let storeStock = 0;
   storeTransactions.forEach(h => {
-    if(h.type === "Sasan Tama" || (h.type === "Transfer Sasan" && h.dest === storeName)) storeStock += h.qty;
-    else if(h.type === "Sasan Sai" || (h.type === "Transfer Sasan" && h.store === storeName)) storeStock -= h.qty;
+    if(h.type === "Sasan Tama"){
+      storeStock += h.qty;
+    } else if(h.type === "Transfer Sasan"){
+      if(h.store === storeName){
+        storeStock -= h.qty; // Berkurang di tempat asal
+      }
+      if(h.dest === storeName){
+        storeStock += h.qty; // Bertambah di tempat tujuan
+      }
+    } else if(h.type === "Sasan Sai"){
+      storeStock -= h.qty;
+    }
   });
   return storeStock >= 0 ? storeStock : 0;
 }
