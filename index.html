@@ -192,7 +192,8 @@ const productSubOptions = {
   "BRYON": ["Bryon Surabaya A", "Bryon Surabaya B"],
   "LUMINOR": ["Luminor putih Non Kaca", "Luminor Cokelat Non Kaca"],
   "THERION": ["Therion Jepara A", "Therion Jepara B"],
-  "POLARIS ZJERO": ["Jati Standard Zjero", "Jati Standard Full Kaca"]
+  "POLARIS ZJERO": ["Jati Standard Zjero", "Jati Standard Full Kaca"],
+  "ORION": ["Orion mutin", "Orion Coklat"]
 };
 
 const masterProducts = [
@@ -354,7 +355,6 @@ function updateProductDisplay(productId, baseName) {
 
   let specificStock = 0;
   if (selectedVariant) {
-    // Mencocokkan pilihan dropdown dengan kolom 'variant' di Supabase
     let foundVar = globalDbRows.find(r => (r.variant || "").trim().toUpperCase() === selectedVariant.toUpperCase());
     if (foundVar) {
       specificStock = Number(foundVar.stock || 0);
