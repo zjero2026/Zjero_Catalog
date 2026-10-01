@@ -493,7 +493,6 @@ th{
     margin: 5mm;
   }
 
-  /* Paksa browser mencetak warna latar belakang dan elemen persis seperti di layar */
   html, body {
     width: 100% !important;
     height: 100% !important;
@@ -505,7 +504,6 @@ th{
     print-color-adjust: exact !important;
   }
 
-  /* Sembunyikan elemen navigasi, login, dan panel luar */
   .side, .top, #login, aside, .app > aside {
     display: none !important;
   }
@@ -530,7 +528,6 @@ th{
     display: none !important;
   }
 
-  /* Tampilkan kartu invoice persis seperti tampilan web */
   .main > section:not(.hidden) {
     display: block !important;
     position: relative !important;
@@ -715,6 +712,16 @@ th{
             <option value="Loja Baucau">Loja Baucau</option>
           </select>
 
+          <!-- PILIHAN SUPPLIER -->
+          <label>Hili Supplier / Pemasok Asal</label>
+          <select id="insupplier">
+            <option value="Supplier Lokal Dili">Supplier Lokal Dili</option>
+            <option value="Supplier Jawa / Surabaya">Supplier Jawa / Surabaya</option>
+            <option value="Supplier Denpasar / Bali">Supplier Denpasar / Bali</option>
+            <option value="Supplier Import China">Supplier Import China</option>
+            <option value="Lainnya">Lainnya</option>
+          </select>
+
           <label>Kondisaun Sasan</label>
           <select id="incondition">
             <option value="good">Di'ak (Siap Jual)</option>
@@ -845,7 +852,7 @@ th{
     <!-- HISTORY / RIWAYAT -->
     <section id="history" class="hidden">
       <div class="panel">
-        <button type="button" class="print-btn" onclick="window.print()">🖨️ Imprime / Download PDF Istoria</button>
+        <button type="button" class="print-btn" onclick="window.print()">🖨️️ Imprime / Download PDF Istoria</button>
         <h2>Istoria Transaksaun</h2>
         <table>
           <thead>
@@ -921,9 +928,7 @@ th{
             <th style="text-align:right;">Presu ($)</th>
           </tr>
         </thead>
-        <tbody id="inv-items-body">
-          <!-- Dinamis diisi JS -->
-        </tbody>
+        <tbody id="inv-items-body"></tbody>
       </table>
 
       <div class="invoice-summary-box">
@@ -990,9 +995,7 @@ th{
             <th style="text-align:center;">Kuantidade Stock</th>
           </tr>
         </thead>
-        <tbody id="print-store-items">
-          <!-- Dinamis diisi JS -->
-        </tbody>
+        <tbody id="print-store-items"></tbody>
       </table>
 
       <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #eee; padding-top:15px; margin-top:20px;">
@@ -1092,7 +1095,7 @@ async function loadData(){
     status: x.status
   }));
 
-  const tx = await api("stock_transactions?select=id,product_id,transaction_type,quantity,naran_loja,objetivu_sai,notes,payment_status,total_price,dp_amount,ambulance_price,freezer_price,created_at&order=created_at.desc");
+  const tx = await api("stock_transactions?select=id,product_id,transaction_type,quantity,naran_loja,objetivu_sai,notes,payment_status,total_price,dp_amount,ambulance_price,freezer_price,supplier,created_at&order=created_at.desc");
 
   history = tx.map(h => {
     const product = data.find(p => p.id === h.product_id);
@@ -1120,6 +1123,7 @@ async function loadData(){
       boxPrice: boxP > 0 ? boxP : tot,
       paymentStatus: h.transaction_type === "out" ? (h.payment_status || "LUNAS") : "—",
       note: h.notes || "",
+      supplier: h.supplier || "—",
       time: new Date(h.created_at).toLocaleString("id-ID")
     };
   });
@@ -1445,6 +1449,11 @@ async function transact(kind){
   const modelElement = document.getElementById(kind === "in" ? "inmodel" : "outmodel");
   const qtyElement = document.getElementById(kind === "in" ? "inqty" : "outqty");
   const store = storeElement.value;
+  
+  // Ambil nilai supplier jika jenis transaksinya adalah 'in' (sasan tama)
+  const supplierElement = document.getElementById("insupplier");
+  const supplierName = (kind === "in" && supplierElement) ? supplierElement.value : "—";
+
   const destElement = document.getElementById("outdest");
   const boxPriceEl = document.getElementById("outboxprice");
   const ambulanceEl = document.getElementById("outambulance");
@@ -1509,7 +1518,8 @@ async function transact(kind){
         ambulance_price: ambulancePrice,
         freezer_price: freezerPrice,
         payment_status: paymentStatus,
-        notes: note
+        notes: note,
+        supplier: supplierName
       })
     });
 
@@ -1775,7 +1785,8 @@ function renderHistory(){
       }
     } else {
       let isDamaged = h.note && h.note.includes("rusak");
-      paymentBadge = isDamaged ? `<span class="badge-dam">⚠️ Sasan Aat / Rusak</span>` : `<span style="color:#39734e; font-weight:bold;">Sasan Tama (Di'ak)</span>`;
+      let supplierInfo = `<br><small style="color:#a77c1e; font-weight:bold;">📦 Supplier: ${h.supplier}</small>`;
+      paymentBadge = isDamaged ? `<span class="badge-dam">⚠️ Sasan Aat / Rusak</span>` + supplierInfo : `<span style="color:#39734e; font-weight:bold;">Sasan Tama (Di'ak)</span>` + supplierInfo;
     }
 
     return `
