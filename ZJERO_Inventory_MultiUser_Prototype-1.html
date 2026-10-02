@@ -817,6 +817,10 @@ th{
       <div class="panel" style="max-width:650px">
         <h2>Transfer Sasan (Husi Fatin Asal ba Fatin Tujuan)</h2>
         <div class="form">
+          <!-- INPUT TANGGAL TRANSFER -->
+          <label>Data Transfer (Tanggal / Waktu)</label>
+          <input id="transferdate" type="datetime-local">
+
           <label>Hili Fatin Asal (Husi Gudang ka Loja Ne'ebé)</label>
           <select id="fromstore" onchange="updateTransferStockInfo()">
             <option value="Gudang Lahane">Gudang Lahane</option>
@@ -857,7 +861,7 @@ th{
     <!-- PENYESUAIAN STOK MANUAL PER LOJA -->
     <section id="adjustment" class="hidden">
       <div class="panel" style="max-width:650px">
-        <h2>Penyesuaian Stok Manual (Koreksi Selisih Loja)</h2>
+        <h2>Penyesuaian Stok Masing-Masing Loja</h2>
         <div class="form">
           <label>Data Penyesuaian (Tanggal / Waktu)</label>
           <input id="adjdate" type="datetime-local">
@@ -875,7 +879,7 @@ th{
 
           <label>Modelu Kaixao</label>
           <select id="adjmodel" onchange="updateAdjStockInfo()"></select>
-          <div id="adjstockinfo" class="stock-info">📦 Stock di toko ini saat ini: 0</div>
+          <div id="adjstockinfo" class="stock-info">📦 Stock di loja ini saat ini: 0</div>
 
           <label>Jenis Penyesuaian</label>
           <select id="adjtype">
@@ -887,9 +891,9 @@ th{
           <input id="adjqty" type="number" min="1" placeholder="Egzemplu: 2">
 
           <label>Alasan / Komentáriu</label>
-          <textarea id="adjnote" rows="3" placeholder="Egzemplu: Koreksi stok opname bulanan"></textarea>
+          <textarea id="adjnote" rows="3" placeholder="Egzemplu: Koreksi selisih stok opname loja"></textarea>
 
-          <button type="button" style="background:#a77c1e;" onclick="executeAdjustment()">Simpan Penyesuaian Stok</button>
+          <button type="button" style="background:#a77c1e;" onclick="executeAdjustment()">Simpan Penyesuaian Stok Loja</button>
         </div>
       </div>
     </section>
@@ -919,7 +923,7 @@ th{
     <!-- MENU KHUSUS: LAPORAN / ISTORIA TRANSFER -->
     <section id="transferhistory" class="hidden">
       <div class="panel">
-        <button type="button" class="print-btn" onclick="window.print()">🖨️ Imprime / Download PDF Laporan Transfer</button>
+        <button type="button" class="print-btn" onclick="window.print()">🖨️️ Imprime / Download PDF Laporan Transfer</button>
         <h2>Laporan Transfer Sasan (Gudang / Loja)</h2>
         <table>
           <thead>
@@ -1046,7 +1050,7 @@ th{
       <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #eee; padding-top:15px; margin-top:20px;">
         <small style="color:#888;">Sistem Jestaun Stock ZJERO.</small>
         <div>
-          <button type="button" onclick="window.print()" class="print-btn" style="margin:0;">🖨️️ Cetak / Download PDF</button>
+          <button type="button" onclick="window.print()" class="print-btn" style="margin:0;">🖨️ Cetak / Download PDF</button>
           <button type="button" class="secondary" onclick="page('dashboard', document.querySelectorAll('.nav')[0])" style="margin-left:8px;">Fali ba Painel</button>
         </div>
       </div>
@@ -1215,6 +1219,7 @@ async function executeAppStartup(){
     const nowLocal = new Date().toISOString().slice(0,16);
     document.getElementById("indate").value = nowLocal;
     document.getElementById("outdate").value = nowLocal;
+    document.getElementById("transferdate").value = nowLocal;
     document.getElementById("adjdate").value = nowLocal;
 
     page("dashboard", document.querySelector(".nav.active"));
@@ -1339,7 +1344,7 @@ function updateAdjStockInfo(){
   const product = data[productIdx];
 
   if(!product){
-    infoEl.textContent = `📦 Stock di toko ini: 0`;
+    infoEl.textContent = `📦 Stock di loja ini: 0`;
     return;
   }
   const storeStock = getStoreStock(storeName, product.id);
@@ -1352,6 +1357,8 @@ async function executeTransfer(){
   const modelIdx = Number(document.getElementById("transfermodel").value);
   const qty = Number(document.getElementById("transferqty").value);
   const note = document.getElementById("transfernote").value.trim();
+  const dateEl = document.getElementById("transferdate").value;
+  const customDateValue = dateEl ? new Date(dateEl).toISOString() : new Date().toISOString();
 
   if(fromStore === toStore){
     alert("Fatin asal no fatin tujuan labele hanesan!");
@@ -1389,7 +1396,8 @@ async function executeTransfer(){
         ambulance_price: 0,
         freezer_price: 0,
         payment_status: "LUNAS",
-        notes: note ? note : "Transfer sasan"
+        notes: note ? note : "Transfer sasan",
+        created_at: customDateValue
       })
     });
 
@@ -1435,7 +1443,6 @@ async function executeAdjustment(){
   const fullNote = `[PENYESUAIAN ${adjType === 'add' ? 'TAMBAH' : 'KURANG'}] ${noteText}`;
 
   try {
-    // 1. Catat transaksi penyesuaian
     await api("stock_transactions", {
       method: "POST",
       headers: { "Prefer": "return=minimal" },
@@ -1455,7 +1462,6 @@ async function executeAdjustment(){
       })
     });
 
-    // 2. Update total stok master produk secara keseluruhan
     let newStock = Number(product.stock || 0);
     newStock = adjType === 'add' ? (newStock + qty) : (newStock - qty);
     if(newStock < 0) newStock = 0;
@@ -1473,7 +1479,7 @@ async function executeAdjustment(){
 
     document.getElementById("adjqty").value = "";
     document.getElementById("adjnote").value = "";
-    alert("Penyesuaian stok manual berhasil disimpan!");
+    alert("Penyesuaian stok loja berhasil disimpan!");
   } catch(error) {
     console.error(error);
     alert("Gagal melakukan penyesuaian stok.\n\n" + error.message);
@@ -1492,9 +1498,10 @@ function applyRole(){
     nav[6].style.display = "none";
     nav[7].style.display = "none";
     nav[8].style.display = "none";
+    nav[9].style.display = "none";
   }
   if(current.role === "Gudang"){
-    nav[8].style.display = "none";
+    nav[9].style.display = "none";
   }
 }
 
@@ -1935,7 +1942,7 @@ function renderHistory(){
         paymentBadge += `<br><button type="button" class="btn-lunas" onclick="updatePaymentStatus('${h.id}')" style="margin-top:3px;">Update LUNAS</button>`;
       }
     } else if(h.type === "Penyesuaian Stok") {
-      paymentBadge = `<span class="pill" style="background:#fff0d7; color:#986b1a;">⚙️ Penyesuaian Stok</span>`;
+      paymentBadge = `<span class="pill" style="background:#fff0d7; color:#986b1a;">⚙️ Penyesuaian Loja</span>`;
     } else {
       let isDamaged = h.note && h.note.includes("rusak");
       let supplierInfo = `<br><small style="color:#a77c1e; font-weight:bold;">📦 Supplier: ${h.supplier}</small>`;
@@ -2020,7 +2027,7 @@ updateDash = function(){
       <div class="store-card">
         <div class="store-card-header">
           <h3>🏢 ${store} <span style="font-size:12px; color:#a77c1e; font-weight:bold;">(Total: ${storeTotalCount})</span></h3>
-          <button type="button" class="store-print-btn" onclick="showStorePrint('${store}')">🖨️️ Cetak Stock</button>
+          <button type="button" class="store-print-btn" onclick="showStorePrint('${store}')">🖨️ Cetak Stock</button>
         </div>
         <ul style="margin:0;padding-left:18px;font-size:12px;">
     `;
