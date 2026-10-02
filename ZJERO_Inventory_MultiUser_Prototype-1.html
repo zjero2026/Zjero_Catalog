@@ -75,7 +75,6 @@ body{
   font-weight:bold
 }
 
-/* Tombol Install PWA di Sidebar */
 .install-btn{
   margin-top:auto;
   background:#39734e;
@@ -240,6 +239,27 @@ th{
   display:none!important
 }
 
+/* Modal Edit Transaksi */
+.modal-overlay{
+  position:fixed;
+  top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,0.5);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
+}
+.modal-box{
+  background:#fff;
+  width:450px;
+  max-width:90%;
+  padding:25px;
+  border-radius:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.3);
+  max-height:90vh;
+  overflow-y:auto;
+}
+
 .login{
   min-height:100vh;
   display:flex;
@@ -371,7 +391,6 @@ th{
   cursor: pointer;
 }
 
-/* KHUSUS DESAIN PROFESIONAL CETAK INVOICE */
 #invoice-section {
   background: #fff;
   border: 1px solid #e5e0d8;
@@ -478,7 +497,6 @@ th{
   margin-top: 6px;
 }
 
-/* KERTAS CETAK LAPORAN STOK PER TOKO */
 #store-print-section {
   background: #fff;
   border: 1px solid #e5e0d8;
@@ -817,7 +835,6 @@ th{
       <div class="panel" style="max-width:650px">
         <h2>Transfer Sasan (Husi Fatin Asal ba Fatin Tujuan)</h2>
         <div class="form">
-          <!-- INPUT TANGGAL TRANSFER -->
           <label>Data Transfer (Tanggal / Waktu)</label>
           <input id="transferdate" type="datetime-local">
 
@@ -923,7 +940,7 @@ th{
     <!-- MENU KHUSUS: LAPORAN / ISTORIA TRANSFER -->
     <section id="transferhistory" class="hidden">
       <div class="panel">
-        <button type="button" class="print-btn" onclick="window.print()">🖨️️ Imprime / Download PDF Laporan Transfer</button>
+        <button type="button" class="print-btn" onclick="window.print()">🖨️ Imprime / Download PDF Laporan Transfer</button>
         <h2>Laporan Transfer Sasan (Gudang / Loja)</h2>
         <table>
           <thead>
@@ -1079,6 +1096,35 @@ th{
   </main>
 </div>
 
+<!-- MODAL EDIT TRANSAKSI LENGKAP -->
+<div id="editModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <h2 style="margin-top:0; color:#a77c1e;">Edit Transaksi</h2>
+    <div class="form">
+      <input type="hidden" id="edit-tx-id">
+      
+      <label>Tanggal & Waktu</label>
+      <input id="edit-date" type="datetime-local">
+
+      <label>Kuantidade</label>
+      <input id="edit-qty" type="number" min="1">
+
+      <div id="edit-price-fields">
+        <label>Total Harga / Biaya ($)</label>
+        <input id="edit-totalprice" type="number" step="0.01">
+      </div>
+
+      <label>Komentáriu / Notas</label>
+      <textarea id="edit-note" rows="3"></textarea>
+
+      <div style="display:flex; gap:10px; margin-top:10px;">
+        <button type="button" style="background:#39734e; flex:1;" onclick="saveEditedTransaction()">Simpan Perubahan</button>
+        <button type="button" class="secondary" style="flex:1;" onclick="closeEditModal()">Batal</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 let deferredPrompt;
 const installBtn = document.getElementById("installAppBtn");
@@ -1162,6 +1208,7 @@ async function loadData(){
       productId: h.product_id,
       store: storeName,
       name: product ? (product.variant ? product.name + " — " + product.variant : product.name) : "—",
+      rawType: h.transaction_type,
       type: h.transaction_type === "in" ? "Sasan Tama" : (h.transaction_type === "transfer" ? "Transfer Sasan" : (h.transaction_type === "adjustment" ? "Penyesuaian Stok" : "Sasan Sai")),
       qty: Number(h.quantity || 0),
       dest: h.transaction_type === "in" ? "(Sasan Tama)" : (h.objetivu_sai || "—"),
@@ -1173,6 +1220,7 @@ async function loadData(){
       paymentStatus: h.transaction_type === "out" ? (h.payment_status || "LUNAS") : "—",
       note: h.notes || "",
       supplier: h.supplier || "—",
+      rawDate: h.created_at,
       time: new Date(h.created_at).toLocaleString("id-ID")
     };
   });
@@ -1758,34 +1806,86 @@ async function deleteTransaction(txId) {
   }
 }
 
-async function editTransaction(txId) {
-  const passInput = prompt("Hatama password:");
+// BUKA MODAL EDIT TRANSAKSI
+function openEditModal(txId) {
+  const passInput = prompt("Hatama password ba edit:");
   if (passInput === null) return;
-
   if (passInput !== "zjeroadmin2026") {
     alert("Password sala!");
     return;
   }
 
-  const newQty = prompt("Hatama kuantidade foun:");
-  if(newQty === null) return;
-  const qtyNum = Number(newQty);
-  if(isNaN(qtyNum) || qtyNum < 1){
-    alert("Kuantidade sala.");
+  const h = history.find(x => String(x.id) === String(txId));
+  if(!h) {
+    alert("Transaksaun la hetan.");
+    return;
+  }
+
+  document.getElementById("edit-tx-id").value = h.id;
+  
+  // Format tanggal untuk input datetime-local (YYYY-MM-DDTHH:mm)
+  if(h.rawDate) {
+    let d = new Date(h.rawDate);
+    let localIso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0,16);
+    document.getElementById("edit-date").value = localIso;
+  }
+
+  document.getElementById("edit-qty").value = h.qty;
+  document.getElementById("edit-totalprice").value = h.totalPrice;
+  document.getElementById("edit-note").value = h.note;
+
+  // Jika transaksi keluar, tampilkan input harga total
+  if(h.rawType === "out") {
+    document.getElementById("edit-price-fields").style.display = "block";
+  } else {
+    document.getElementById("edit-price-fields").style.display = "none";
+  }
+
+  document.getElementById("editModal").classList.remove("hidden");
+}
+
+function closeEditModal() {
+  document.getElementById("editModal").classList.add("hidden");
+}
+
+async function saveEditedTransaction() {
+  const txId = document.getElementById("edit-tx-id").value;
+  const newDate = document.getElementById("edit-date").value;
+  const newQty = Number(document.getElementById("edit-qty").value);
+  const newPrice = Number(document.getElementById("edit-totalprice").value || 0);
+  const newNote = document.getElementById("edit-note").value.trim();
+
+  if(!newQty || newQty < 1) {
+    alert("Kuantidade tenke iha no labele menus husi 1.");
     return;
   }
 
   try {
+    let updatePayload = {
+      quantity: newQty,
+      notes: newNote
+    };
+
+    if(newDate) {
+      updatePayload.created_at = new Date(newDate).toISOString();
+    }
+
+    const h = history.find(x => String(x.id) === String(txId));
+    if(h && h.rawType === "out") {
+      updatePayload.total_price = newPrice;
+    }
+
     await api("stock_transactions?id=eq." + txId, {
       method: "PATCH",
       headers: { "Prefer": "return=minimal" },
-      body: JSON.stringify({ quantity: qtyNum })
+      body: JSON.stringify(updatePayload)
     });
 
+    closeEditModal();
     await loadData();
     renderHistory();
     updateDash();
-    alert("Kuantidade transaksaun troka ona ho susesu!");
+    alert("Transaksaun troka ona ho susesu!");
   } catch(error) {
     console.error(error);
     alert("La konsege edit transaksaun.\n\n" + error.message);
@@ -1923,7 +2023,8 @@ function renderHistory(){
 
   table.innerHTML = filteredHistory.map(h => {
     let rincianText = "—";
-    let actionButtons = `<button type="button" class="edit-btn" onclick="editTransaction('${h.id}')">✏️ Edit</button><button type="button" class="delete-btn" onclick="deleteTransaction('${h.id}')">🗑️ Delete</button>`;
+    // Memanggil fungsi openEditModal(h.id) untuk edit lengkap
+    let actionButtons = `<button type="button" class="edit-btn" onclick="openEditModal('${h.id}')">✏️ Edit</button><button type="button" class="delete-btn" onclick="deleteTransaction('${h.id}')">🗑️ Delete</button>`;
     
     if(h.type === "Sasan Sai") {
       rincianText = `Kaixao: $${h.boxPrice}<br>Ambulansia: $${h.ambulancePrice}<br>Freezer: $${h.freezerPrice}`;
@@ -1946,7 +2047,7 @@ function renderHistory(){
     } else {
       let isDamaged = h.note && h.note.includes("rusak");
       let supplierInfo = `<br><small style="color:#a77c1e; font-weight:bold;">📦 Supplier: ${h.supplier}</small>`;
-      paymentBadge = isDamaged ? `<span class="badge-dam">⚠️ Sasan Aat / Rusak</span>` + supplierInfo : `<span style="color:#39734e; font-weight:bold;">Sasan Tama (Di'ak)</span>` + supplierInfo;
+      paymentBadge = isDamaged ? `<span class="badge-dam">⚠️️ Sasan Aat / Rusak</span>` + supplierInfo : `<span style="color:#39734e; font-weight:bold;">Sasan Tama (Di'ak)</span>` + supplierInfo;
     }
 
     return `
