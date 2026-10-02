@@ -486,7 +486,6 @@ th{
   padding: 30px !important;
 }
 
-/* CSS MEDIA PRINT AGAR TAMPIL PERSIS SEPERTI GAMBAR (DENGAN WARNA, KOTAK, DAN TOMBOL) */
 @media print {
   @page {
     size: A4 portrait;
@@ -701,6 +700,10 @@ th{
       <div class="panel" style="max-width:650px">
         <h2>Sasan Tama</h2>
         <div class="form">
+          <!-- INPUT TANGGAL TRANSAKSI KUSUS (Bisa diatur mundur) -->
+          <label>Data Transaksaun (Tanggal / Waktu)</label>
+          <input id="indate" type="datetime-local">
+
           <label>Hili Loja / Fatin</label>
           <select id="instore" onchange="updateStoreStock('in')">
             <option value="Loja Rebal">Loja Rebal</option>
@@ -712,7 +715,6 @@ th{
             <option value="Loja Baucau">Loja Baucau</option>
           </select>
 
-          <!-- PILIHAN SUPPLIER -->
           <label>Hili Supplier / Pemasok Asal</label>
           <select id="insupplier">
             <option value="Supplier Lokal Dili">Supplier Lokal Dili</option>
@@ -748,6 +750,10 @@ th{
       <div class="panel" style="max-width:650px">
         <h2>Sasan Sai</h2>
         <div class="form">
+          <!-- INPUT TANGGAL TRANSAKSI KUSUS (Bisa diatur mundur) -->
+          <label>Data Transaksaun (Tanggal / Waktu)</label>
+          <input id="outdate" type="datetime-local">
+
           <label>Hili Loja Asal Sasan</label>
           <select id="outstore" onchange="updateStoreStock('out')">
             <option value="Loja Rebal">Loja Rebal</option>
@@ -852,7 +858,7 @@ th{
     <!-- HISTORY / RIWAYAT -->
     <section id="history" class="hidden">
       <div class="panel">
-        <button type="button" class="print-btn" onclick="window.print()">🖨️️ Imprime / Download PDF Istoria</button>
+        <button type="button" class="print-btn" onclick="window.print()">🖨 Imprime / Download PDF Istoria</button>
         <h2>Istoria Transaksaun</h2>
         <table>
           <thead>
@@ -1167,6 +1173,13 @@ async function executeAppStartup(){
   try {
     await loadData();
     setup();
+    // Set default value tanggal hari ini di form in & out
+    const nowLocal = new Date().toISOString().slice(0,16);
+    const indateEl = document.getElementById("indate");
+    const outdateEl = document.getElementById("outdate");
+    if(indateEl) indateEl.value = nowLocal;
+    if(outdateEl) outdateEl.value = nowLocal;
+
     page("dashboard", document.querySelector(".nav.active"));
   } catch(error) {
     console.error(error);
@@ -1450,9 +1463,12 @@ async function transact(kind){
   const qtyElement = document.getElementById(kind === "in" ? "inqty" : "outqty");
   const store = storeElement.value;
   
-  // Ambil nilai supplier jika jenis transaksinya adalah 'in' (sasan tama)
   const supplierElement = document.getElementById("insupplier");
   const supplierName = (kind === "in" && supplierElement) ? supplierElement.value : "—";
+
+  // Ambil nilai tanggal kustom yang diinput user
+  const customDateEl = document.getElementById(kind === "in" ? "indate" : "outdate");
+  const customDateValue = customDateEl && customDateEl.value ? new Date(customDateEl.value).toISOString() : new Date().toISOString();
 
   const destElement = document.getElementById("outdest");
   const boxPriceEl = document.getElementById("outboxprice");
@@ -1519,7 +1535,8 @@ async function transact(kind){
         freezer_price: freezerPrice,
         payment_status: paymentStatus,
         notes: note,
-        supplier: supplierName
+        supplier: supplierName,
+        created_at: customDateValue // Menyimpan tanggal kustom ke database
       })
     });
 
