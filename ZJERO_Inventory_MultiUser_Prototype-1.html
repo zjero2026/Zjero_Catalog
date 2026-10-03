@@ -371,6 +371,25 @@ th{
   cursor: pointer;
 }
 
+/* MODAL EDIT TRANSAKSI */
+.modal {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 5px 25px rgba(0,0,0,0.3);
+}
+
 /* KHUSUS DESAIN PROFESIONAL CETAK INVOICE */
 #invoice-section {
   background: #fff;
@@ -745,6 +764,9 @@ th{
             <option value="Loja Baucau">Loja Baucau</option>
           </select>
 
+          <label>Naran Suplier (Supplier)</label>
+          <input id="insupplier" type="text" placeholder="Egzemplu: PT Mebel Jaya">
+
           <label>Kondisaun Sasan</label>
           <select id="incondition">
             <option value="good">Di'ak (Siap Jual)</option>
@@ -757,6 +779,9 @@ th{
           
           <label>Kuantidade Tama</label>
           <input id="inqty" type="number" min="1" placeholder="Egzemplu: 5">
+
+          <label>Data no Tempu Transaksaun (Bisa disesuaikan jika hari lewat)</label>
+          <input id="intimestamp" type="datetime-local">
           
           <label>Komentáriu / Notas</label>
           <textarea id="innote" rows="3" placeholder="Opcional"></textarea>
@@ -1057,6 +1082,32 @@ th{
   </main>
 </div>
 
+<!-- MODAL FORM EDIT TRANSAKSI -->
+<div id="editModal" class="modal hidden">
+  <div class="modal-content">
+    <h3 style="margin-top:0; color:#a77c1e;">Edit Transaksaun</h3>
+    <input type="hidden" id="edit-tx-id">
+    <div class="form">
+      <label>Data & Tempu Transaksaun</label>
+      <input id="edit-timestamp" type="datetime-local">
+      
+      <label>Kuantidade</label>
+      <input id="edit-qty" type="number" min="1">
+      
+      <label>Total Harga / Biaya ($)</label>
+      <input id="edit-totalprice" type="number" step="0.01">
+
+      <label>Komentáriu / Notas</label>
+      <textarea id="edit-note" rows="3"></textarea>
+
+      <div style="display:flex; gap:10px; margin-top:10px;">
+        <button type="button" onclick="saveEditedTransaction()" style="background:#39734e; flex:1;">Simpan</button>
+        <button type="button" onclick="closeEditModal()" class="secondary" style="flex:1;">Batal</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 let deferredPrompt;
 const installBtn = document.getElementById("installAppBtn");
@@ -1150,6 +1201,7 @@ async function loadData(){
       boxPrice: boxP > 0 ? boxP : tot,
       paymentStatus: h.transaction_type === "out" ? (h.payment_status || "LUNAS") : "—",
       note: h.notes || "",
+      rawTime: h.created_at,
       time: new Date(h.created_at).toLocaleString("id-ID")
     };
   });
@@ -1214,6 +1266,14 @@ function setup(){
   if(outmodel) outmodel.innerHTML = options;
   if(transfermodel) transfermodel.innerHTML = options;
   
+  // Set default datetime-local ke waktu sekarang
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  const timeInput = document.getElementById("intimestamp");
+  if(timeInput && !timeInput.value) {
+    timeInput.value = now.toISOString().slice(0, 16);
+  }
+
   updateStoreStock('in');
   updateStoreStock('out');
   updateTransferStockInfo();
@@ -1261,7 +1321,6 @@ function getStoreStock(storeName, productId){
   return storeStock >= 0 ? storeStock : 0;
 }
 
-// Fungsi menghitung total stock gabungan dari semua loja untuk stok global
 function getTotalStoreStock(productId) {
   const stores = ["Loja Rebal", "Loja Bairopite", "Gudang Lahane", "Loja Same", "Loja Oe-cusse", "Loja Ainaro", "Loja Baucau"];
   let total = 0;
@@ -1446,10 +1505,7 @@ function renderStoreManagement(){
 
 async function executeStoreAdjustment(storeName, productId, txType) {
   const inputEl = document.querySelector(`.store-adj-input[data-store="${storeName}"][data-product="${productId}"]`);
-  if(!inputEl) {
-    alert("Input tidak ditemukan!");
-    return;
-  }
+  if(!inputEl) return;
   const qtyInput = Number(inputEl.value);
 
   if(isNaN(qtyInput) || qtyInput <= 0) {
@@ -1469,7 +1525,6 @@ async function executeStoreAdjustment(storeName, productId, txType) {
   if(!confirm(`Ita sure hakarak ${actionLabel} stock ${qtyInput} ba ${storeName}?`)) return;
 
   try {
-    // Catat transaksi
     await api("stock_transactions", {
       method: "POST",
       headers: { "Prefer": "return=minimal" },
@@ -1488,12 +1543,10 @@ async function executeStoreAdjustment(storeName, productId, txType) {
       })
     });
 
-    // Hitung total stok gabungan terbaru dari semua loja untuk produk ini
     await loadData();
     const newTotalStock = getTotalStoreStock(productId);
     let newStatus = newTotalStock === 0 ? "out_of_stock" : (newTotalStock <= 3 ? "low_stock" : "available");
 
-    // Sinkronkan stok global di tabel produk agar otomatis mengikuti total loja
     await api(`products?id=eq.${productId}`, {
       method: "PATCH",
       headers: { "Prefer": "return=minimal" },
@@ -1512,68 +1565,6 @@ async function executeStoreAdjustment(storeName, productId, txType) {
   }
 }
 
-function renderData(){
-  const search = document.getElementById("search");
-  const filter = document.getElementById("filter");
-  const table = document.getElementById("datatable");
-  if(!table) return;
-
-  const q = (search.value || "").toLowerCase();
-  const f = filter.value || "";
-
-  const filtered = data.filter(x => {
-    const label = x.name + " " + (x.variant || "");
-    return (!f || x.type === f) && (!q || label.toLowerCase().includes(q));
-  });
-
-  table.innerHTML = filtered.map(x => {
-    // Ambil stok aktual global berdasarkan total akumulasi semua loja
-    const totalStoreStock = getTotalStoreStock(x.id);
-    const label = x.variant ? x.name + " — " + x.variant : x.name;
-    return `
-      <tr>
-        <td>${x.code || "—"}</td>
-        <td>${x.type || "—"}</td>
-        <td><b>${label}</b></td>
-        <td style="text-align:center;"><b>${totalStoreStock}</b></td>
-        <td>
-          <button type="button" class="update-stock-btn" onclick="updateDirectStock('${x.id}')">💾 Update Stock</button>
-        </td>
-      </tr>
-    `;
-  }).join("");
-}
-
-async function updateDirectStock(productId) {
-  const passInput = prompt("Hatama password:");
-  if (passInput === null) return;
-
-  if (passInput !== "adminzjero2026") {
-    alert("Password sala!");
-    return;
-  }
-
-  // Hitung total stok dari semua loja saat ini
-  const totalStoreStock = getTotalStoreStock(productId);
-  let newStatus = totalStoreStock === 0 ? "out_of_stock" : (totalStoreStock <= 3 ? "low_stock" : "available");
-
-  try {
-    await api("products?id=eq." + productId, {
-      method: "PATCH",
-      headers: { "Prefer": "return=minimal" },
-      body: JSON.stringify({ stock: totalStoreStock, status: newStatus })
-    });
-
-    await loadData();
-    renderData();
-    updateDash();
-    alert("Stock global sinkronisasi ona tuir total loja!");
-  } catch(error) {
-    console.error(error);
-    alert("La konsege sinkronisasi stock.\n\n" + error.message);
-  }
-}
-
 async function transact(kind){
   const storeElement = document.getElementById(kind === "in" ? "instore" : "outstore");
   const modelElement = document.getElementById(kind === "in" ? "inmodel" : "outmodel");
@@ -1587,12 +1578,16 @@ async function transact(kind){
   const dpEl = document.getElementById("outdp");
   const noteElement = document.getElementById(kind === "in" ? "innote" : "outnote");
   const conditionEl = document.getElementById("incondition");
+  const supplierEl = document.getElementById("insupplier");
+  const timeEl = document.getElementById("intimestamp");
 
   const idx = Number(modelElement.value);
-  const qty = Number(qtyElement.value);
+  const qty = Number(qtyInput = qtyElement.value);
   const dest = kind === "out" ? (destElement.value.trim() || "—") : "—";
   
   const isDamaged = kind === "in" && conditionEl && conditionEl.value === "damaged";
+  const supplierName = kind === "in" && supplierEl ? supplierEl.value.trim() : "";
+  const customTime = kind === "in" && timeEl && timeEl.value ? new Date(timeEl.value).toISOString() : new Date().toISOString();
 
   const boxPrice = kind === "out" ? Number(boxPriceEl.value || 0) : 0;
   const ambulancePrice = kind === "out" ? Number(ambulanceEl.value || 0) : 0;
@@ -1610,6 +1605,10 @@ async function transact(kind){
   const product = data[idx];
   let note = noteElement ? noteElement.value.trim() : "";
   
+  if(supplierName) {
+    note = `Suplier: ${supplierName}${note ? ' - ' + note : ''}`;
+  }
+
   if(isDamaged){
     const labelName = product ? (product.variant ? `${product.name} — ${product.variant}` : product.name) : "Kaixao";
     note = `(${labelName} rusak : ${qty})${note ? ' - ' + note : ''}`;
@@ -1639,11 +1638,11 @@ async function transact(kind){
         ambulance_price: ambulancePrice,
         freezer_price: freezerPrice,
         payment_status: paymentStatus,
-        notes: note
+        notes: note,
+        created_at: customTime
       })
     });
 
-    // Ambil data terbaru dan sinkronkan stok global mengikuti total semua loja
     await loadData();
     const newTotalStock = getTotalStoreStock(product.id);
     let newStatus = newTotalStock === 0 ? "out_of_stock" : (newTotalStock <= 3 ? "low_stock" : "available");
@@ -1658,6 +1657,7 @@ async function transact(kind){
     setup();
 
     qtyElement.value = "";
+    if(supplierEl) supplierEl.value = "";
     if(destElement) destElement.value = "";
     if(boxPriceEl) boxPriceEl.value = "";
     if(dpEl) dpEl.value = "";
@@ -1704,7 +1704,6 @@ async function deleteTransaction(txId) {
   if(!confirm("Ita sure hakarak hamos transaksaun ne'e?")) return;
 
   try {
-    // Ambil data transaksi sebelum dihapus untuk tahu product_id
     const txRows = await api(`stock_transactions?id=eq.${txId}&select=product_id`);
     const prodId = txRows && txRows.length > 0 ? txRows[0].product_id : null;
 
@@ -1727,15 +1726,16 @@ async function deleteTransaction(txId) {
     renderHistory();
     renderData();
     updateDash();
-    alert("Transaksaun hamos ona no stok sinkronise ona!");
+    alert("Transaksaun hamos ona ho susesu!");
   } catch(error) {
     console.error(error);
     alert("La konsege hamos transaksaun.\n\n" + error.message);
   }
 }
 
-async function editTransaction(txId) {
-  const passInput = prompt("Hatama password:");
+// Fungsi Buka Modal Edit Transaksi Lengkap
+function editTransaction(txId) {
+  const passInput = prompt("Hatama password admin:");
   if (passInput === null) return;
 
   if (passInput !== "zjeroadmin2026") {
@@ -1743,12 +1743,51 @@ async function editTransaction(txId) {
     return;
   }
 
-  const newQty = prompt("Hatama kuantidade foun:");
-  if(newQty === null) return;
-  const qtyNum = Number(newQty);
-  if(isNaN(qtyNum) || qtyNum < 1){
-    alert("Kuantidade sala.");
+  const h = history.find(x => String(x.id) === String(txId));
+  if(!h) {
+    alert("Data transaksaun la hetan.");
     return;
+  }
+
+  document.getElementById("edit-tx-id").value = h.id;
+  document.getElementById("edit-qty").value = h.qty;
+  document.getElementById("edit-totalprice").value = h.totalPrice;
+  document.getElementById("edit-note").value = h.note;
+
+  // Format tanggal untuk datetime-local
+  if(h.rawTime) {
+    const dt = new Date(h.rawTime);
+    dt.setMinutes(dt.getMinutes() - dt.getTimezoneOffset());
+    document.getElementById("edit-timestamp").value = dt.toISOString().slice(0, 16);
+  }
+
+  document.getElementById("editModal").classList.remove("hidden");
+}
+
+function closeEditModal() {
+  document.getElementById("editModal").classList.add("hidden");
+}
+
+async function saveEditedTransaction() {
+  const txId = document.getElementById("edit-tx-id").value;
+  const newQty = Number(document.getElementById("edit-qty").value);
+  const newPrice = Number(document.getElementById("edit-totalprice").value);
+  const newNote = document.getElementById("edit-note").value.trim();
+  const newTimeInput = document.getElementById("edit-timestamp").value;
+
+  if(isNaN(newQty) || newQty < 1) {
+    alert("Kuantidade labele kosong.");
+    return;
+  }
+
+  const updatePayload = {
+    quantity: newQty,
+    total_price: newPrice,
+    notes: newNote
+  };
+
+  if(newTimeInput) {
+    updatePayload.created_at = new Date(newTimeInput).toISOString();
   }
 
   try {
@@ -1758,7 +1797,7 @@ async function editTransaction(txId) {
     await api("stock_transactions?id=eq." + txId, {
       method: "PATCH",
       headers: { "Prefer": "return=minimal" },
-      body: JSON.stringify({ quantity: qtyNum })
+      body: JSON.stringify(updatePayload)
     });
 
     if(prodId) {
@@ -1772,14 +1811,75 @@ async function editTransaction(txId) {
       });
     }
 
+    closeEditModal();
     await loadData();
     renderHistory();
     renderData();
     updateDash();
-    alert("Kuantidade transaksaun troka ona no stok sinkronise ona!");
+    alert("Transaksaun atualiza ona ho susesu!");
   } catch(error) {
     console.error(error);
     alert("La konsege edit transaksaun.\n\n" + error.message);
+  }
+}
+
+function renderData(){
+  const search = document.getElementById("search");
+  const filter = document.getElementById("filter");
+  const table = document.getElementById("datatable");
+  if(!table) return;
+
+  const q = (search.value || "").toLowerCase();
+  const f = filter.value || "";
+
+  const filtered = data.filter(x => {
+    const label = x.name + " " + (x.variant || "");
+    return (!f || x.type === f) && (!q || label.toLowerCase().includes(q));
+  });
+
+  table.innerHTML = filtered.map(x => {
+    const totalStoreStock = getTotalStoreStock(x.id);
+    const label = x.variant ? x.name + " — " + x.variant : x.name;
+    return `
+      <tr>
+        <td>${x.code || "—"}</td>
+        <td>${x.type || "—"}</td>
+        <td><b>${label}</b></td>
+        <td style="text-align:center;"><b>${totalStoreStock}</b></td>
+        <td>
+          <button type="button" class="update-stock-btn" onclick="updateDirectStock('${x.id}')">💾 Sinkronkan Stock</button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
+async function updateDirectStock(productId) {
+  const passInput = prompt("Hatama password admin:");
+  if (passInput === null) return;
+
+  if (passInput !== "adminzjero2026") {
+    alert("Password sala!");
+    return;
+  }
+
+  const totalStoreStock = getTotalStoreStock(productId);
+  let newStatus = totalStoreStock === 0 ? "out_of_stock" : (totalStoreStock <= 3 ? "low_stock" : "available");
+
+  try {
+    await api("products?id=eq." + productId, {
+      method: "PATCH",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({ stock: totalStoreStock, status: newStatus })
+    });
+
+    await loadData();
+    renderData();
+    updateDash();
+    alert("Stock global sinkronisasi ona tuir total loja!");
+  } catch(error) {
+    console.error(error);
+    alert("La konsege sinkronisasi stock.\n\n" + error.message);
   }
 }
 
