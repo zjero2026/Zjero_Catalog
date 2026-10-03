@@ -719,8 +719,9 @@ th{
             <tr>
               <th>Kode</th>
               <th>Modelu Kaixao</th>
-              <th style="text-align:center;">Penyesuaian Stok (+ / -)</th>
-              <th style="text-align:center;">Aksi</th>
+              <th style="text-align:center;">Stock Aktual</th>
+              <th style="text-align:center;">Jumlah Penyesuaian</th>
+              <th style="text-align:center;">Aksi Cepat</th>
             </tr>
           </thead>
           <tbody id="storemanagementtable"></tbody>
@@ -1420,46 +1421,26 @@ function renderStoreManagement(){
       <tr>
         <td>${p.code || "—"}</td>
         <td><b>${label}</b></td>
+        <td style="text-align:center;"><b>${currentQty}</b></td>
         <td style="text-align:center;">
-          <div style="display:inline-flex; align-items:center; gap:5px;">
-            <button type="button" onclick="changeQtyInput('${storeName}', '${p.id}', -1)" style="padding:5px 10px; background:#a8483e;">-</button>
-            <input id="store-stock-${storeName}-${p.id}" type="number" min="0" value="0" style="width:60px; padding:5px; text-align:center;">
-            <button type="button" onclick="changeQtyInput('${storeName}', '${p.id}', 1)" style="padding:5px 10px; background:#39734e;">+</button>
-          </div>
+          <input id="store-adj-${storeName}-${p.id}" type="number" min="0" value="0" style="width:70px; padding:5px; text-align:center;">
         </td>
-        <td style="text-align:center;">
-          <button type="button" class="update-stock-btn" onclick="adjustStoreStockDirect('${storeName}', '${p.id}')">💾 Simpan</button>
+        <td style="text-align:center; display:flex; gap:5px; justify-content:center;">
+          <button type="button" onclick="executeStoreAdjustment('${storeName}', '${p.id}', 'in')" style="background:#39734e; padding:6px 10px; font-size:11px;">➕ Tambah</button>
+          <button type="button" onclick="executeStoreAdjustment('${storeName}', '${p.id}', 'out')" style="background:#a8483e; padding:6px 10px; font-size:11px;">➖ Kurang</button>
         </td>
       </tr>
     `;
   }).join("");
 }
 
-function changeQtyInput(storeName, productId, val) {
-  const inputEl = document.getElementById(`store-stock-${storeName}-${productId}`);
-  if(!inputEl) return;
-  let currentVal = Number(inputEl.value || 0);
-  currentVal += val;
-  if(currentVal < 0) currentVal = 0;
-  inputEl.value = currentVal;
-}
-
-async function adjustStoreStockDirect(storeName, productId) {
-  const inputEl = document.getElementById(`store-stock-${storeName}-${productId}`);
+async function executeStoreAdjustment(storeName, productId, txType) {
+  const inputEl = document.getElementById(`store-adj-${storeName}-${productId}`);
   if(!inputEl) return;
   const qtyInput = Number(inputEl.value);
 
   if(isNaN(qtyInput) || qtyInput <= 0) {
-    alert("Favor hatama kuantidade ne'ebé loloos.");
-    return;
-  }
-
-  const actionType = prompt("Pilih jenis penyesuaian:\nKetik 'tambah' untuk menambah stok\nKetik 'kurang' untuk mengurangi stok");
-  if(actionType === null) return;
-  const typeLower = actionType.trim().toLowerCase();
-
-  if(typeLower !== 'tambah' && typeLower !== 'kurang') {
-    alert("Pilihan salah! Ketik 'tambah' atau 'kurang'.");
+    alert("Favor hatama kuantidade ne'ebé loloos (lu vih 0).");
     return;
   }
 
@@ -1471,15 +1452,14 @@ async function adjustStoreStockDirect(storeName, productId) {
     return;
   }
 
-  const txType = typeLower === 'kurang' ? "out" : "in";
   const currentStock = getStoreStock(storeName, productId);
-
   if(txType === "out" && qtyInput > currentStock) {
-    alert("Stock iha loja la sufisiente atu hamenus hikas tantu barak! (Stock atual: " + currentStock + ")");
+    alert("Stock iha loja la sufisiente atu hamenus! (Stock aktual: " + currentStock + ")");
     return;
   }
 
-  if(!confirm(`Ita sure hakarak ${typeLower} stock ${qtyInput} ba ${storeName}?`)) return;
+  const actionLabel = txType === "in" ? "tambah" : "kurang";
+  if(!confirm(`Ita sure hakarak ${actionLabel} stock ${qtyInput} ba ${storeName}?`)) return;
 
   try {
     await api("stock_transactions", {
@@ -1916,7 +1896,7 @@ function renderHistory(){
       }
     } else {
       let isDamaged = h.note && h.note.includes("rusak");
-      paymentBadge = isDamaged ? `<span class="badge-dam">⚠️️ Sasan Aat / Rusak</span>` : `<span style="color:#39734e; font-weight:bold;">Sasan Tama (Di'ak)</span>`;
+      paymentBadge = isDamaged ? `<span class="badge-dam">⚠️ Sasan Aat / Rusak</span>` : `<span style="color:#39734e; font-weight:bold;">Sasan Tama (Di'ak)</span>`;
     }
 
     return `
@@ -2015,6 +1995,7 @@ updateDash = function(){
     if(!hasItems) breakdownHTML += `<li style="color:#888;">Seidauk iha stock</li>`;
     breakdownHTML += `</ul></div>`;
   });
+  breakdownHTML += `</ul></div>`; // Fix closing
   breakdownEl.innerHTML = breakdownHTML;
 
   const available = data.filter(x => Number(x.stock || 0) > 3).length;
