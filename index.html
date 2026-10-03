@@ -184,7 +184,6 @@ const HEADERS = {
 
 const wa='67076312111';
 
-// Daftar sub-varian produk beserta nama lengkapnya
 const productSubOptions = {
   "SURABAYA": ["Surabaya A Segi 4", "Surabaya B Segi 8"],
   "JEPARA": ["Jepara VIP", "Jepara A Putih", "Jepara B Silver", "Jepara C Cokelat"],
@@ -230,7 +229,7 @@ const masterProducts = [
   {codes: ["AS12"], name: "ORION", type: "ASIA STYLE", images: ["Images/AS_11.jpg", "Images/AS_11b.jpg", "Images/AS_11c.jpg"]},
   {codes: ["AS13", "AS14", "AS15", "AS16", "AS17", "AS18"], name: "JEPARA", type: "ASIA STYLE", images: ["Images/AS_12.png", "Images/AS_12b.jpg", "Images/AS_12c.jpg", "Images/AS_12d.jpg"]},
   {codes: ["AS19", "AS20", "AS21"], name: "SURABAYA", type: "ASIA STYLE", images: ["Images/AS_13.jpg", "Images/AS_13b.jpg", "Images/AS_13c.jpg"]},
-  {codes: ["AS22", "AS23"], name: "KAIXAO KIK", type: "ASIA STYLE", images: ["Images/AS_14.jpg", "Images/AS_14b.jpg", "Images/AS_14c.jpg"]},
+  {codes: ["AS22", "AS23"], name: "KAIXAO KIK", type: "ASIA STYLE", images: ["Images/AS_14.jpg", "Images/AM_14b.jpg", "Images/AS_14c.jpg"]},
   {codes: ["AS24"], name: "TRINITY", type: "ASIA STYLE", images: ["Images/AS_15.jpg", "Images/AS_15b.jpg", "Images/AS_15c.jpg"]},
   {codes: ["AS25"], name: "OKTAV", type: "ASIA STYLE", images: ["Images/AS_16.png", "Images/AS_16b.jpg"]},
   {codes: ["AS26"], name: "LEGACY", type: "ASIA STYLE", images: ["Images/AS_17.jpg", "Images/AS_17b.jpg", "Images/AS_17c.jpg"]},
@@ -242,18 +241,12 @@ const masterProducts = [
 ];
 
 let globalDbRows = [];
-let globalTransactions = [];
 let products = [];
 
 async function loadCatalog() {
   try {
-    const [resProd, resTx] = await Promise.all([
-      fetch(SUPABASE_URL + "/rest/v1/products?select=id,code,name,variant,stock", { headers: HEADERS }),
-      fetch(SUPABASE_URL + "/rest/v1/stock_transactions?select=product_id,transaction_type,quantity,notes", { headers: HEADERS })
-    ]);
-
+    const resProd = await fetch(SUPABASE_URL + "/rest/v1/products?select=id,code,name,variant,stock", { headers: HEADERS });
     if(resProd.ok) globalDbRows = await resProd.json();
-    if(resTx.ok) globalTransactions = await resTx.json();
   } catch(e) {
     console.error("Gagal konek Supabase:", e);
   }
@@ -261,14 +254,16 @@ async function loadCatalog() {
   products = masterProducts.map((item, idx) => {
     let totalStock = 0;
     
-    item.codes.forEach(c => {
-      let foundProducts = globalDbRows.filter(r => (r.code || "").trim().toUpperCase() === c.toUpperCase() || (r.name || "").trim().toUpperCase().includes(item.name.toUpperCase()));
-      foundProducts.forEach(prod => {
-        totalStock += Number(prod.stock || 0);
-      });
+    // Cari berdasarkan kode atau nama produk di database
+    globalDbRows.forEach(r => {
+      let rCode = (r.code || "").trim().toUpperCase();
+      let rName = (r.name || "").trim().toUpperCase();
+      if (item.codes.includes(rCode) || rName.includes(item.name.toUpperCase())) {
+        totalStock += Number(r.stock || 0);
+      }
     });
 
-    let stockDesc = totalStock === 0 ? "⚠️ Stock Hotu Ona (Habis)" : (totalStock <= 3 ? "⚠️ Stock Menus: " + totalStock : "📦 Stock Tersedia: " + totalStock);
+    let stockDesc = totalStock === 0 ? "⚠️️ Stock Hotu Ona (Habis)" : (totalStock <= 3 ? "⚠️ Stock Menus: " + totalStock : "📦 Stock Tersedia: " + totalStock);
 
     return {
       id: "prod-" + idx,
@@ -347,18 +342,22 @@ function updateProductDisplay(productId, baseName) {
 
   let specificStock = 0;
   if (selectedVariant) {
-    let foundVar = globalDbRows.find(r => (r.variant || "").trim().toUpperCase() === selectedVariant.toUpperCase());
-    if (foundVar) {
-      specificStock = Number(foundVar.stock || 0);
-    }
+    globalDbRows.forEach(r => {
+      let rVariant = (r.variant || "").trim().toUpperCase();
+      let rName = (r.name || "").trim().toUpperCase();
+      if (rVariant === selectedVariant.toUpperCase() || rName.includes(selectedVariant.toUpperCase())) {
+        specificStock += Number(r.stock || 0);
+      }
+    });
   } else {
     let masterItem = masterProducts.find(p => p.name === baseName);
     if (masterItem) {
-      masterItem.codes.forEach(c => {
-        let found = globalDbRows.filter(r => (r.code || "").trim().toUpperCase() === c.toUpperCase() || (r.name || "").trim().toUpperCase().includes(baseName.toUpperCase()));
-        found.forEach(f => {
-          specificStock += Number(f.stock || 0);
-        });
+      globalDbRows.forEach(r => {
+        let rCode = (r.code || "").trim().toUpperCase();
+        let rName = (r.name || "").trim().toUpperCase();
+        if (masterItem.codes.includes(rCode) || rName.includes(baseName.toUpperCase())) {
+          specificStock += Number(r.stock || 0);
+        }
       });
     }
   }
