@@ -1423,7 +1423,7 @@ function renderStoreManagement(){
         <td><b>${label}</b></td>
         <td style="text-align:center;"><b>${currentQty}</b></td>
         <td style="text-align:center;">
-          <input id="store-adj-${storeName}-${p.id}" type="number" min="0" value="0" style="width:70px; padding:5px; text-align:center;">
+          <input class="store-adj-input" data-store="${storeName}" data-product="${p.id}" type="number" min="0" value="0" style="width:70px; padding:5px; text-align:center;">
         </td>
         <td style="text-align:center; display:flex; gap:5px; justify-content:center;">
           <button type="button" onclick="executeStoreAdjustment('${storeName}', '${p.id}', 'in')" style="background:#39734e; padding:6px 10px; font-size:11px;">➕ Tambah</button>
@@ -1435,8 +1435,12 @@ function renderStoreManagement(){
 }
 
 async function executeStoreAdjustment(storeName, productId, txType) {
-  const inputEl = document.getElementById(`store-adj-${storeName}-${productId}`);
-  if(!inputEl) return;
+  // Cari input menggunakan selector unik berdasarkan store dan product id
+  const inputEl = document.querySelector(`.store-adj-input[data-store="${storeName}"][data-product="${productId}"]`);
+  if(!inputEl) {
+    alert("Input tidak ditemukan!");
+    return;
+  }
   const qtyInput = Number(inputEl.value);
 
   if(isNaN(qtyInput) || qtyInput <= 0) {
@@ -1920,7 +1924,7 @@ function renderTransferHistory(){
 
   table.innerHTML = transferList.map(h => {
     let noteDisplay = h.note ? `<br><small style="color:#666;">💬 ${h.note}</small>` : "";
-    let actionButtons = `<button type="button" class="delete-btn" onclick="deleteTransaction('${h.id}')">🗑️ Delete</button>`;
+    let actionButtons = `<button type="button" class="delete-btn" onclick="deleteTransaction('${h.id}')">🗑️️ Delete</button>`;
 
     return `
       <tr>
