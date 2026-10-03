@@ -672,7 +672,7 @@ th{
     <!-- DATA KAIXAO -->
     <section id="data" class="hidden">
       <div class="panel">
-        <button type="button" class="print-btn" onclick="window.print()">🖨️️ Imprime / Download PDF Dadus Kaixao</button>
+        <button type="button" class="print-btn" onclick="window.print()">🖨️ Imprime / Download PDF Dadus Kaixao</button>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
           <input id="search" placeholder="🔎 Aluka modelu kaixao..." oninput="renderData()" style="flex:1">
           <select id="filter" onchange="renderData()" style="max-width:210px">
@@ -1423,7 +1423,7 @@ function renderStoreManagement(){
         <td><b>${label}</b></td>
         <td style="text-align:center;"><b>${currentQty}</b></td>
         <td style="text-align:center;">
-          <input id="store-adj-${p.id}" type="number" min="0" value="0" style="width:70px; padding:5px; text-align:center;">
+          <input id="store-adj-${storeName}-${p.id}" type="number" min="0" value="0" style="width:70px; padding:5px; text-align:center;">
         </td>
         <td style="text-align:center; display:flex; gap:5px; justify-content:center;">
           <button type="button" onclick="executeStoreAdjustment('${storeName}', '${p.id}', 'in')" style="background:#39734e; padding:6px 10px; font-size:11px;">➕ Tambah</button>
@@ -1435,7 +1435,7 @@ function renderStoreManagement(){
 }
 
 async function executeStoreAdjustment(storeName, productId, txType) {
-  const inputEl = document.getElementById(`store-adj-${productId}`);
+  const inputEl = document.getElementById(`store-adj-${storeName}-${productId}`);
   if(!inputEl) return;
   const qtyInput = Number(inputEl.value);
 
@@ -1449,12 +1449,6 @@ async function executeStoreAdjustment(storeName, productId, txType) {
 
   if (passInput !== "adminzjero2026") {
     alert("Password sala!");
-    return;
-  }
-
-  const currentStock = getStoreStock(storeName, productId);
-  if(txType === "out" && qtyInput > currentStock) {
-    alert("Stock iha loja la sufisiente atu hamenus! (Stock aktual: " + currentStock + ")");
     return;
   }
 
