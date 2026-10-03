@@ -688,7 +688,7 @@ th{
               <th>Kode</th>
               <th>Type</th>
               <th>Modelu Kaixao / Varian</th>
-              <th>Stock Aktual</th>
+              <th>Stock Aktual (Total Loja)</th>
               <th>Aksi / Update Stock</th>
             </tr>
           </thead>
@@ -1261,6 +1261,16 @@ function getStoreStock(storeName, productId){
   return storeStock >= 0 ? storeStock : 0;
 }
 
+// Fungsi menghitung total stock gabungan dari semua loja untuk stok global
+function getTotalStoreStock(productId) {
+  const stores = ["Loja Rebal", "Loja Bairopite", "Gudang Lahane", "Loja Same", "Loja Oe-cusse", "Loja Ainaro", "Loja Baucau"];
+  let total = 0;
+  stores.forEach(store => {
+    total += getStoreStock(store, productId);
+  });
+  return total;
+}
+
 function getStoreDamagedStock(storeName, productId){
   const storeTransactions = history.filter(h => h.store === storeName && h.productId === productId && h.type === "Sasan Tama" && h.note.includes("rusak"));
   let damagedStock = 0;
@@ -1435,7 +1445,6 @@ function renderStoreManagement(){
 }
 
 async function executeStoreAdjustment(storeName, productId, txType) {
-  // Cari input menggunakan selector unik berdasarkan store dan product id
   const inputEl = document.querySelector(`.store-adj-input[data-store="${storeName}"][data-product="${productId}"]`);
   if(!inputEl) {
     alert("Input tidak ditemukan!");
@@ -1460,6 +1469,7 @@ async function executeStoreAdjustment(storeName, productId, txType) {
   if(!confirm(`Ita sure hakarak ${actionLabel} stock ${qtyInput} ba ${storeName}?`)) return;
 
   try {
+    // Catat transaksi
     await api("stock_transactions", {
       method: "POST",
       headers: { "Prefer": "return=minimal" },
@@ -1478,11 +1488,24 @@ async function executeStoreAdjustment(storeName, productId, txType) {
       })
     });
 
+    // Hitung total stok gabungan terbaru dari semua loja untuk produk ini
+    await loadData();
+    const newTotalStock = getTotalStoreStock(productId);
+    let newStatus = newTotalStock === 0 ? "out_of_stock" : (newTotalStock <= 3 ? "low_stock" : "available");
+
+    // Sinkronkan stok global di tabel produk agar otomatis mengikuti total loja
+    await api(`products?id=eq.${productId}`, {
+      method: "PATCH",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({ stock: newTotalStock, status: newStatus })
+    });
+
     inputEl.value = "0";
     await loadData();
     renderStoreManagement();
+    renderData();
     updateDash();
-    alert("Stock iha loja ne'e atualiza ona ho susesu!");
+    alert("Stock iha loja no global atualiza ona ho susesu!");
   } catch(error) {
     console.error(error);
     alert("La konsege atualiza stock loja.\n\n" + error.message);
@@ -1504,14 +1527,15 @@ function renderData(){
   });
 
   table.innerHTML = filtered.map(x => {
-    const stock = Number(x.stock || 0);
+    // Ambil stok aktual global berdasarkan total akumulasi semua loja
+    const totalStoreStock = getTotalStoreStock(x.id);
     const label = x.variant ? x.name + " — " + x.variant : x.name;
     return `
       <tr>
         <td>${x.code || "—"}</td>
         <td>${x.type || "—"}</td>
         <td><b>${label}</b></td>
-        <td><input id="stock-input-${x.id}" type="number" value="${stock}" style="width:70px; padding:5px; text-align:center;"></td>
+        <td style="text-align:center;"><b>${totalStoreStock}</b></td>
         <td>
           <button type="button" class="update-stock-btn" onclick="updateDirectStock('${x.id}')">💾 Update Stock</button>
         </td>
@@ -1521,15 +1545,6 @@ function renderData(){
 }
 
 async function updateDirectStock(productId) {
-  const inputEl = document.getElementById("stock-input-" + productId);
-  if(!inputEl) return;
-  const newStock = Number(inputEl.value);
-
-  if(isNaN(newStock) || newStock < 0) {
-    alert("Favor hatama numeru stock ne'ebé loloos.");
-    return;
-  }
-
   const passInput = prompt("Hatama password:");
   if (passInput === null) return;
 
@@ -1538,24 +1553,24 @@ async function updateDirectStock(productId) {
     return;
   }
 
-  if(!confirm("Muda stock ba " + newStock + "?")) return;
-
-  let newStatus = newStock === 0 ? "out_of_stock" : (newStock <= 3 ? "low_stock" : "available");
+  // Hitung total stok dari semua loja saat ini
+  const totalStoreStock = getTotalStoreStock(productId);
+  let newStatus = totalStoreStock === 0 ? "out_of_stock" : (totalStoreStock <= 3 ? "low_stock" : "available");
 
   try {
     await api("products?id=eq." + productId, {
       method: "PATCH",
       headers: { "Prefer": "return=minimal" },
-      body: JSON.stringify({ stock: newStock, status: newStatus })
+      body: JSON.stringify({ stock: totalStoreStock, status: newStatus })
     });
 
     await loadData();
     renderData();
     updateDash();
-    alert("Stock atualiza ona ho susesu!");
+    alert("Stock global sinkronisasi ona tuir total loja!");
   } catch(error) {
     console.error(error);
-    alert("La konsege atualiza stock.\n\n" + error.message);
+    alert("La konsege sinkronisasi stock.\n\n" + error.message);
   }
 }
 
@@ -1608,10 +1623,6 @@ async function transact(kind){
     alert("Favor hatama kuantidade ne'ebé loloos.");
     return;
   }
-  if(kind === "out" && qty > Number(product.stock || 0)){
-    alert("Stock la iha Sufisiente.");
-    return;
-  }
 
   try{
     await api("stock_transactions", {
@@ -1632,17 +1643,15 @@ async function transact(kind){
       })
     });
 
-    let newStock = Number(product.stock || 0);
-    if(!isDamaged) {
-      newStock = kind === "in" ? (newStock + qty) : (newStock - qty);
-    }
-    
-    let newStatus = newStock === 0 ? "out_of_stock" : (newStock <= 3 ? "low_stock" : "available");
+    // Ambil data terbaru dan sinkronkan stok global mengikuti total semua loja
+    await loadData();
+    const newTotalStock = getTotalStoreStock(product.id);
+    let newStatus = newTotalStock === 0 ? "out_of_stock" : (newTotalStock <= 3 ? "low_stock" : "available");
 
     await api("products?id=eq." + product.id, {
       method: "PATCH",
       headers: { "Prefer": "return=minimal" },
-      body: JSON.stringify({ stock: newStock, status: newStatus })
+      body: JSON.stringify({ stock: newTotalStock, status: newStatus })
     });
 
     await loadData();
@@ -1695,14 +1704,30 @@ async function deleteTransaction(txId) {
   if(!confirm("Ita sure hakarak hamos transaksaun ne'e?")) return;
 
   try {
+    // Ambil data transaksi sebelum dihapus untuk tahu product_id
+    const txRows = await api(`stock_transactions?id=eq.${txId}&select=product_id`);
+    const prodId = txRows && txRows.length > 0 ? txRows[0].product_id : null;
+
     await api("stock_transactions?id=eq." + txId, {
       method: "DELETE"
     });
 
+    if(prodId) {
+      await loadData();
+      const newTotalStock = getTotalStoreStock(prodId);
+      let newStatus = newTotalStock === 0 ? "out_of_stock" : (newTotalStock <= 3 ? "low_stock" : "available");
+      await api(`products?id=eq.${prodId}`, {
+        method: "PATCH",
+        headers: { "Prefer": "return=minimal" },
+        body: JSON.stringify({ stock: newTotalStock, status: newStatus })
+      });
+    }
+
     await loadData();
     renderHistory();
+    renderData();
     updateDash();
-    alert("Transaksaun hamos ona ho susesu!");
+    alert("Transaksaun hamos ona no stok sinkronise ona!");
   } catch(error) {
     console.error(error);
     alert("La konsege hamos transaksaun.\n\n" + error.message);
@@ -1727,16 +1752,31 @@ async function editTransaction(txId) {
   }
 
   try {
+    const txRows = await api(`stock_transactions?id=eq.${txId}&select=product_id`);
+    const prodId = txRows && txRows.length > 0 ? txRows[0].product_id : null;
+
     await api("stock_transactions?id=eq." + txId, {
       method: "PATCH",
       headers: { "Prefer": "return=minimal" },
       body: JSON.stringify({ quantity: qtyNum })
     });
 
+    if(prodId) {
+      await loadData();
+      const newTotalStock = getTotalStoreStock(prodId);
+      let newStatus = newTotalStock === 0 ? "out_of_stock" : (newTotalStock <= 3 ? "low_stock" : "available");
+      await api(`products?id=eq.${prodId}`, {
+        method: "PATCH",
+        headers: { "Prefer": "return=minimal" },
+        body: JSON.stringify({ stock: newTotalStock, status: newStatus })
+      });
+    }
+
     await loadData();
     renderHistory();
+    renderData();
     updateDash();
-    alert("Kuantidade transaksaun troka ona ho susesu!");
+    alert("Kuantidade transaksaun troka ona no stok sinkronise ona!");
   } catch(error) {
     console.error(error);
     alert("La konsege edit transaksaun.\n\n" + error.message);
@@ -1924,7 +1964,7 @@ function renderTransferHistory(){
 
   table.innerHTML = transferList.map(h => {
     let noteDisplay = h.note ? `<br><small style="color:#666;">💬 ${h.note}</small>` : "";
-    let actionButtons = `<button type="button" class="delete-btn" onclick="deleteTransaction('${h.id}')">🗑️️ Delete</button>`;
+    let actionButtons = `<button type="button" class="delete-btn" onclick="deleteTransaction('${h.id}')">🗑️ Delete</button>`;
 
     return `
       <tr>
@@ -1993,6 +2033,7 @@ updateDash = function(){
     if(!hasItems) breakdownHTML += `<li style="color:#888;">Seidauk iha stock</li>`;
     breakdownHTML += `</ul></div>`;
   });
+  breakdownHTML += `</ul></div>`;
   breakdownEl.innerHTML = breakdownHTML;
 
   const available = data.filter(x => Number(x.stock || 0) > 3).length;
