@@ -241,29 +241,55 @@ const masterProducts = [
 ];
 
 let globalDbRows = [];
-let products = [];
+let globalTransactions = [];
 
 async function loadCatalog() {
   try {
-    const resProd = await fetch(SUPABASE_URL + "/rest/v1/products?select=id,code,name,variant,stock", { headers: HEADERS });
+    const [resProd, resTx] = await Promise.all([
+      fetch(SUPABASE_URL + "/rest/v1/products?select=id,code,name,variant,stock", { headers: HEADERS }),
+      fetch(SUPABASE_URL + "/rest/v1/stock_transactions?select=product_id,transaction_type,quantity,notes", { headers: HEADERS })
+    ]);
+
     if(resProd.ok) globalDbRows = await resProd.json();
+    if(resTx.ok) globalTransactions = await resTx.json();
   } catch(e) {
     console.error("Gagal konek Supabase:", e);
   }
 
+  // Hitung ulang stok real berdasarkan transaksi agar persis dengan aplikasi admin
   products = masterProducts.map((item, idx) => {
     let totalStock = 0;
-    
-    // Cari berdasarkan kode atau nama produk di database
-    globalDbRows.forEach(r => {
-      let rCode = (r.code || "").trim().toUpperCase();
-      let rName = (r.name || "").trim().toUpperCase();
-      if (item.codes.includes(rCode) || rName.includes(item.name.toUpperCase())) {
-        totalStock += Number(r.stock || 0);
-      }
+
+    // Cari produk di Supabase berdasarkan kode atau nama utama
+    let matchedProducts = globalDbRows.filter(r => {
+      let c = (r.code || "").trim().toUpperCase();
+      let n = (r.name || "").trim().toUpperCase();
+      let v = (r.variant || "").trim().toUpperCase();
+      return item.codes.includes(c) || n.includes(item.name.toUpperCase()) || v.includes(item.name.toUpperCase());
     });
 
-    let stockDesc = totalStock === 0 ? "⚠️️ Stock Hotu Ona (Habis)" : (totalStock <= 3 ? "⚠️ Stock Menus: " + totalStock : "📦 Stock Tersedia: " + totalStock);
+    matchedProducts.forEach(prod => {
+      // Hitung akumulasi dari tabel transaksi untuk produk ini
+      let prodTransactions = globalTransactions.filter(h => h.product_id === prod.id);
+      let prodStock = 0;
+      
+      if(prodTransactions.length > 0) {
+        prodTransactions.forEach(h => {
+          if(h.transaction_type === "in" || (h.notes && h.notes.includes("Tambah"))) {
+            prodStock += Number(h.quantity || 0);
+          } else if(h.transaction_type === "out" || h.transaction_type === "transfer" || (h.notes && h.notes.includes("Kurang"))) {
+            prodStock -= Number(h.quantity || 0);
+          }
+        });
+      } else {
+        // Jika belum ada transaksi tercatat, ambil langsung kolom stock produk
+        prodStock = Number(prod.stock || 0);
+      }
+
+      totalStock += prodStock >= 0 ? prodStock : 0;
+    });
+
+    let stockDesc = totalStock === 0 ? "⚠️ Stock Hotu Ona (Habis)" : (totalStock <= 3 ? "⚠️ Stock Menus: " + totalStock : "📦 Stock Tersedia: " + totalStock);
 
     return {
       id: "prod-" + idx,
@@ -341,26 +367,33 @@ function updateProductDisplay(productId, baseName) {
   nameElem.textContent = targetName;
 
   let specificStock = 0;
-  if (selectedVariant) {
-    globalDbRows.forEach(r => {
-      let rVariant = (r.variant || "").trim().toUpperCase();
-      let rName = (r.name || "").trim().toUpperCase();
-      if (rVariant === selectedVariant.toUpperCase() || rName.includes(selectedVariant.toUpperCase())) {
-        specificStock += Number(r.stock || 0);
-      }
-    });
-  } else {
-    let masterItem = masterProducts.find(p => p.name === baseName);
-    if (masterItem) {
-      globalDbRows.forEach(r => {
-        let rCode = (r.code || "").trim().toUpperCase();
-        let rName = (r.name || "").trim().toUpperCase();
-        if (masterItem.codes.includes(rCode) || rName.includes(baseName.toUpperCase())) {
-          specificStock += Number(r.stock || 0);
+  
+  let matchedProducts = globalDbRows.filter(r => {
+    let n = (r.name || "").trim().toUpperCase();
+    let v = (r.variant || "").trim().toUpperCase();
+    if(selectedVariant) {
+      return v === selectedVariant.toUpperCase() || n.includes(selectedVariant.toUpperCase());
+    } else {
+      return n.includes(baseName.toUpperCase());
+    }
+  });
+
+  matchedProducts.forEach(prod => {
+    let prodTransactions = globalTransactions.filter(h => h.product_id === prod.id);
+    let prodStock = 0;
+    if(prodTransactions.length > 0) {
+      prodTransactions.forEach(h => {
+        if(h.transaction_type === "in" || (h.notes && h.notes.includes("Tambah"))) {
+          prodStock += Number(h.quantity || 0);
+        } else if(h.transaction_type === "out" || h.transaction_type === "transfer" || (h.notes && h.notes.includes("Kurang"))) {
+          prodStock -= Number(h.quantity || 0);
         }
       });
+    } else {
+      prodStock = Number(prod.stock || 0);
     }
-  }
+    specificStock += prodStock >= 0 ? prodStock : 0;
+  });
 
   let stockDesc = specificStock === 0 ? "⚠️ Stock Hotu Ona (Habis)" : (specificStock <= 3 ? "⚠️ Stock Menus: " + specificStock : "📦 Stock Tersedia: " + specificStock);
   descElem.textContent = stockDesc;
