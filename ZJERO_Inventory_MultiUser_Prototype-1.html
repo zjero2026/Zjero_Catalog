@@ -672,7 +672,7 @@ th{
     <!-- DATA KAIXAO -->
     <section id="data" class="hidden">
       <div class="panel">
-        <button type="button" class="print-btn" onclick="window.print()">🖨️️ Imprime / Download PDF Dadus Kaixao</button>
+        <button type="button" class="print-btn" onclick="window.print()">🖨️ Imprime / Download PDF Dadus Kaixao</button>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
           <input id="search" placeholder="🔎 Aluka modelu kaixao..." oninput="renderData()" style="flex:1">
           <select id="filter" onchange="renderData()" style="max-width:210px">
@@ -719,8 +719,8 @@ th{
             <tr>
               <th>Kode</th>
               <th>Modelu Kaixao</th>
-              <th>Stock Aktual di Loja Ini</th>
-              <th>Aksi Penyesuaian Stok</th>
+              <th style="text-align:center;">Penyesuaian Stok (+ / -)</th>
+              <th style="text-align:center;">Aksi</th>
             </tr>
           </thead>
           <tbody id="storemanagementtable"></tbody>
@@ -874,7 +874,7 @@ th{
     <!-- HISTORY / RIWAYAT -->
     <section id="history" class="hidden">
       <div class="panel">
-        <button type="button" class="print-btn" onclick="window.print()">🖨️️ Imprime / Download PDF Istoria</button>
+        <button type="button" class="print-btn" onclick="window.print()">🖨️ Imprime / Download PDF Istoria</button>
         <h2>Istoria Transaksaun</h2>
         <table>
           <thead>
@@ -896,7 +896,7 @@ th{
     <!-- MENU KHUSUS: LAPORAN / ISTORIA TRANSFER -->
     <section id="transferhistory" class="hidden">
       <div class="panel">
-        <button type="button" class="print-btn" onclick="window.print()">🖨️️ Imprime / Download PDF Laporan Transfer</button>
+        <button type="button" class="print-btn" onclick="window.print()">🖨️ Imprime / Download PDF Laporan Transfer</button>
         <h2>Laporan Transfer Sasan (Gudang / Loja)</h2>
         <table>
           <thead>
@@ -1240,8 +1240,10 @@ function getStoreStock(storeName, productId){
   );
   let storeStock = 0;
   storeTransactions.forEach(h => {
-    if(h.type === "Sasan Tama"){
-      storeStock += h.qty;
+    if(h.type === "Sasan Sai" || h.transaction_type === "out" || (h.notes && h.notes.includes("Kurang"))){
+      if(h.store === storeName) {
+        storeStock -= h.qty;
+      }
     } else if(h.type === "Transfer Sasan"){
       if(h.store === storeName){
         storeStock -= h.qty; 
@@ -1249,8 +1251,10 @@ function getStoreStock(storeName, productId){
       if(h.dest === storeName){
         storeStock += h.qty; 
       }
-    } else if(h.type === "Sasan Sai"){
-      storeStock -= h.qty;
+    } else {
+      if(h.store === storeName) {
+        storeStock += h.qty;
+      }
     }
   });
   return storeStock >= 0 ? storeStock : 0;
@@ -1416,22 +1420,46 @@ function renderStoreManagement(){
       <tr>
         <td>${p.code || "—"}</td>
         <td><b>${label}</b></td>
-        <td><input id="store-stock-${storeName}-${p.id}" type="number" value="${currentQty}" style="width:70px; padding:5px; text-align:center;"></td>
-        <td>
-          <button type="button" class="update-stock-btn" onclick="adjustStoreStock('${storeName}', '${p.id}')">💾 Simpan Penyesuaian</button>
+        <td style="text-align:center;">
+          <div style="display:inline-flex; align-items:center; gap:5px;">
+            <button type="button" onclick="changeQtyInput('${storeName}', '${p.id}', -1)" style="padding:5px 10px; background:#a8483e;">-</button>
+            <input id="store-stock-${storeName}-${p.id}" type="number" min="0" value="0" style="width:60px; padding:5px; text-align:center;">
+            <button type="button" onclick="changeQtyInput('${storeName}', '${p.id}', 1)" style="padding:5px 10px; background:#39734e;">+</button>
+          </div>
+        </td>
+        <td style="text-align:center;">
+          <button type="button" class="update-stock-btn" onclick="adjustStoreStockDirect('${storeName}', '${p.id}')">💾 Simpan</button>
         </td>
       </tr>
     `;
   }).join("");
 }
 
-async function adjustStoreStock(storeName, productId) {
+function changeQtyInput(storeName, productId, val) {
   const inputEl = document.getElementById(`store-stock-${storeName}-${productId}`);
   if(!inputEl) return;
-  const targetQty = Number(inputEl.value);
+  let currentVal = Number(inputEl.value || 0);
+  currentVal += val;
+  if(currentVal < 0) currentVal = 0;
+  inputEl.value = currentVal;
+}
 
-  if(isNaN(targetQty) || targetQty < 0) {
-    alert("Favor hatama numeru stock ne'ebé loloos.");
+async function adjustStoreStockDirect(storeName, productId) {
+  const inputEl = document.getElementById(`store-stock-${storeName}-${productId}`);
+  if(!inputEl) return;
+  const qtyInput = Number(inputEl.value);
+
+  if(isNaN(qtyInput) || qtyInput <= 0) {
+    alert("Favor hatama kuantidade ne'ebé loloos.");
+    return;
+  }
+
+  const actionType = prompt("Pilih jenis penyesuaian:\nKetik 'tambah' untuk menambah stok\nKetik 'kurang' untuk mengurangi stok");
+  if(actionType === null) return;
+  const typeLower = actionType.trim().toLowerCase();
+
+  if(typeLower !== 'tambah' && typeLower !== 'kurang') {
+    alert("Pilihan salah! Ketik 'tambah' atau 'kurang'.");
     return;
   }
 
@@ -1443,27 +1471,24 @@ async function adjustStoreStock(storeName, productId) {
     return;
   }
 
-  const currentQty = getStoreStock(storeName, productId);
-  const diff = targetQty - currentQty;
+  const txType = typeLower === 'kurang' ? "out" : "in";
+  const currentStock = getStoreStock(storeName, productId);
 
-  if(diff === 0) {
-    alert("Kuantidade stock seidauk troka.");
+  if(txType === "out" && qtyInput > currentStock) {
+    alert("Stock iha loja la sufisiente atu hamenus hikas tantu barak! (Stock atual: " + currentStock + ")");
     return;
   }
 
-  if(!confirm(`Muda stock ${storeName} husi ${currentQty} ba ${targetQty}?`)) return;
+  if(!confirm(`Ita sure hakarak ${typeLower} stock ${qtyInput} ba ${storeName}?`)) return;
 
   try {
-    const txType = diff < 0 ? "out" : "in";
-    const qtyChange = Math.abs(diff);
-
     await api("stock_transactions", {
       method: "POST",
       headers: { "Prefer": "return=minimal" },
       body: JSON.stringify({
         product_id: productId,
         transaction_type: txType,
-        quantity: qtyChange,
+        quantity: qtyInput,
         naran_loja: storeName,
         objetivu_sai: txType === "out" ? "Penyesuaian Kurang Stok" : "—",
         total_price: 0,
@@ -1471,10 +1496,11 @@ async function adjustStoreStock(storeName, productId) {
         ambulance_price: 0,
         freezer_price: 0,
         payment_status: "LUNAS",
-        notes: "Penyesuaian manual stock per loja"
+        notes: txType === "out" ? "Penyesuaian Kurang Stok Manual" : "Penyesuaian Tambah Stok Manual"
       })
     });
 
+    inputEl.value = "0";
     await loadData();
     renderStoreManagement();
     updateDash();
@@ -1890,7 +1916,7 @@ function renderHistory(){
       }
     } else {
       let isDamaged = h.note && h.note.includes("rusak");
-      paymentBadge = isDamaged ? `<span class="badge-dam">⚠️ Sasan Aat / Rusak</span>` : `<span style="color:#39734e; font-weight:bold;">Sasan Tama (Di'ak)</span>`;
+      paymentBadge = isDamaged ? `<span class="badge-dam">⚠️️ Sasan Aat / Rusak</span>` : `<span style="color:#39734e; font-weight:bold;">Sasan Tama (Di'ak)</span>`;
     }
 
     return `
