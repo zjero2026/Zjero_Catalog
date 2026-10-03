@@ -151,7 +151,7 @@ body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#222}
     <div class="top-brand">
       <img src="logo.png" alt="Logo ZJERO" class="top-logo" onerror="this.style.display='none'">
       <div class="top-title-area">
-        <h1>ZJERO CATALOGU</h1>
+        <h1>ZJERO CATALOGUE</h1>
         <p>KATALOGU KAIXAO / COFFIN</p>
       </div>
     </div>
@@ -242,16 +242,18 @@ const masterProducts = [
 ];
 
 let globalDbRows = [];
+let globalTransactions = [];
 let products = [];
 
 async function loadCatalog() {
   try {
-    const response = await fetch(SUPABASE_URL + "/rest/v1/products?select=code,name,variant,stock", {
-      headers: HEADERS
-    });
-    if(response.ok) {
-      globalDbRows = await response.json();
-    }
+    const [resProd, resTx] = await Promise.all([
+      fetch(SUPABASE_URL + "/rest/v1/products?select=id,code,name,variant,stock", { headers: HEADERS }),
+      fetch(SUPABASE_URL + "/rest/v1/stock_transactions?select=product_id,transaction_type,quantity,notes", { headers: HEADERS })
+    ]);
+
+    if(resProd.ok) globalDbRows = await resProd.json();
+    if(resTx.ok) globalTransactions = await resTx.json();
   } catch(e) {
     console.error("Gagal konek Supabase:", e);
   }
@@ -260,21 +262,11 @@ async function loadCatalog() {
     let totalStock = 0;
     
     item.codes.forEach(c => {
-      let found = globalDbRows.find(r => (r.code || "").trim().toUpperCase() === c.toUpperCase());
-      if(found) {
-        totalStock += Number(found.stock || 0);
-      }
-    });
-
-    if(totalStock === 0) {
-      globalDbRows.forEach(r => {
-        let dbName = (r.name || "").trim().toUpperCase();
-        let dbCode = (r.code || "").trim().toUpperCase();
-        if(dbName.includes(item.name.toUpperCase()) || item.codes.includes(dbCode)) {
-          totalStock += Number(r.stock || 0);
-        }
+      let foundProducts = globalDbRows.filter(r => (r.code || "").trim().toUpperCase() === c.toUpperCase() || (r.name || "").trim().toUpperCase().includes(item.name.toUpperCase()));
+      foundProducts.forEach(prod => {
+        totalStock += Number(prod.stock || 0);
       });
-    }
+    });
 
     let stockDesc = totalStock === 0 ? "⚠️ Stock Hotu Ona (Habis)" : (totalStock <= 3 ? "⚠️ Stock Menus: " + totalStock : "📦 Stock Tersedia: " + totalStock);
 
@@ -363,8 +355,10 @@ function updateProductDisplay(productId, baseName) {
     let masterItem = masterProducts.find(p => p.name === baseName);
     if (masterItem) {
       masterItem.codes.forEach(c => {
-        let found = globalDbRows.find(r => (r.code || "").trim().toUpperCase() === c.toUpperCase());
-        if(found) specificStock += Number(found.stock || 0);
+        let found = globalDbRows.filter(r => (r.code || "").trim().toUpperCase() === c.toUpperCase() || (r.name || "").trim().toUpperCase().includes(baseName.toUpperCase()));
+        found.forEach(f => {
+          specificStock += Number(f.stock || 0);
+        });
       });
     }
   }
