@@ -371,7 +371,7 @@ th{
   cursor: pointer;
 }
 
-/* MODAL EDIT TRANSAKSI */
+/* MODAL FORM EDIT TRANSAKSI */
 .modal {
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
@@ -780,7 +780,7 @@ th{
           <label>Kuantidade Tama</label>
           <input id="inqty" type="number" min="1" placeholder="Egzemplu: 5">
 
-          <label>Data no Tempu Transaksaun (Bisa disesuaikan jika hari lewat)</label>
+          <label>Data no Tempu Transaksaun</label>
           <input id="intimestamp" type="datetime-local">
           
           <label>Komentáriu / Notas</label>
@@ -846,6 +846,9 @@ th{
           
           <label>Objetivu Sai / Hatama ba Fatin Ne'ebé</label>
           <input id="outdest" type="text" placeholder="Egzemplu: RSUD / Filial / Uma Duka">
+
+          <label>Data no Tempu Transaksaun</label>
+          <input id="outtimestamp" type="datetime-local">
           
           <label>Komentáriu / Notas</label>
           <textarea id="outnote" rows="3" placeholder="Egzemplu: Staff : Aldo"></textarea>
@@ -888,6 +891,9 @@ th{
 
           <label>Kuantidade Transfer</label>
           <input id="transferqty" type="number" min="1" placeholder="Egzemplu: 3">
+
+          <label>Data no Tempu Transaksaun</label>
+          <input id="transfertimestamp" type="datetime-local">
 
           <label>Komentáriu / Notas</label>
           <textarea id="transfernote" rows="3" placeholder="Egzemplu: Transportadora / Soper / Placa No..."></textarea>
@@ -1266,13 +1272,19 @@ function setup(){
   if(outmodel) outmodel.innerHTML = options;
   if(transfermodel) transfermodel.innerHTML = options;
   
-  // Set default datetime-local ke waktu sekarang
+  // Set default datetime-local ke waktu sekarang untuk semua menu transaksi
   const now = new Date();
   now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-  const timeInput = document.getElementById("intimestamp");
-  if(timeInput && !timeInput.value) {
-    timeInput.value = now.toISOString().slice(0, 16);
-  }
+  const defaultIsoTime = now.toISOString().slice(0, 16);
+
+  const timeInputIn = document.getElementById("intimestamp");
+  if(timeInputIn && !timeInputIn.value) timeInputIn.value = defaultIsoTime;
+
+  const timeInputOut = document.getElementById("outtimestamp");
+  if(timeInputOut && !timeInputOut.value) timeInputOut.value = defaultIsoTime;
+
+  const timeInputTransfer = document.getElementById("transfertimestamp");
+  if(timeInputTransfer && !timeInputTransfer.value) timeInputTransfer.value = defaultIsoTime;
 
   updateStoreStock('in');
   updateStoreStock('out');
@@ -1381,6 +1393,7 @@ async function executeTransfer(){
   const modelIdx = Number(document.getElementById("transfermodel").value);
   const qty = Number(document.getElementById("transferqty").value);
   const note = document.getElementById("transfernote").value.trim();
+  const timeEl = document.getElementById("transfertimestamp");
 
   if(fromStore === toStore){
     alert("Fatin asal no fatin tujuan labele hanesan!");
@@ -1403,6 +1416,8 @@ async function executeTransfer(){
     return;
   }
 
+  const customTime = timeEl && timeEl.value ? new Date(timeEl.value).toISOString() : new Date().toISOString();
+
   try {
     await api("stock_transactions", {
       method: "POST",
@@ -1418,7 +1433,8 @@ async function executeTransfer(){
         ambulance_price: 0,
         freezer_price: 0,
         payment_status: "LUNAS",
-        notes: note ? note : "Transfer sasan"
+        notes: note ? note : "Transfer sasan",
+        created_at: customTime
       })
     });
 
@@ -1579,15 +1595,15 @@ async function transact(kind){
   const noteElement = document.getElementById(kind === "in" ? "innote" : "outnote");
   const conditionEl = document.getElementById("incondition");
   const supplierEl = document.getElementById("insupplier");
-  const timeEl = document.getElementById("intimestamp");
+  const timeEl = document.getElementById(kind === "in" ? "intimestamp" : "outtimestamp");
 
   const idx = Number(modelElement.value);
-  const qty = Number(qtyInput = qtyElement.value);
+  const qty = Number(qtyElement.value);
   const dest = kind === "out" ? (destElement.value.trim() || "—") : "—";
   
   const isDamaged = kind === "in" && conditionEl && conditionEl.value === "damaged";
   const supplierName = kind === "in" && supplierEl ? supplierEl.value.trim() : "";
-  const customTime = kind === "in" && timeEl && timeEl.value ? new Date(timeEl.value).toISOString() : new Date().toISOString();
+  const customTime = timeEl && timeEl.value ? new Date(timeEl.value).toISOString() : new Date().toISOString();
 
   const boxPrice = kind === "out" ? Number(boxPriceEl.value || 0) : 0;
   const ambulancePrice = kind === "out" ? Number(ambulanceEl.value || 0) : 0;
@@ -1754,7 +1770,6 @@ function editTransaction(txId) {
   document.getElementById("edit-totalprice").value = h.totalPrice;
   document.getElementById("edit-note").value = h.note;
 
-  // Format tanggal untuk datetime-local
   if(h.rawTime) {
     const dt = new Date(h.rawTime);
     dt.setMinutes(dt.getMinutes() - dt.getTimezoneOffset());
