@@ -1780,6 +1780,7 @@ async function updatePaymentStatus(txId) {
   }
 }
 
+// PERBAIKAN FUNGSI DELETE AGAR LANGSUNG BERHASIL
 async function deleteTransaction(txId) {
   const passInput = prompt("Hatama password:");
   if (passInput === null) return;
@@ -1792,13 +1793,20 @@ async function deleteTransaction(txId) {
   if(!confirm("Ita sure hakarak hamos transaksaun ne'e?")) return;
 
   try {
-    await api("stock_transactions?id=eq." + txId, {
-      method: "DELETE"
+    const response = await fetch(SUPABASE_URL + "/rest/v1/stock_transactions?id=eq." + txId, {
+      method: "DELETE",
+      headers: HEADERS
     });
 
+    if (!response.ok) {
+      throw new Error("Gagal menghapus data dari database.");
+    }
+
     await loadData();
+    setup();
     renderHistory();
     updateDash();
+    
     alert("Transaksaun hamos ona ho susesu!");
   } catch(error) {
     console.error(error);
@@ -1806,7 +1814,7 @@ async function deleteTransaction(txId) {
   }
 }
 
-// BUKA MODAL EDIT TRANSAKSI
+// BUKA MODAL EDIT TRANSAKSI LENGKAP
 function openEditModal(txId) {
   const passInput = prompt("Hatama password ba edit:");
   if (passInput === null) return;
@@ -1823,7 +1831,6 @@ function openEditModal(txId) {
 
   document.getElementById("edit-tx-id").value = h.id;
   
-  // Format tanggal untuk input datetime-local (YYYY-MM-DDTHH:mm)
   if(h.rawDate) {
     let d = new Date(h.rawDate);
     let localIso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0,16);
@@ -1834,7 +1841,6 @@ function openEditModal(txId) {
   document.getElementById("edit-totalprice").value = h.totalPrice;
   document.getElementById("edit-note").value = h.note;
 
-  // Jika transaksi keluar, tampilkan input harga total
   if(h.rawType === "out") {
     document.getElementById("edit-price-fields").style.display = "block";
   } else {
@@ -2023,7 +2029,6 @@ function renderHistory(){
 
   table.innerHTML = filteredHistory.map(h => {
     let rincianText = "—";
-    // Memanggil fungsi openEditModal(h.id) untuk edit lengkap
     let actionButtons = `<button type="button" class="edit-btn" onclick="openEditModal('${h.id}')">✏️ Edit</button><button type="button" class="delete-btn" onclick="deleteTransaction('${h.id}')">🗑️ Delete</button>`;
     
     if(h.type === "Sasan Sai") {
@@ -2047,7 +2052,7 @@ function renderHistory(){
     } else {
       let isDamaged = h.note && h.note.includes("rusak");
       let supplierInfo = `<br><small style="color:#a77c1e; font-weight:bold;">📦 Supplier: ${h.supplier}</small>`;
-      paymentBadge = isDamaged ? `<span class="badge-dam">⚠️️ Sasan Aat / Rusak</span>` + supplierInfo : `<span style="color:#39734e; font-weight:bold;">Sasan Tama (Di'ak)</span>` + supplierInfo;
+      paymentBadge = isDamaged ? `<span class="badge-dam">⚠️ Sasan Aat / Rusak</span>` + supplierInfo : `<span style="color:#39734e; font-weight:bold;">Sasan Tama (Di'ak)</span>` + supplierInfo;
     }
 
     return `
@@ -2128,7 +2133,7 @@ updateDash = function(){
       <div class="store-card">
         <div class="store-card-header">
           <h3>🏢 ${store} <span style="font-size:12px; color:#a77c1e; font-weight:bold;">(Total: ${storeTotalCount})</span></h3>
-          <button type="button" class="store-print-btn" onclick="showStorePrint('${store}')">🖨️ Cetak Stock</button>
+          <button type="button" class="store-print-btn" onclick="showStorePrint('${store}')">🖨️️ Cetak Stock</button>
         </div>
         <ul style="margin:0;padding-left:18px;font-size:12px;">
     `;
