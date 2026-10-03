@@ -1447,14 +1447,14 @@ async function adjustStoreStock(storeName, productId) {
   const diff = targetQty - currentQty;
 
   if(diff === 0) {
-    alert("Kuantidadestock seidauk troka.");
+    alert("Kuantidade stock seidauk troka.");
     return;
   }
 
   if(!confirm(`Muda stock ${storeName} husi ${currentQty} ba ${targetQty}?`)) return;
 
   try {
-    const txType = diff > 0 ? "in" : "out";
+    const txType = diff < 0 ? "out" : "in";
     const qtyChange = Math.abs(diff);
 
     await api("stock_transactions", {
@@ -1465,7 +1465,7 @@ async function adjustStoreStock(storeName, productId) {
         transaction_type: txType,
         quantity: qtyChange,
         naran_loja: storeName,
-        objetivu_sai: txType === "out" ? "Penyesuaian Stok" : "—",
+        objetivu_sai: txType === "out" ? "Penyesuaian Kurang Stok" : "—",
         total_price: 0,
         dp_amount: 0,
         ambulance_price: 0,
@@ -2019,7 +2019,7 @@ document.addEventListener("DOMContentLoaded", function(){
       current = JSON.parse(savedUser);
       executeAppStartup();
     }catch(e){
-      localStorage.removeItem("zjero_user</li>");
+      localStorage.removeItem("zjero_user");
     }
   }
 
