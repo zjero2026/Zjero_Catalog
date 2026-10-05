@@ -1094,6 +1094,17 @@ th{
     <h3 style="margin-top:0; color:#a77c1e;">Edit Transaksaun</h3>
     <input type="hidden" id="edit-tx-id">
     <div class="form">
+      <label>Loja / Fatin</label>
+      <select id="edit-store">
+        <option value="Loja Rebal">Loja Rebal</option>
+        <option value="Loja Bairopite">Loja Bairopite</option>
+        <option value="Gudang Lahane">Gudang Lahane</option>
+        <option value="Loja Same">Loja Same</option>
+        <option value="Loja Oe-cusse">Loja Oe-cusse</option>
+        <option value="Loja Ainaro">Loja Ainaro</option>
+        <option value="Loja Baucau">Loja Baucau</option>
+      </select>
+
       <label>Data & Tempu Transaksaun</label>
       <input id="edit-timestamp" type="datetime-local">
       
@@ -1272,7 +1283,6 @@ function setup(){
   if(outmodel) outmodel.innerHTML = options;
   if(transfermodel) transfermodel.innerHTML = options;
   
-  // Set default datetime-local ke waktu sekarang untuk semua menu transaksi
   const now = new Date();
   now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
   const defaultIsoTime = now.toISOString().slice(0, 16);
@@ -1754,7 +1764,7 @@ function editTransaction(txId) {
   const passInput = prompt("Hatama password admin:");
   if (passInput === null) return;
 
-  if (passInput !== "zjeroadmin2026") {
+  if (passInput !== "adminzjero2026") {
     alert("Password sala!");
     return;
   }
@@ -1766,6 +1776,7 @@ function editTransaction(txId) {
   }
 
   document.getElementById("edit-tx-id").value = h.id;
+  document.getElementById("edit-store").value = h.store;
   document.getElementById("edit-qty").value = h.qty;
   document.getElementById("edit-totalprice").value = h.totalPrice;
   document.getElementById("edit-note").value = h.note;
@@ -1785,6 +1796,7 @@ function closeEditModal() {
 
 async function saveEditedTransaction() {
   const txId = document.getElementById("edit-tx-id").value;
+  const newStore = document.getElementById("edit-store").value;
   const newQty = Number(document.getElementById("edit-qty").value);
   const newPrice = Number(document.getElementById("edit-totalprice").value);
   const newNote = document.getElementById("edit-note").value.trim();
@@ -1796,6 +1808,7 @@ async function saveEditedTransaction() {
   }
 
   const updatePayload = {
+    naran_loja: newStore,
     quantity: newQty,
     total_price: newPrice,
     notes: newNote
