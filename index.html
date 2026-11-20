@@ -396,8 +396,8 @@ function updateProductDisplay(productId, baseName) {
     specificStock += prodStock >= 0 ? prodStock : 0;
   });
 
-  let stockDesc = specificStock === 0 ? "⚠️ Stock Hotu Ona (Habis)" : (specificStock <= 3 ? "⚠️ Stock Menus: " + specificStock : "📦 Stock Tersedia: " + specificStock);
-  descElem.textContent = stockDesc;
+  let stockDesc = specificStock === 0 ? "⚠️ Stock sedauk mosu  (Under Maintenance)" : (specificStock <= 3 ? "⚠️ Stock Menus: " + specificStock : "📦 Stock Tersedia: " + specificStock);
+  descElem.textContent = stockDesc;qq
 
   let message = `Halo ZJERO, Ha’u interese ho produtu ${targetName}`;
   waLinkElem.href = `https://wa.me/${wa}?text=` + encodeURIComponent(message);
