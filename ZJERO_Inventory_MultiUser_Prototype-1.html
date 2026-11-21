@@ -75,7 +75,6 @@ body{
   font-weight:bold
 }
 
-/* Tombol Install PWA di Sidebar */
 .install-btn{
   margin-top:auto;
   background:#39734e;
@@ -371,7 +370,6 @@ th{
   cursor: pointer;
 }
 
-/* MODAL FORM EDIT TRANSAKSI */
 .modal {
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
@@ -390,7 +388,6 @@ th{
   box-shadow: 0 5px 25px rgba(0,0,0,0.3);
 }
 
-/* KHUSUS DESAIN PROFESIONAL CETAK INVOICE */
 #invoice-section {
   background: #fff;
   border: 1px solid #e5e0d8;
@@ -497,7 +494,6 @@ th{
   margin-top: 6px;
 }
 
-/* KERTAS CETAK LAPORAN STOK PER TOKO */
 #store-print-section {
   background: #fff;
   border: 1px solid #e5e0d8;
@@ -505,7 +501,6 @@ th{
   padding: 30px !important;
 }
 
-/* CSS MEDIA PRINT EKSKLUSIF A4 BERSIH TANPA POTONG */
 @media print {
   @page {
     size: A4 portrait;
@@ -594,7 +589,6 @@ th{
 
 <body>
 
-<!-- LOGIN -->
 <div id="login" class="login">
   <div class="loginbox">
     <div class="loginlogo">
@@ -614,7 +608,6 @@ th{
   </div>
 </div>
 
-<!-- APPLICATION -->
 <div id="app" class="app hidden">
   <aside class="side">
     <div class="logo">
@@ -645,7 +638,6 @@ th{
       <div class="user">● <span id="who"></span></div>
     </div>
 
-    <!-- DASHBOARD -->
     <section id="dashboard">
       <div class="cards">
         <div class="card">
@@ -689,7 +681,6 @@ th{
       </div>
     </section>
 
-    <!-- DATA KAIXAO -->
     <section id="data" class="hidden">
       <div class="panel">
         <button type="button" class="print-btn" onclick="window.print()">🖨️ Imprime / Download PDF Dadus Kaixao</button>
@@ -717,7 +708,6 @@ th{
       </div>
     </section>
 
-    <!-- MENU STOK PER LOJA -->
     <section id="storemanagement" class="hidden">
       <div class="panel">
         <h2>Jestaun & Penyesuaian Stok per Loja</h2>
@@ -749,7 +739,6 @@ th{
       </div>
     </section>
 
-    <!-- SASAN TAMA -->
     <section id="in" class="hidden">
       <div class="panel" style="max-width:650px">
         <h2>Sasan Tama</h2>
@@ -777,22 +766,21 @@ th{
           <label>Modelu Kaixao</label>
           <select id="inmodel" onchange="updateStoreStock('in')"></select>
           <div id="instockinfo" class="stock-info">📦 Stock iha loja ne'e: 0</div>
-          
+
           <label>Kuantidade Tama</label>
           <input id="inqty" type="number" min="1" placeholder="Egzemplu: 5">
 
           <label>Data no Tempu Transaksaun</label>
           <input id="intimestamp" type="datetime-local">
-          
+
           <label>Komentáriu / Notas</label>
           <textarea id="innote" rows="3" placeholder="Opcional"></textarea>
-          
+
           <button type="button" onclick="transact('in')">Rejistu Sasan Tama</button>
         </div>
       </div>
     </section>
 
-    <!-- SASAN SAI -->
     <section id="out" class="hidden">
       <div class="panel" style="max-width:650px">
         <h2>Sasan Sai</h2>
@@ -812,17 +800,17 @@ th{
           <div id="outstockinfo" class="stock-info">📦 Stock iha loja ne'e: 0</div>
           <label>Kuantidade Sai</label>
           <input id="outqty" type="number" min="1" placeholder="Egzemplu: 2">
-          
+
           <label>Presu Kaixao ($)</label>
           <input id="outboxprice" type="number" min="0" step="0.01" placeholder="Egzemplu: 500">
-          
+
           <label>Presu Ambulansia</label>
           <select id="outambulance">
             <option value="0">Gratuita (Pakote) - $0</option>
             <option value="50">1 loron - $50 (Dili laran)</option>
             <option value="190">1 loron - $190 (Municipiu)</option>
           </select>
-          
+
           <label>Presu Freezer</label>
           <select id="outfreezer">
             <option value="0">Gratuita (Pakote) - $0</option>
@@ -833,33 +821,32 @@ th{
             <option value="300">2 loron - $300 (Municipiu)</option>
             <option value="450">3 loron - $450 (Municipiu)</option>
           </select>
-          
+
           <label>Opsaun ba Pagamentu</label>
           <select id="outpaytype" onchange="toggleDPField()">
             <option value="lunas">Cash Lunas</option>
             <option value="dp">Down Payment (DP)</option>
           </select>
-          
+
           <div id="dpcontainer" class="hidden">
             <label>Down Payment / DP ($)</label>
             <input id="outdp" type="number" min="0" step="0.01" placeholder="Egzemplu: 200">
           </div>
-          
+
           <label>Objetivu Sai / Hatama ba Fatin Ne'ebé (Customer / Loja Seluk)</label>
           <input id="outdest" type="text" placeholder="Egzemplu: Bp. Carlos / Loja Rebal">
 
           <label>Data no Tempu Transaksaun</label>
           <input id="outtimestamp" type="datetime-local">
-          
+
           <label>Komentáriu / Notas</label>
           <textarea id="outnote" rows="3" placeholder="Egzemplu: Staff : Aldo"></textarea>
-          
+
           <button type="button" class="danger" onclick="transact('out')">Rejistu Sasan Sai</button>
         </div>
       </div>
     </section>
 
-    <!-- TRANSFER SASAN -->
     <section id="transfer" class="hidden">
       <div class="panel" style="max-width:650px">
         <h2>Transfer Sasan (Husi Fatin Asal ba Fatin Tujuan)</h2>
@@ -904,7 +891,6 @@ th{
       </div>
     </section>
 
-    <!-- LAPORAN KHUSUS: ISTORIA SASAN TAMA -->
     <section id="inhistory" class="hidden">
       <div class="panel">
         <button type="button" class="print-btn" onclick="window.print()">🖨️ Imprime / Download PDF Laporan Sasan Tama</button>
@@ -925,7 +911,6 @@ th{
       </div>
     </section>
 
-    <!-- LAPORAN KHUSUS: ISTORIA SASAN SAI -->
     <section id="outhistory" class="hidden">
       <div class="panel">
         <button type="button" class="print-btn" onclick="window.print()">🖨️ Imprime / Download PDF Laporan Sasan Sai</button>
@@ -947,7 +932,6 @@ th{
       </div>
     </section>
 
-    <!-- LAPORAN KHUSUS: ISTORIA TRANSFER -->
     <section id="transferhistory" class="hidden">
       <div class="panel">
         <button type="button" class="print-btn" onclick="window.print()">🖨️ Imprime / Download PDF Laporan Transfer</button>
@@ -968,7 +952,6 @@ th{
       </div>
     </section>
 
-    <!-- INVOICE PROFESIONAL DENGAN LOGO -->
     <section id="invoice-section" class="panel hidden" style="max-width:700px; margin:auto;">
       <div class="invoice-header">
         <div class="invoice-brand">
@@ -1004,9 +987,7 @@ th{
             <th style="text-align:right;">Presu ($)</th>
           </tr>
         </thead>
-        <tbody id="inv-items-body">
-          <!-- Dinamis diisi JS -->
-        </tbody>
+        <tbody id="inv-items-body"></tbody>
       </table>
 
       <div class="invoice-summary-box">
@@ -1049,7 +1030,6 @@ th{
       </div>
     </section>
 
-    <!-- HALAMAN CETAK KHUSUS LAPORAN STOK PER TOKO -->
     <section id="store-print-section" class="panel hidden" style="max-width:700px; margin:auto;">
       <div class="invoice-header">
         <div class="invoice-brand">
@@ -1073,9 +1053,7 @@ th{
             <th style="text-align:center;">Kuantidade Stock</th>
           </tr>
         </thead>
-        <tbody id="print-store-items">
-          <!-- Dinamis diisi JS -->
-        </tbody>
+        <tbody id="print-store-items"></tbody>
       </table>
 
       <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #eee; padding-top:15px; margin-top:20px;">
@@ -1087,7 +1065,6 @@ th{
       </div>
     </section>
 
-    <!-- USERS -->
     <section id="users" class="hidden">
       <div class="panel">
         <h2>Uzuáriu & Direitu Acessu</h2>
@@ -1110,7 +1087,6 @@ th{
   </main>
 </div>
 
-<!-- MODAL FORM EDIT TRANSAKSI -->
 <div id="editModal" class="modal hidden">
   <div class="modal-content">
     <h3 style="margin-top:0; color:#a77c1e;">Edit Transaksaun</h3>
@@ -1129,10 +1105,10 @@ th{
 
       <label>Data & Tempu Transaksaun</label>
       <input id="edit-timestamp" type="datetime-local">
-      
+
       <label>Kuantidade</label>
       <input id="edit-qty" type="number" min="1">
-      
+
       <label>Total Harga / Biaya ($)</label>
       <input id="edit-totalprice" type="number" step="0.01">
 
@@ -1268,7 +1244,7 @@ async function login(){
 
   current = { name: username, role: user.role };
   localStorage.setItem("zjero_user", JSON.stringify(current));
-  
+
   await executeAppStartup();
 }
 
@@ -1295,7 +1271,7 @@ function setup(){
   const inmodel = document.getElementById("inmodel");
   const outmodel = document.getElementById("outmodel");
   const transfermodel = document.getElementById("transfermodel");
-  
+
   const options = data.map((x,i) => {
     const label = x.variant ? x.name + " — " + x.variant : x.name;
     return `<option value="${i}">${label}</option>`;
@@ -1304,7 +1280,7 @@ function setup(){
   if(inmodel) inmodel.innerHTML = options;
   if(outmodel) outmodel.innerHTML = options;
   if(transfermodel) transfermodel.innerHTML = options;
-  
+
   const now = new Date();
   now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
   const defaultIsoTime = now.toISOString().slice(0, 16);
@@ -1339,8 +1315,8 @@ function toggleDPField(){
 }
 
 function getStoreStock(storeName, productId){
-  const storeTransactions = history.filter(h => 
-    (h.store === storeName && h.productId === productId) || 
+  const storeTransactions = history.filter(h =>
+    (h.store === storeName && h.productId === productId) ||
     (h.type === "Transfer Sasan" && h.dest === storeName && h.productId === productId)
   );
   let storeStock = 0;
@@ -1351,10 +1327,10 @@ function getStoreStock(storeName, productId){
       }
     } else if(h.type === "Transfer Sasan"){
       if(h.store === storeName){
-        storeStock -= h.qty; 
+        storeStock -= h.qty;
       }
       if(h.dest === storeName){
-        storeStock += h.qty; 
+        storeStock += h.qty;
       }
     } else {
       if(h.store === storeName) {
@@ -1635,7 +1611,7 @@ async function transact(kind){
   const idx = Number(modelElement.value);
   const qty = Number(qtyElement.value);
   const dest = kind === "out" ? (destElement.value.trim() || "—") : "—";
-  
+
   const isDamaged = kind === "in" && conditionEl && conditionEl.value === "damaged";
   const supplierName = kind === "in" && supplierEl ? supplierEl.value.trim() : "";
   const customTime = timeEl && timeEl.value ? new Date(timeEl.value).toISOString() : new Date().toISOString();
@@ -1655,7 +1631,7 @@ async function transact(kind){
 
   const product = data[idx];
   let note = noteElement ? noteElement.value.trim() : "";
-  
+
   if(supplierName) {
     note = `Suplier: ${supplierName}${note ? ' - ' + note : ''}`;
   }
@@ -2068,7 +2044,7 @@ function showInvoice(txId) {
 function renderInHistory(){
   const table = document.getElementById("inhistorytable");
   if(!table) return;
-  
+
   const inList = history.filter(h => h.type === "Sasan Tama");
 
   if(!inList.length){
@@ -2098,7 +2074,7 @@ function renderInHistory(){
 function renderOutHistory(){
   const table = document.getElementById("outhistorytable");
   if(!table) return;
-  
+
   const outList = history.filter(h => h.type === "Sasan Sai");
 
   if(!outList.length){
@@ -2188,7 +2164,7 @@ updateDash = function(){
   const stores = ["Loja Rebal", "Loja Bairopite", "Gudang Lahane", "Loja Same", "Loja Oe-cusse", "Loja Ainaro", "Loja Baucau"];
   const breakdownEl = document.getElementById("storestockbreakdown");
   let breakdownHTML = "";
-  
+
   stores.forEach(store => {
     let storeTotalCount = 0;
     data.forEach(p => {
