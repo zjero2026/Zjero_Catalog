@@ -175,7 +175,7 @@ body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#222}
 
 <script>
 const SUPABASE_URL = "https://wfathvetdbeohfnrrvrl.supabase.co";
-const SUPABASE_KEY = "sb_publishable_62YUXL0hUN3X4p-..."; // Ganti dengan kunci lengkap yang Anda salin dari Supabase
+const SUPABASE_KEY = "sb_publishable_62YUXL0hUN3X4p-Y999TvQ_3OzHfPl4";
 const HEADERS = {
   "apikey": SUPABASE_KEY,
   "Authorization": "Bearer " + SUPABASE_KEY,
@@ -392,7 +392,7 @@ function updateProductDisplay(productId, baseName) {
     specificStock += prodStock >= 0 ? prodStock : 0;
   });
 
-  let stockDesc = specificStock === 0 ? "⚠️ Stock sedauk mosu(Under Maintenance)" : (specificStock <= 3 ? "⚠️ Stock Menus: " + specificStock : "📦 Stock Tersedia: " + specificStock);
+  let stockDesc = specificStock === 0 ? "⚠️ Stock Hotu Ona (Habis)" : (specificStock <= 3 ? "⚠️ Stock Menus: " + specificStock : "📦 Stock Tersedia: " + specificStock);
   descElem.textContent = stockDesc;
 
   let message = `Halo ZJERO, Ha’u interese ho produtu ${targetName}`;
