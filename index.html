@@ -174,8 +174,8 @@ body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#222}
 <div class="footer">ZJERO Catalogue &copy; 2026</div>
 
 <script>
-const SUPABASE_URL = "https://nlyofmbqfmvhxssourwc.supabase.co";
-const SUPABASE_KEY = "sb_publishable_0FYPfH2F2AggNG_Zp7FKBA_NkK_KKnh";
+const SUPABASE_URL = "https://wfathvetdbeohfnrrvrl.supabase.co";
+const SUPABASE_KEY = "sb_publishable_62YUXL0hUN3X4p-..."; // Ganti dengan kunci lengkap yang Anda salin dari Supabase
 const HEADERS = {
   "apikey": SUPABASE_KEY,
   "Authorization": "Bearer " + SUPABASE_KEY,
@@ -257,11 +257,9 @@ async function loadCatalog() {
     console.error("Gagal konek Supabase:", e);
   }
 
-  // Hitung ulang stok real berdasarkan transaksi agar persis dengan aplikasi admin
   products = masterProducts.map((item, idx) => {
     let totalStock = 0;
 
-    // Cari produk di Supabase berdasarkan kode atau nama utama
     let matchedProducts = globalDbRows.filter(r => {
       let c = (r.code || "").trim().toUpperCase();
       let n = (r.name || "").trim().toUpperCase();
@@ -270,7 +268,6 @@ async function loadCatalog() {
     });
 
     matchedProducts.forEach(prod => {
-      // Hitung akumulasi dari tabel transaksi untuk produk ini
       let prodTransactions = globalTransactions.filter(h => h.product_id === prod.id);
       let prodStock = 0;
       
@@ -283,7 +280,6 @@ async function loadCatalog() {
           }
         });
       } else {
-        // Jika belum ada transaksi tercatat, ambil langsung kolom stock produk
         prodStock = Number(prod.stock || 0);
       }
 
@@ -397,7 +393,7 @@ function updateProductDisplay(productId, baseName) {
   });
 
   let stockDesc = specificStock === 0 ? "⚠️ Stock sedauk mosu(Under Maintenance)" : (specificStock <= 3 ? "⚠️ Stock Menus: " + specificStock : "📦 Stock Tersedia: " + specificStock);
-  descElem.textContent = stockDesc;qq
+  descElem.textContent = stockDesc;
 
   let message = `Halo ZJERO, Ha’u interese ho produtu ${targetName}`;
   waLinkElem.href = `https://wa.me/${wa}?text=` + encodeURIComponent(message);
