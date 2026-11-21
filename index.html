@@ -81,7 +81,6 @@ body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#222}
   margin-bottom:2px;
 }
 
-/* Filter Utama dengan Slide Horizontal */
 .filters{
   display:flex;
   gap:8px;
@@ -122,7 +121,6 @@ body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#222}
 .desc{font-size:12px;color:#39704c;font-weight:bold;margin-top:4px;}
 .price{font-size:16px;font-weight:700;margin:10px 0;color:#c59a38}
 
-/* Styling Dropdown di dalam Kartu */
 .card-select {
   width: 100%;
   padding: 8px 10px;
@@ -141,7 +139,7 @@ body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#222}
 .wa:hover{background:#333}
 
 .empty{text-align:center;padding:50px;grid-column:1/-1;color:#777;}
-.footer{text-align:center;color:#777;padding:30px;font-size:13px} 
+.footer{text-align:center;color:#777;padding:30px;font-size:13px}
 </style>
 </head>
 <body>
@@ -162,7 +160,6 @@ body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#222}
   </div>
 </div>
 
-<!-- Filter Utama Bisa Digeser (Slide) -->
 <div class="filters">
   <button onclick="show('SEMUA',this)">ALL DATA</button>
   <button onclick="show('AMERICAN STYLE',this)">AMERICAN STYLE</button>
@@ -270,7 +267,7 @@ async function loadCatalog() {
     matchedProducts.forEach(prod => {
       let prodTransactions = globalTransactions.filter(h => h.product_id === prod.id);
       let prodStock = 0;
-      
+
       if(prodTransactions.length > 0) {
         prodTransactions.forEach(h => {
           if(h.transaction_type === "in" || (h.notes && h.notes.includes("Tambah"))) {
@@ -319,7 +316,7 @@ function show(cat,btn,save=true){
   document.getElementById('grid').innerHTML = list.map(p => {
     let price = 'Presu, kontaktu ami';
     let imgs = p.images.map((img, i) => `<img src="${esc(img)}" class="${i===0?'active':''}" alt="${esc(p.name)}" onerror="this.onerror=null;this.src='logo.png';">`).join('');
-    
+
     let subOptionsHtml = '';
     if (productSubOptions[p.name]) {
       let options = productSubOptions[p.name].map(opt => `<option value="${esc(opt)}">${esc(opt)}</option>`).join('');
@@ -364,7 +361,7 @@ function updateProductDisplay(productId, baseName) {
   nameElem.textContent = targetName;
 
   let specificStock = 0;
-  
+
   let matchedProducts = globalDbRows.filter(r => {
     let n = (r.name || "").trim().toUpperCase();
     let v = (r.variant || "").trim().toUpperCase();
@@ -392,7 +389,7 @@ function updateProductDisplay(productId, baseName) {
     specificStock += prodStock >= 0 ? prodStock : 0;
   });
 
-  let stockDesc = specificStock === 0 ? "⚠️ Stock Hotu Ona (Habis)" : (specificStock <= 3 ? "⚠️ Stock Menus: " + specificStock : "📦 Stock Tersedia: " + specificStock);
+  let stockDesc = specificStock === 0 ? "⚠️ Stock sedauk mosu(Under Maintenance)" : (specificStock <= 3 ? "⚠️ Stock Menus: " + specificStock : "📦 Stock Tersedia: " + specificStock);
   descElem.textContent = stockDesc;
 
   let message = `Halo ZJERO, Ha’u interese ho produtu ${targetName}`;
